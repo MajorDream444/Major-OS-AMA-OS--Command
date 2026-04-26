@@ -3,124 +3,131 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Major OS Command Center</title>
+    <title>AMA OS Mission Control</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Command navigation">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">M</span>
+      <header class="command-bar">
+        <div class="mission-title">
+          <span class="system-dot" aria-hidden="true"></span>
           <div>
-            <p class="eyebrow">Major OS</p>
-            <h1>Command</h1>
+            <p class="eyebrow">AMA OS / PHASE 1</p>
+            <h1>Mission Control</h1>
           </div>
         </div>
 
-        <nav class="nav-list" aria-label="Primary">
-          <a class="nav-item active" href="#overview">Overview</a>
-          <a class="nav-item" href="#leads">Leads</a>
-          <a class="nav-item" href="#pipelines">Pipelines</a>
-          <a class="nav-item" href="#apps">App Registry</a>
-          <a class="nav-item" href="#agents">Agents</a>
-        </nav>
-
-        <div class="sidebar-note">
-          <span>Source of truth</span>
-          <strong>GitHub</strong>
+        <div class="mode-switch" aria-label="Control mode">
+          <button class="mode active" type="button">CONTROL</button>
+          <button class="mode" type="button">WAR</button>
         </div>
+
+        <div class="command-meta">
+          <span class="signal synced">SYNCED</span>
+          <span class="unread">03 UNREAD</span>
+        </div>
+      </header>
+
+      <aside class="left-rail" aria-label="Agent roster and navigation">
+        <section class="panel nav-panel">
+          <div class="panel-header compact">
+            <p class="eyebrow">Console</p>
+            <h2>Navigation</h2>
+          </div>
+          <nav class="nav-list" aria-label="Primary">
+            <a class="nav-item active" href="#actions">ACTIONS</a>
+            <a class="nav-item" href="#leads">LEADS</a>
+            <a class="nav-item" href="#pipelines">PIPELINES</a>
+            <a class="nav-item" href="#apps">APPS</a>
+          </nav>
+        </section>
+
+        <section class="panel agent-panel" id="agents">
+          <div class="panel-header compact">
+            <p class="eyebrow">Runtime</p>
+            <h2>Agent Status</h2>
+          </div>
+          <div id="agent-status" class="agent-list"></div>
+        </section>
       </aside>
 
-      <main class="main-panel">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Boot scaffold</p>
-            <h2>Command Center Dashboard</h2>
+      <main class="ops-column" id="overview">
+        <section class="focus-strip panel" id="actions">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Focus</p>
+              <h2>Top 3 Actions</h2>
+            </div>
+            <span class="signal action">ACTION</span>
           </div>
-          <div class="status-pill" aria-label="Data mode">Mock data only</div>
-        </header>
+          <ol id="top-actions" class="action-list"></ol>
+        </section>
 
-        <section class="summary-strip" aria-label="System summary">
-          <div>
-            <span>Command Center</span>
-            <strong>Major-OS-AMA-OS--Command</strong>
+        <section class="panel queue-panel" id="leads">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Queue</p>
+              <h2>Today's Leads</h2>
+            </div>
+            <span class="signal high">HIGH</span>
           </div>
-          <div>
-            <span>Reusable AI OS</span>
-            <strong>Major-AI-OS</strong>
+          <div id="todays-leads" class="lead-list"></div>
+        </section>
+
+        <section class="panel pipelines-panel" id="pipelines">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Lanes</p>
+              <h2>Operational Pipelines</h2>
+            </div>
+            <span class="signal queued">QUEUED</span>
           </div>
-          <div>
-            <span>App Factory</span>
-            <strong>52in52</strong>
+          <div class="pipeline-group">
+            <article class="pipeline-lane">
+              <header>
+                <h3>BWYH Pipeline</h3>
+                <span class="signal ready">READY</span>
+              </header>
+              <div id="pipeline-bwyh"></div>
+            </article>
+            <article class="pipeline-lane">
+              <header>
+                <h3>Contour Pipeline</h3>
+                <span class="signal review">REVIEW</span>
+              </header>
+              <div id="pipeline-contour"></div>
+            </article>
+            <article class="pipeline-lane">
+              <header>
+                <h3>SAF Pipeline</h3>
+                <span class="signal med">MED</span>
+              </header>
+              <div id="pipeline-saf"></div>
+            </article>
           </div>
         </section>
 
-        <section class="dashboard-grid" id="overview" aria-label="Dashboard panels">
-          <article class="panel panel-leads" id="leads">
-            <div class="panel-header">
-              <p class="eyebrow">Intake</p>
-              <h3>Today's Leads</h3>
-            </div>
-            <div id="todays-leads" class="lead-list"></div>
-          </article>
-
-          <article class="panel panel-actions">
-            <div class="panel-header">
-              <p class="eyebrow">Focus</p>
-              <h3>Top 3 Actions</h3>
-            </div>
-            <ol id="top-actions" class="action-list"></ol>
-          </article>
-
-          <article class="panel pipeline-card" id="pipelines">
-            <div class="panel-header">
-              <p class="eyebrow">Pipeline</p>
-              <h3>BWYH Pipeline</h3>
-            </div>
-            <div id="pipeline-bwyh"></div>
-          </article>
-
-          <article class="panel pipeline-card">
-            <div class="panel-header">
-              <p class="eyebrow">Pipeline</p>
-              <h3>Contour Pipeline</h3>
-            </div>
-            <div id="pipeline-contour"></div>
-          </article>
-
-          <article class="panel pipeline-card">
-            <div class="panel-header">
-              <p class="eyebrow">Pipeline</p>
-              <h3>SAF Pipeline</h3>
-            </div>
-            <div id="pipeline-saf"></div>
-          </article>
-
-          <article class="panel panel-wide" id="apps">
-            <div class="panel-header">
+        <section class="panel registry-panel" id="apps">
+          <div class="panel-header inline">
+            <div>
               <p class="eyebrow">Factory</p>
-              <h3>App Registry</h3>
+              <h2>App Registry</h2>
             </div>
-            <div id="app-registry" class="registry-table"></div>
-          </article>
-
-          <article class="panel" id="agents">
-            <div class="panel-header">
-              <p class="eyebrow">Runtime</p>
-              <h3>Agent Status</h3>
-            </div>
-            <div id="agent-status" class="agent-list"></div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <p class="eyebrow">Log</p>
-              <h3>Activity Feed</h3>
-            </div>
-            <div id="activity-feed" class="activity-list"></div>
-          </article>
+            <span class="signal synced">SYNCED</span>
+          </div>
+          <div id="app-registry" class="registry-table"></div>
         </section>
       </main>
+
+      <aside class="right-rail" aria-label="Activity feed">
+        <section class="panel activity-panel">
+          <div class="panel-header compact">
+            <p class="eyebrow">Live Log</p>
+            <h2>Activity Feed</h2>
+          </div>
+          <div id="activity-feed" class="activity-list"></div>
+        </section>
+      </aside>
     </div>
 
     <script src="app.js"></script>
