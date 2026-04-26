@@ -46,6 +46,36 @@ const state = {
       agent: "A004 Ops Watcher"
     }
   ],
+  dailyBrief: [
+    {
+      label: "REVENUE ACTION",
+      status: "ACTION",
+      title: "Send Contour offer follow-up",
+      owner: "A006 Outreach",
+      next: "Move one warm lead toward call"
+    },
+    {
+      label: "CONTENT ACTION",
+      status: "READY",
+      title: "Draft Substack authority note",
+      owner: "A003 Content Catcher",
+      next: "Publish one operating insight"
+    },
+    {
+      label: "SYSTEM IMPROVEMENT",
+      status: "DONE",
+      title: "Add Daily Brief protocol",
+      owner: "A004 Ops Watcher",
+      next: "Log system improvement in GitHub"
+    },
+    {
+      label: "BLOCKER",
+      status: "REVIEW",
+      title: "Choose first live sync target",
+      owner: "Major",
+      next: "Approve Airtable or Notion first"
+    }
+  ],
   pipelines: {
     bwyh: [
       ["Lead capture", "ACTIVE", 70],
@@ -301,6 +331,23 @@ const renderActions = () => {
   `).join("");
 };
 
+const renderDailyBrief = () => {
+  const target = document.querySelector("#daily-brief-list");
+  target.innerHTML = state.dailyBrief.map((item) => `
+    <article class="brief-row">
+      <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
+      <div>
+        <strong>${escapeHtml(item.label)}</strong>
+        <p>${escapeHtml(item.title)}</p>
+      </div>
+      <div>
+        <span class="meta">${escapeHtml(item.owner)}</span>
+        <span class="meta">${escapeHtml(item.next)}</span>
+      </div>
+    </article>
+  `).join("");
+};
+
 const renderPipeline = (id, stages) => {
   const target = document.querySelector(id);
   target.innerHTML = `
@@ -395,6 +442,7 @@ const renderAll = () => {
   renderNeedsMajor();
   renderLeads();
   renderActions();
+  renderDailyBrief();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
   renderPipeline("#pipeline-saf", state.pipelines.saf);

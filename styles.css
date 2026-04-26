@@ -293,7 +293,8 @@ h3 {
 
 .agent-list,
 .activity-list,
-.lead-list {
+.lead-list,
+.brief-list {
   display: grid;
 }
 
@@ -372,6 +373,39 @@ time {
   color: var(--muted);
   font-size: 10px;
   font-weight: 800;
+}
+
+.brief-row {
+  min-height: 48px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) minmax(160px, 0.7fr);
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.brief-row:first-child {
+  border-top: 0;
+}
+
+.brief-row strong {
+  display: block;
+  color: var(--ink);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.brief-row p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.brief-row div:last-child {
+  display: grid;
+  gap: 3px;
 }
 
 .lead-row {
@@ -623,6 +657,7 @@ td strong {
 
   .pipeline-stage,
   .lead-row,
+  .brief-row,
   .action-list li,
   .command-console {
     grid-template-columns: 1fr;
