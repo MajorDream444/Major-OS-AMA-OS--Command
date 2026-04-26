@@ -1,13 +1,13 @@
 .PHONY: start dev run check
 
 start:
-	./run.sh
+	bash run.sh
 
 dev:
-	./dev.sh
+	bash dev.sh
 
 run:
-	./run.sh
+	bash run.sh
 
 check:
-	./dev.sh
+	bash dev.sh
