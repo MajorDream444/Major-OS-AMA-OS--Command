@@ -168,6 +168,81 @@ h3 {
   gap: 10px;
 }
 
+.command-console {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr) 74px;
+  align-items: stretch;
+}
+
+.command-console label {
+  padding: 7px 10px;
+  display: grid;
+  gap: 2px;
+  border-right: 1px solid var(--line);
+}
+
+.command-console label strong {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.command-console input {
+  min-width: 0;
+  padding: 0 10px;
+  color: var(--green);
+  background: var(--surface-hard);
+  border: 0;
+  border-right: 1px solid var(--line);
+  outline: none;
+  font: inherit;
+}
+
+.command-console input:focus {
+  box-shadow: inset 0 0 0 1px rgba(32, 245, 138, 0.45);
+}
+
+.command-console input::placeholder {
+  color: #3f5049;
+}
+
+.command-console button {
+  color: var(--green);
+  background: var(--green-dim);
+  border: 0;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.command-console button:hover {
+  background: rgba(32, 245, 138, 0.2);
+}
+
+.needs-major {
+  min-height: 42px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.needs-major strong {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.needs-major.waiting {
+  border-color: rgba(255, 176, 32, 0.45);
+  background: linear-gradient(90deg, var(--amber-dim), rgba(11, 15, 14, 0.96) 70%);
+}
+
 .panel {
   background: rgba(11, 15, 14, 0.96);
   border: 1px solid var(--line);
@@ -230,6 +305,11 @@ h3 {
   align-items: center;
   gap: 8px;
   border-top: 1px solid var(--line);
+}
+
+.agent-row.is-working {
+  animation: workPulse 1.25s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--green-dim), transparent 76%);
 }
 
 .agent-row:first-child,
@@ -344,7 +424,9 @@ time {
 .queued,
 .review,
 .med,
-.action {
+.action,
+.waiting,
+.working {
   color: var(--amber);
   background: var(--amber-dim);
   border-color: rgba(255, 176, 32, 0.35);
@@ -361,6 +443,27 @@ time {
   color: var(--blue);
   background: var(--blue-dim);
   border-color: rgba(56, 168, 255, 0.36);
+}
+
+.done {
+  color: var(--green);
+  background: var(--green-dim);
+  border-color: rgba(32, 245, 138, 0.38);
+}
+
+.idle {
+  color: var(--muted);
+  background: #0b1110;
+  border-color: var(--line);
+}
+
+.work-dot {
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  display: inline-block;
+  background: var(--amber);
+  animation: dotBlink 0.7s steps(2, end) infinite;
 }
 
 .pipeline-group {
@@ -466,6 +569,10 @@ td strong {
   border-top: 1px solid var(--line);
 }
 
+.heartbeat-row {
+  opacity: 0.78;
+}
+
 .activity-row .signal {
   width: max-content;
 }
@@ -516,12 +623,35 @@ td strong {
 
   .pipeline-stage,
   .lead-row,
-  .action-list li {
+  .action-list li,
+  .command-console {
     grid-template-columns: 1fr;
     align-items: start;
   }
 
   .tag-row {
     justify-content: flex-start;
+  }
+}
+
+@keyframes workPulse {
+  0%,
+  100% {
+    box-shadow: inset 2px 0 0 rgba(32, 245, 138, 0.45);
+  }
+
+  50% {
+    box-shadow: inset 2px 0 0 var(--green), 0 0 14px rgba(32, 245, 138, 0.16);
+  }
+}
+
+@keyframes dotBlink {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 1;
   }
 }

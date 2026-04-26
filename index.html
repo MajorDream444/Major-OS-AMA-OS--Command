@@ -24,7 +24,7 @@
 
         <div class="command-meta">
           <span class="signal synced">SYNCED</span>
-          <span class="unread">03 UNREAD</span>
+          <span class="unread" id="unread-counter">03 UNREAD</span>
         </div>
       </header>
 
@@ -52,6 +52,28 @@
       </aside>
 
       <main class="ops-column" id="overview">
+        <form class="command-console panel" id="command-form">
+          <label for="command-input">
+            <span class="eyebrow">Command Input</span>
+            <strong>Dispatch Mission</strong>
+          </label>
+          <input
+            id="command-input"
+            type="text"
+            autocomplete="off"
+            placeholder="type command: find 5 contour leads"
+          >
+          <button type="submit">SEND</button>
+        </form>
+
+        <section class="needs-major panel" id="needs-major-panel" aria-live="polite">
+          <div>
+            <p class="eyebrow">Needs Major</p>
+            <strong id="needs-major-text">No review holds</strong>
+          </div>
+          <span class="signal ready" id="needs-major-signal">READY</span>
+        </section>
+
         <section class="focus-strip panel" id="actions">
           <div class="panel-header inline">
             <div>
