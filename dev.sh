@@ -17,6 +17,9 @@ required_files=(
   "HANDOFF_COMMAND_CENTER.md"
   "docs/HANDOFF_COMMAND_CENTER.md"
   ".env.example"
+  "index.html"
+  "styles.css"
+  "app.js"
 )
 
 missing=0
@@ -36,5 +39,13 @@ if [[ "$missing" -ne 0 ]]; then
 fi
 
 echo
-echo "No dashboard app is wired yet. This script currently validates the boot layer only."
-echo "Next source-of-truth file: HANDOFF_COMMAND_CENTER.md"
+echo "Starting Command Center UI scaffold..."
+echo "URL: http://localhost:4173"
+echo
+
+if command -v python3 >/dev/null 2>&1; then
+  python3 -m http.server 4173
+else
+  echo "python3 is required to run the static dev server."
+  exit 1
+fi
