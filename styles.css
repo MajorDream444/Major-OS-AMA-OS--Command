@@ -122,6 +122,22 @@ h3 {
   justify-content: flex-end;
 }
 
+.reset-state {
+  height: 28px;
+  padding: 0 10px;
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid rgba(255, 77, 94, 0.34);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.reset-state:hover {
+  border-color: rgba(255, 77, 94, 0.7);
+}
+
 .mode {
   height: 28px;
   padding: 0 12px;

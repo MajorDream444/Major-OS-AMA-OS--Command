@@ -1,8 +1,11 @@
-const state = {
+const STORAGE_KEY = "major-os-command-center-state-v1";
+
+const seedState = {
   unread: 3,
   missionId: 0,
   heartbeatVisible: false,
   needsMajor: null,
+  commands: [],
   leads: [
     {
       name: "Systems audit inquiry",
@@ -138,6 +141,57 @@ const state = {
   ]
 };
 
+let state;
+
+const cloneState = (value) => JSON.parse(JSON.stringify(value));
+
+const mergeSeedState = (savedState) => {
+  const merged = {
+    ...cloneState(seedState),
+    ...savedState
+  };
+
+  merged.commands = Array.isArray(savedState.commands) ? savedState.commands : [];
+  merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
+  merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
+  merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
+  merged.pipelines = savedState.pipelines || cloneState(seedState.pipelines);
+  merged.apps = Array.isArray(savedState.apps) ? savedState.apps : cloneState(seedState.apps);
+  merged.agents = Array.isArray(savedState.agents) ? savedState.agents : cloneState(seedState.agents);
+  merged.activity = Array.isArray(savedState.activity) ? savedState.activity : cloneState(seedState.activity);
+  merged.unread = Number.isFinite(savedState.unread) ? savedState.unread : seedState.unread;
+  merged.missionId = Number.isFinite(savedState.missionId) ? savedState.missionId : seedState.missionId;
+  merged.needsMajor = savedState.needsMajor || null;
+
+  return merged;
+};
+
+const saveState = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn("Local state save failed", error);
+  }
+};
+
+const loadState = () => {
+  try {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (!savedState) {
+      const seededState = cloneState(seedState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seededState));
+      return seededState;
+    }
+
+    return mergeSeedState(JSON.parse(savedState));
+  } catch (error) {
+    console.warn("Local state load failed; using seed state", error);
+    return cloneState(seedState);
+  }
+};
+
+state = loadState();
+
 const routes = [
   { pattern: /\b(lead|find|scout)\b/i, agentId: "A001" },
   { pattern: /\b(audit|diagnose)\b/i, agentId: "A002" },
@@ -179,6 +233,7 @@ const setAgentStatus = (agentId, status) => {
   const agent = findAgent(agentId);
   if (!agent) return;
   agent.status = status;
+  saveState();
   renderAgents();
 };
 
@@ -197,6 +252,7 @@ const pushActivity = (item, label = "ACTIVE", options = {}) => {
   });
 
   state.activity = state.activity.slice(0, 9);
+  saveState();
   renderActivity();
   renderUnread();
 };
@@ -204,6 +260,7 @@ const pushActivity = (item, label = "ACTIVE", options = {}) => {
 const pushAction = ({ label, title, next, agent }) => {
   state.actions.unshift({ label, title, next, agent });
   state.actions = state.actions.slice(0, 3);
+  saveState();
   renderActions();
 };
 
@@ -214,6 +271,7 @@ const updateNeedsMajor = (mission, agent) => {
         agent: agentLabel(agent)
       }
     : null;
+  saveState();
   renderNeedsMajor();
 };
 
@@ -229,6 +287,14 @@ const dispatchMission = (command) => {
   const agent = routeCommand(trimmed);
   const reviewRequired = shouldRequestReview(trimmed, state.missionId);
 
+  state.commands.unshift({
+    id: mission.id,
+    command: trimmed,
+    agent: agentLabel(agent),
+    time: nowStamp()
+  });
+  state.commands = state.commands.slice(0, 20);
+  saveState();
   updateNeedsMajor(null);
   pushAction({
     label: "ACTION",
@@ -431,6 +497,17 @@ const bindCommandInput = () => {
   });
 };
 
+const bindResetControl = () => {
+  const button = document.querySelector("#reset-local-state");
+
+  button.addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_KEY);
+    state = cloneState(seedState);
+    saveState();
+    renderAll();
+  });
+};
+
 const startHeartbeat = () => {
   window.setInterval(() => {
     pushActivity("Ops Watcher heartbeat", "SYNCED", { heartbeat: true });
@@ -452,5 +529,6 @@ const renderAll = () => {
 };
 
 bindCommandInput();
+bindResetControl();
 renderAll();
 startHeartbeat();
