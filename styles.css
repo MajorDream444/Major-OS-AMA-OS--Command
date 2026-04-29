@@ -491,6 +491,11 @@ time {
   box-shadow: inset 2px 0 0 var(--green);
 }
 
+.distribution-panel.review-highlight {
+  border-color: rgba(255, 176, 32, 0.55);
+  box-shadow: inset 2px 0 0 var(--amber);
+}
+
 .github-log-row {
   min-height: 42px;
   padding: 7px 10px;
@@ -598,6 +603,42 @@ time {
 }
 
 .media-workflow-row .meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.distribution-list {
+  display: grid;
+}
+
+.distribution-row {
+  min-height: 44px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) 76px 112px 90px 92px minmax(130px, 0.65fr);
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.distribution-row:first-child {
+  border-top: 0;
+}
+
+.distribution-row strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.distribution-row .meta {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -863,6 +904,7 @@ td strong {
   .brief-row,
   .github-log-row,
   .media-workflow-row,
+  .distribution-row,
   .action-list li,
   .command-console {
     grid-template-columns: 1fr;

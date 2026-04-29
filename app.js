@@ -22,6 +22,7 @@ const seedState = {
   githubLogsHighlighted: false,
   agentRegistryHighlighted: false,
   mediaEngineHighlighted: false,
+  distributionHighlighted: false,
   leads: [
     {
       name: "Systems audit inquiry",
@@ -175,6 +176,35 @@ const seedState = {
       next_action: "Turn hooks into video script",
       assigned_agent: "A003 Content Catcher",
       status: "REVIEW"
+    }
+  ],
+  distributionQueue: [
+    {
+      title: "AI Was Never Invented",
+      lane: "Doctrine",
+      channel: "Substack",
+      asset_type: "article",
+      status: "READY",
+      next_action: "Review local publish handoff",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title: "Your Business Is the Bottleneck",
+      lane: "Contour",
+      channel: "LinkedIn",
+      asset_type: "hook",
+      status: "NEEDS REVIEW",
+      next_action: "Approve authority hook",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title: "Build While You Heal: System Before Scale",
+      lane: "BWYH",
+      channel: "YouTube Shorts",
+      asset_type: "short script",
+      status: "READY",
+      next_action: "Queue local short script",
+      owner_agent: "A003 Content Catcher"
     }
   ],
   pipelines: {
@@ -366,6 +396,8 @@ const mergeSeedState = (savedState) => {
   merged.agentRegistryHighlighted = Boolean(savedState.agentRegistryHighlighted);
   merged.mediaEngineHighlighted = Boolean(savedState.mediaEngineHighlighted);
   merged.mediaWorkflow = Array.isArray(savedState.mediaWorkflow) ? savedState.mediaWorkflow : cloneState(seedState.mediaWorkflow);
+  merged.distributionHighlighted = Boolean(savedState.distributionHighlighted);
+  merged.distributionQueue = Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
   merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
@@ -422,6 +454,7 @@ const routes = [
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
 const agentRegistryCommandPattern = /\bshow agents\b/i;
 const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
+const distributionCommandPattern = /\b(distribute|send to x|send to substack|save to memory)\b/i;
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({
@@ -529,6 +562,12 @@ const findMediaItem = (title) =>
     item.title.toLowerCase() === title.toLowerCase()
   );
 
+const findDistributionItem = (title, channel) =>
+  state.distributionQueue.find((item) =>
+    item.title.toLowerCase() === title.toLowerCase() &&
+    item.channel.toLowerCase() === channel.toLowerCase()
+  );
+
 const upsertMediaWorkflowItem = (title, updates) => {
   const cleanTitle = normalizeTitle(title);
   const existing = findMediaItem(cleanTitle);
@@ -554,6 +593,194 @@ const upsertMediaWorkflowItem = (title, updates) => {
   saveState();
   renderMediaEngine();
   return item;
+};
+
+const distributionTemplates = (title) => {
+  const lane = inferMediaLane(title);
+  return [
+    {
+      title,
+      lane,
+      channel: "Substack",
+      asset_type: "article",
+      status: "READY",
+      next_action: "Review local Substack handoff",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title,
+      lane,
+      channel: "X",
+      asset_type: "hook",
+      status: "NEEDS REVIEW",
+      next_action: "Approve hook before queue",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title,
+      lane,
+      channel: "Instagram",
+      asset_type: "short script",
+      status: "READY",
+      next_action: "Cut into local IG short",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title,
+      lane,
+      channel: "YouTube Shorts",
+      asset_type: "short script",
+      status: "READY",
+      next_action: "Prepare local short script",
+      owner_agent: "A003 Content Catcher"
+    },
+    {
+      title,
+      lane,
+      channel: "GitHub / Obsidian Memory",
+      asset_type: "memory note",
+      status: "READY",
+      next_action: "Save local memory handoff",
+      owner_agent: "A003 Content Catcher"
+    }
+  ];
+};
+
+const upsertDistributionItem = (item) => {
+  const cleanTitle = normalizeTitle(item.title);
+  const existing = findDistributionItem(cleanTitle, item.channel);
+
+  if (existing) {
+    Object.assign(existing, {
+      ...item,
+      title: cleanTitle
+    });
+    saveState();
+    renderDistributionQueue();
+    return existing;
+  }
+
+  const nextItem = {
+    ...item,
+    title: cleanTitle
+  };
+
+  state.distributionQueue.unshift(nextItem);
+  saveState();
+  renderDistributionQueue();
+  return nextItem;
+};
+
+const upsertDistributionBatch = (title) => {
+  const cleanTitle = normalizeTitle(title);
+  const rows = distributionTemplates(cleanTitle).map(upsertDistributionItem);
+  state.distributionQueue = state.distributionQueue.filter((item, index, list) =>
+    list.findIndex((candidate) =>
+      candidate.title.toLowerCase() === item.title.toLowerCase() &&
+      candidate.channel.toLowerCase() === item.channel.toLowerCase()
+    ) === index
+  );
+  saveState();
+  renderDistributionQueue();
+  return rows;
+};
+
+const extractDistributionTopic = (command) => {
+  const patterns = [
+    /^distribute\s+(.+)$/i,
+    /^send to x\s+(.+)$/i,
+    /^send to substack\s+(.+)$/i,
+    /^save to memory\s+(.+)$/i
+  ];
+  const match = patterns.map((pattern) => command.match(pattern)).find(Boolean);
+  return match ? match[1].trim() : command.trim();
+};
+
+const syncDistributionFromMediaStage = (title, stage) => {
+  if (!["Publish", "Remotion Queue", "HeyGen Queue", "Distribution"].includes(stage)) return;
+
+  const cleanTitle = normalizeTitle(title);
+  upsertDistributionBatch(cleanTitle);
+  state.distributionHighlighted = true;
+  saveState();
+  renderDistributionQueue();
+};
+
+const addDistributionActions = (title) => {
+  const actionable = state.distributionQueue.find((item) =>
+    item.title.toLowerCase() === title.toLowerCase() &&
+    ["READY", "NEEDS REVIEW"].includes(item.status)
+  );
+
+  if (!actionable) return;
+
+  pushAction({
+    label: actionable.status,
+    title: `Distribution: ${actionable.title}`,
+    next: `${actionable.channel} / ${actionable.next_action}`,
+    agent: actionable.owner_agent
+  });
+};
+
+const handleDistributionCommand = (mission, command) => {
+  const topic = normalizeTitle(extractDistributionTopic(command));
+  const agent = findAgent("A003");
+  let event = "Distribution queued";
+
+  logSubmittedCommand(mission, command, agentLabel(agent));
+  updateNeedsMajor(null);
+  state.distributionHighlighted = true;
+
+  if (/^distribute\b/i.test(command)) {
+    upsertDistributionBatch(topic);
+    upsertMediaWorkflowItem(topic, {
+      stage: "Distribution",
+      next_action: "Queue outbound channels",
+      assigned_agent: agentLabel(agent),
+      status: "ACTION"
+    });
+    event = "Distribution queued";
+  } else if (/^send to x\b/i.test(command)) {
+    upsertDistributionItem({
+      title: topic,
+      lane: inferMediaLane(topic),
+      channel: "X",
+      asset_type: "hook",
+      status: "QUEUED",
+      next_action: "Local X handoff queued",
+      owner_agent: agentLabel(agent)
+    });
+    event = "X handoff queued";
+  } else if (/^send to substack\b/i.test(command)) {
+    upsertDistributionItem({
+      title: topic,
+      lane: inferMediaLane(topic),
+      channel: "Substack",
+      asset_type: "article",
+      status: "QUEUED",
+      next_action: "Local Substack handoff queued",
+      owner_agent: agentLabel(agent)
+    });
+    event = "Substack handoff queued";
+  } else {
+    upsertDistributionItem({
+      title: topic,
+      lane: inferMediaLane(topic),
+      channel: "GitHub / Obsidian Memory",
+      asset_type: "memory note",
+      status: "READY",
+      next_action: "Save local memory note",
+      owner_agent: agentLabel(agent)
+    });
+    event = "Memory save queued";
+  }
+
+  pushActivity(event, "QUEUED");
+  addDistributionActions(topic);
+  simulateContentCatcher(mission, command, event);
+  saveState();
+  renderDistributionQueue();
+  renderMediaEngine();
 };
 
 const simulateContentCatcher = (mission, command, finalEvent = "Media workflow updated") => {
@@ -684,6 +911,8 @@ const handleMediaWorkflowCommand = (mission, command) => {
   updateNeedsMajor(null);
   state.mediaEngineHighlighted = true;
   upsertMediaWorkflowItem(topic, update);
+  syncDistributionFromMediaStage(topic, update.stage);
+  addDistributionActions(topic);
   pushAction(action);
   pushActivity(`${mission.id} media workflow -> Content Catcher`, "ACTION");
   events.forEach(([event, label], index) => {
@@ -722,6 +951,11 @@ const dispatchMission = (command) => {
 
   if (agentRegistryCommandPattern.test(trimmed)) {
     reviewAgentRegistry(mission, trimmed);
+    return;
+  }
+
+  if (distributionCommandPattern.test(trimmed)) {
+    handleDistributionCommand(mission, trimmed);
     return;
   }
 
@@ -967,6 +1201,26 @@ const renderMediaEngine = () => {
   `).join("");
 };
 
+const renderDistributionQueue = () => {
+  const panel = document.querySelector("#distribution-queue");
+  const target = document.querySelector("#distribution-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.distributionHighlighted));
+  target.innerHTML = state.distributionQueue.map((item, index) => `
+    <article class="distribution-row ${index === 0 ? "selected" : ""}">
+      <div>
+        <strong>${escapeHtml(item.title)}</strong>
+        <span class="meta">${escapeHtml(item.next_action)}</span>
+      </div>
+      <span class="signal">${escapeHtml(item.lane)}</span>
+      <span class="meta">${escapeHtml(item.channel)}</span>
+      <span class="signal">${escapeHtml(item.asset_type)}</span>
+      <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
+      <span class="meta">${escapeHtml(item.owner_agent)}</span>
+    </article>
+  `).join("");
+};
+
 const renderPipeline = (id, stages) => {
   const target = document.querySelector(id);
   target.innerHTML = `
@@ -1086,6 +1340,7 @@ const renderAll = () => {
   renderDailyBrief();
   renderGithubLogs();
   renderMediaEngine();
+  renderDistributionQueue();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
   renderPipeline("#pipeline-saf", state.pipelines.saf);
