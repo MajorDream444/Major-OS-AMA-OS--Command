@@ -1,5 +1,18 @@
 const STORAGE_KEY = "major-os-command-center-state-v1";
 
+const mediaStages = [
+  "Raw Thought",
+  "Draft",
+  "Edit",
+  "Publish",
+  "Hooks",
+  "Video Script",
+  "Remotion Queue",
+  "HeyGen Queue",
+  "Distribution",
+  "Memory Update"
+];
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -8,6 +21,7 @@ const seedState = {
   commands: [],
   githubLogsHighlighted: false,
   agentRegistryHighlighted: false,
+  mediaEngineHighlighted: false,
   leads: [
     {
       name: "Systems audit inquiry",
@@ -135,6 +149,32 @@ const seedState = {
       status: "SYNCED",
       timestamp: "2026-04-27 19:48",
       next: "Verify state survival after refresh"
+    }
+  ],
+  mediaWorkflow: [
+    {
+      title: "AI Was Never Invented",
+      lane: "Doctrine",
+      stage: "Raw Thought",
+      next_action: "Capture thesis as Substack draft",
+      assigned_agent: "A003 Content Catcher",
+      status: "READY"
+    },
+    {
+      title: "Your Business Is the Bottleneck",
+      lane: "Contour",
+      stage: "Draft",
+      next_action: "Editorial polish",
+      assigned_agent: "A003 Content Catcher",
+      status: "ACTION"
+    },
+    {
+      title: "Build While You Heal: System Before Scale",
+      lane: "BWYH",
+      stage: "Hooks",
+      next_action: "Turn hooks into video script",
+      assigned_agent: "A003 Content Catcher",
+      status: "REVIEW"
     }
   ],
   pipelines: {
@@ -324,6 +364,8 @@ const mergeSeedState = (savedState) => {
   merged.githubLogs = Array.isArray(savedState.githubLogs) ? savedState.githubLogs : cloneState(seedState.githubLogs);
   merged.githubLogsHighlighted = Boolean(savedState.githubLogsHighlighted);
   merged.agentRegistryHighlighted = Boolean(savedState.agentRegistryHighlighted);
+  merged.mediaEngineHighlighted = Boolean(savedState.mediaEngineHighlighted);
+  merged.mediaWorkflow = Array.isArray(savedState.mediaWorkflow) ? savedState.mediaWorkflow : cloneState(seedState.mediaWorkflow);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
   merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
@@ -372,13 +414,14 @@ state = loadState();
 const routes = [
   { pattern: /\b(lead|find|scout)\b/i, agentId: "A001" },
   { pattern: /\b(audit|diagnose)\b/i, agentId: "A002" },
-  { pattern: /\b(content|video|remotion|heygen|substack)\b/i, agentId: "A003" },
+  { pattern: /\b(content|video|remotion|heygen|substack|article|essay|draft|newsletter|avatar)\b/i, agentId: "A003" },
   { pattern: /\b(email|outreach|follow up)\b/i, agentId: "A006" },
   { pattern: /\b(shopify|gumroad|store|product)\b/i, agentId: "A009" }
 ];
 
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
 const agentRegistryCommandPattern = /\bshow agents\b/i;
+const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({
@@ -446,7 +489,7 @@ const pushActivity = (item, label = "ACTIVE", options = {}) => {
     heartbeat: Boolean(options.heartbeat)
   });
 
-  state.activity = state.activity.slice(0, 9);
+  state.activity = state.activity.slice(0, 30);
   saveState();
   renderActivity();
   renderUnread();
@@ -457,6 +500,198 @@ const pushAction = ({ label, title, next, agent }) => {
   state.actions = state.actions.slice(0, 3);
   saveState();
   renderActions();
+};
+
+const inferMediaLane = (title) => {
+  if (/\b(bwyh|heal|healing)\b/i.test(title)) return "BWYH";
+  if (/\b(contour|sales|business|bottleneck|client)\b/i.test(title)) return "Contour";
+  if (/\b(saf|research|narrative|study)\b/i.test(title)) return "SAF";
+  if (/\b(ai|os|system|agent|command center)\b/i.test(title)) return "Major AI OS";
+  return "Doctrine";
+};
+
+const extractMediaTopic = (command) => {
+  const patterns = [
+    /^draft substack\s+(.+)$/i,
+    /^make video from\s+(.+)$/i,
+    /^queue remotion\s+(.+)$/i,
+    /^queue heygen\s+(.+)$/i,
+    /^publish\s+(.+)$/i
+  ];
+  const match = patterns.map((pattern) => command.match(pattern)).find(Boolean);
+  return match ? match[1].trim() : command.trim();
+};
+
+const normalizeTitle = (title) => title.trim().replace(/\s+/g, " ");
+
+const findMediaItem = (title) =>
+  state.mediaWorkflow.find((item) =>
+    item.title.toLowerCase() === title.toLowerCase()
+  );
+
+const upsertMediaWorkflowItem = (title, updates) => {
+  const cleanTitle = normalizeTitle(title);
+  const existing = findMediaItem(cleanTitle);
+
+  if (existing) {
+    Object.assign(existing, updates);
+    saveState();
+    renderMediaEngine();
+    return existing;
+  }
+
+  const item = {
+    title: cleanTitle,
+    lane: inferMediaLane(cleanTitle),
+    stage: "Raw Thought",
+    next_action: "Choose content angle",
+    assigned_agent: "A003 Content Catcher",
+    status: "READY",
+    ...updates
+  };
+
+  state.mediaWorkflow.unshift(item);
+  saveState();
+  renderMediaEngine();
+  return item;
+};
+
+const simulateContentCatcher = (mission, command, finalEvent = "Media workflow updated") => {
+  const agent = findAgent("A003");
+  setAgentState("A003", {
+    status: "WORKING",
+    current_task: command,
+    last_event: `${mission.id} media workflow`,
+    needs_major: false
+  });
+
+  window.setTimeout(() => {
+    pushActivity("Content Catcher accepted mission", "ACTIVE");
+    setAgentState("A003", {
+      status: "WORKING",
+      current_task: command,
+      last_event: "Building media handoff"
+    });
+  }, 500);
+
+  window.setTimeout(() => {
+    pushActivity(finalEvent, "DONE");
+    setAgentState("A003", {
+      status: "DONE",
+      current_task: command,
+      last_event: finalEvent,
+      needs_major: false
+    });
+  }, 1700);
+
+  window.setTimeout(() => {
+    setAgentState("A003", {
+      status: "READY",
+      current_task: "",
+      last_event: "Ready for next content mission"
+    });
+  }, 3200);
+
+  return agent;
+};
+
+const handleMediaWorkflowCommand = (mission, command) => {
+  const topic = extractMediaTopic(command);
+  const agent = findAgent("A003");
+  let update;
+  let events;
+  let action;
+  let finalEvent;
+
+  if (/^draft substack\b/i.test(command)) {
+    update = {
+      stage: "Draft",
+      next_action: "Editorial Polish",
+      assigned_agent: agentLabel(agent),
+      status: "ACTION"
+    };
+    events = [["Substack draft captured", "ACTION"]];
+    action = {
+      label: "CONTENT ACTION",
+      title: `Draft Substack: ${topic}`,
+      next: "Editorial Polish",
+      agent: agentLabel(agent)
+    };
+    finalEvent = "Substack draft captured";
+  } else if (/^make video from\b/i.test(command)) {
+    update = {
+      stage: "Video Script",
+      next_action: "Queue Remotion / HeyGen",
+      assigned_agent: agentLabel(agent),
+      status: "ACTION"
+    };
+    events = [["Hooks extracted", "ACTION"], ["Video script ready", "READY"]];
+    action = {
+      label: "ACTION",
+      title: `Queue media render: ${topic}`,
+      next: "Remotion / HeyGen queue",
+      agent: agentLabel(agent)
+    };
+    finalEvent = "Video script ready";
+  } else if (/^queue remotion\b/i.test(command)) {
+    update = {
+      stage: "Remotion Queue",
+      next_action: "Queue HeyGen or Distribution",
+      assigned_agent: agentLabel(agent),
+      status: "QUEUED"
+    };
+    events = [["Remotion render queued", "QUEUED"]];
+    action = {
+      label: "QUEUED",
+      title: `Remotion queued: ${topic}`,
+      next: "Review render output later",
+      agent: agentLabel(agent)
+    };
+    finalEvent = "Remotion render queued";
+  } else if (/^queue heygen\b/i.test(command)) {
+    update = {
+      stage: "HeyGen Queue",
+      next_action: "Distribution",
+      assigned_agent: agentLabel(agent),
+      status: "QUEUED"
+    };
+    events = [["HeyGen personalization queued", "QUEUED"]];
+    action = {
+      label: "QUEUED",
+      title: `HeyGen queued: ${topic}`,
+      next: "Prepare distribution",
+      agent: agentLabel(agent)
+    };
+    finalEvent = "HeyGen personalization queued";
+  } else {
+    update = {
+      stage: "Publish",
+      next_action: "Memory Update",
+      assigned_agent: agentLabel(agent),
+      status: "REVIEW"
+    };
+    events = [["Memory update needed", "REVIEW"]];
+    action = {
+      label: "REVIEW",
+      title: `Publish / memory update: ${topic}`,
+      next: "Log insight to memory graph",
+      agent: agentLabel(agent)
+    };
+    finalEvent = "Memory update needed";
+  }
+
+  logSubmittedCommand(mission, command, agentLabel(agent));
+  updateNeedsMajor(null);
+  state.mediaEngineHighlighted = true;
+  upsertMediaWorkflowItem(topic, update);
+  pushAction(action);
+  pushActivity(`${mission.id} media workflow -> Content Catcher`, "ACTION");
+  events.forEach(([event, label], index) => {
+    window.setTimeout(() => pushActivity(event, label), index * 450);
+  });
+  simulateContentCatcher(mission, command, finalEvent);
+  saveState();
+  renderMediaEngine();
 };
 
 const updateNeedsMajor = (mission, agent) => {
@@ -487,6 +722,11 @@ const dispatchMission = (command) => {
 
   if (agentRegistryCommandPattern.test(trimmed)) {
     reviewAgentRegistry(mission, trimmed);
+    return;
+  }
+
+  if (mediaWorkflowCommandPattern.test(trimmed)) {
+    handleMediaWorkflowCommand(mission, trimmed);
     return;
   }
 
@@ -696,6 +936,37 @@ const renderGithubLogs = () => {
   `).join("");
 };
 
+const renderMediaEngine = () => {
+  const panel = document.querySelector("#media-engine");
+  const stageTarget = document.querySelector("#media-stage-strip");
+  const listTarget = document.querySelector("#media-workflow-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.mediaEngineHighlighted));
+
+  stageTarget.innerHTML = mediaStages.map((stage) => {
+    const count = state.mediaWorkflow.filter((item) => item.stage === stage).length;
+    return `
+      <div class="media-stage ${count ? "has-items" : ""}">
+        <span>${escapeHtml(stage.replace(" Queue", ""))}</span>
+        <strong>${count}</strong>
+      </div>
+    `;
+  }).join("");
+
+  listTarget.innerHTML = state.mediaWorkflow.map((item, index) => `
+    <article class="media-workflow-row ${index === 0 ? "selected" : ""}">
+      <div>
+        <strong>${escapeHtml(item.title)}</strong>
+        <span class="meta">${escapeHtml(item.next_action)}</span>
+      </div>
+      <span class="signal">${escapeHtml(item.lane)}</span>
+      <span class="${labelClass(item.stage)}">${escapeHtml(item.stage)}</span>
+      <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
+      <span class="meta">${escapeHtml(item.assigned_agent)}</span>
+    </article>
+  `).join("");
+};
+
 const renderPipeline = (id, stages) => {
   const target = document.querySelector(id);
   target.innerHTML = `
@@ -814,6 +1085,7 @@ const renderAll = () => {
   renderActions();
   renderDailyBrief();
   renderGithubLogs();
+  renderMediaEngine();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
   renderPipeline("#pipeline-saf", state.pipelines.saf);
