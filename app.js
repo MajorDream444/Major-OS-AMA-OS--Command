@@ -7,6 +7,7 @@ const seedState = {
   needsMajor: null,
   commands: [],
   githubLogsHighlighted: false,
+  agentRegistryHighlighted: false,
   leads: [
     {
       name: "Systems audit inquiry",
@@ -177,16 +178,116 @@ const seedState = {
     }
   ],
   agents: [
-    { id: "A001", name: "Scout", status: "IDLE" },
-    { id: "A002", name: "Audit", status: "READY" },
-    { id: "A003", name: "Content Catcher", status: "IDLE" },
-    { id: "A004", name: "Ops Watcher", status: "READY" },
-    { id: "A005", name: "Grant Hunter", status: "IDLE" },
-    { id: "A006", name: "Outreach", status: "READY" },
-    { id: "A007", name: "Offer Builder", status: "IDLE" },
-    { id: "A008", name: "Deck Builder", status: "IDLE" },
-    { id: "A009", name: "Storefront Operator", status: "IDLE" },
-    { id: "A010", name: "Meeting Synthesizer", status: "READY" }
+    {
+      id: "A001",
+      name: "Scout",
+      role: "Lead discovery",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["local leads", "mock search"],
+      workflow: "Find -> qualify -> queue"
+    },
+    {
+      id: "A002",
+      name: "Audit",
+      role: "Diagnostic review",
+      status: "READY",
+      current_task: "",
+      last_event: "Ready for diagnosis",
+      needs_major: false,
+      tools: ["local checklist", "mock score"],
+      workflow: "Intake -> diagnose -> flag"
+    },
+    {
+      id: "A003",
+      name: "Content Catcher",
+      role: "Content and media drafting",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["local brief", "mock media plan"],
+      workflow: "Capture -> draft -> repurpose"
+    },
+    {
+      id: "A004",
+      name: "Ops Watcher",
+      role: "Registry and system monitor",
+      status: "READY",
+      current_task: "",
+      last_event: "Monitoring local runtime",
+      needs_major: false,
+      tools: ["localStorage", "mock logs"],
+      workflow: "Observe -> log -> escalate"
+    },
+    {
+      id: "A005",
+      name: "Grant Hunter",
+      role: "Opportunity scan",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["mock grants", "local notes"],
+      workflow: "Scan -> shortlist -> review"
+    },
+    {
+      id: "A006",
+      name: "Outreach",
+      role: "Follow-up and messaging",
+      status: "READY",
+      current_task: "",
+      last_event: "Ready for follow-up",
+      needs_major: false,
+      tools: ["local contacts", "mock email"],
+      workflow: "Draft -> review -> send later"
+    },
+    {
+      id: "A007",
+      name: "Offer Builder",
+      role: "Offer packaging",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["local offers", "mock pricing"],
+      workflow: "Frame -> package -> handoff"
+    },
+    {
+      id: "A008",
+      name: "Deck Builder",
+      role: "Presentation planning",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["local outline", "mock slides"],
+      workflow: "Outline -> structure -> review"
+    },
+    {
+      id: "A009",
+      name: "Storefront Operator",
+      role: "Commerce setup",
+      status: "IDLE",
+      current_task: "",
+      last_event: "Standing by",
+      needs_major: false,
+      tools: ["mock products", "local offer data"],
+      workflow: "Product -> page -> review"
+    },
+    {
+      id: "A010",
+      name: "Meeting Synthesizer",
+      role: "Meeting memory",
+      status: "READY",
+      current_task: "",
+      last_event: "Ready to summarize",
+      needs_major: false,
+      tools: ["local notes", "mock transcript"],
+      workflow: "Capture -> summarize -> log"
+    }
   ],
   activity: [
     { time: "08:58", item: "Lead classified -> Contour", label: "ACTIVE", heartbeat: false },
@@ -202,6 +303,17 @@ let state;
 
 const cloneState = (value) => JSON.parse(JSON.stringify(value));
 
+const normalizeAgent = (agent, seedAgent) => ({
+  ...seedAgent,
+  ...agent,
+  role: agent.role || seedAgent.role,
+  current_task: agent.current_task || "",
+  last_event: agent.last_event || seedAgent.last_event,
+  needs_major: Boolean(agent.needs_major),
+  tools: Array.isArray(agent.tools) ? agent.tools : seedAgent.tools,
+  workflow: agent.workflow || seedAgent.workflow
+});
+
 const mergeSeedState = (savedState) => {
   const merged = {
     ...cloneState(seedState),
@@ -211,12 +323,18 @@ const mergeSeedState = (savedState) => {
   merged.commands = Array.isArray(savedState.commands) ? savedState.commands : [];
   merged.githubLogs = Array.isArray(savedState.githubLogs) ? savedState.githubLogs : cloneState(seedState.githubLogs);
   merged.githubLogsHighlighted = Boolean(savedState.githubLogsHighlighted);
+  merged.agentRegistryHighlighted = Boolean(savedState.agentRegistryHighlighted);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
   merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
   merged.pipelines = savedState.pipelines || cloneState(seedState.pipelines);
   merged.apps = Array.isArray(savedState.apps) ? savedState.apps : cloneState(seedState.apps);
-  merged.agents = Array.isArray(savedState.agents) ? savedState.agents : cloneState(seedState.agents);
+  merged.agents = cloneState(seedState.agents).map((seedAgent) => {
+    const savedAgent = Array.isArray(savedState.agents)
+      ? savedState.agents.find((agent) => agent.id === seedAgent.id)
+      : null;
+    return normalizeAgent(savedAgent || {}, seedAgent);
+  });
   merged.activity = Array.isArray(savedState.activity) ? savedState.activity : cloneState(seedState.activity);
   merged.unread = Number.isFinite(savedState.unread) ? savedState.unread : seedState.unread;
   merged.missionId = Number.isFinite(savedState.missionId) ? savedState.missionId : seedState.missionId;
@@ -254,12 +372,13 @@ state = loadState();
 const routes = [
   { pattern: /\b(lead|find|scout)\b/i, agentId: "A001" },
   { pattern: /\b(audit|diagnose)\b/i, agentId: "A002" },
-  { pattern: /\b(content|video|remotion|heygen)\b/i, agentId: "A003" },
+  { pattern: /\b(content|video|remotion|heygen|substack)\b/i, agentId: "A003" },
   { pattern: /\b(email|outreach|follow up)\b/i, agentId: "A006" },
   { pattern: /\b(shopify|gumroad|store|product)\b/i, agentId: "A009" }
 ];
 
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
+const agentRegistryCommandPattern = /\bshow agents\b/i;
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({
@@ -301,12 +420,16 @@ const logSubmittedCommand = (mission, command, agent) => {
   saveState();
 };
 
-const setAgentStatus = (agentId, status) => {
+const setAgentState = (agentId, updates) => {
   const agent = findAgent(agentId);
   if (!agent) return;
-  agent.status = status;
+  Object.assign(agent, updates);
   saveState();
   renderAgents();
+};
+
+const setAgentStatus = (agentId, status) => {
+  setAgentState(agentId, { status });
 };
 
 const pushActivity = (item, label = "ACTIVE", options = {}) => {
@@ -362,6 +485,11 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (agentRegistryCommandPattern.test(trimmed)) {
+    reviewAgentRegistry(mission, trimmed);
+    return;
+  }
+
   const agent = routeCommand(trimmed);
   const reviewRequired = shouldRequestReview(trimmed, state.missionId);
 
@@ -374,20 +502,39 @@ const dispatchMission = (command) => {
     agent: agentLabel(agent)
   });
   pushActivity(`${mission.id} dispatched -> ${agent.name}`, "ACTION");
-  setAgentStatus(agent.id, "WORKING");
+  setAgentState(agent.id, {
+    status: "WORKING",
+    current_task: trimmed,
+    last_event: `${mission.id} dispatched`,
+    needs_major: false
+  });
 
   window.setTimeout(() => {
     pushActivity(`${agent.name} accepted mission`, "ACTIVE");
+    setAgentState(agent.id, {
+      status: "WORKING",
+      current_task: trimmed,
+      last_event: `${mission.id} accepted`
+    });
   }, 650);
 
   window.setTimeout(() => {
     pushActivity(`${agent.name} working...`, "WORKING");
-    setAgentStatus(agent.id, "WORKING");
+    setAgentState(agent.id, {
+      status: "WORKING",
+      current_task: trimmed,
+      last_event: "Working..."
+    });
   }, 1500);
 
   window.setTimeout(() => {
     if (reviewRequired) {
-      setAgentStatus(agent.id, "WAITING");
+      setAgentState(agent.id, {
+        status: "WAITING",
+        current_task: trimmed,
+        last_event: "Needs Major review",
+        needs_major: true
+      });
       updateNeedsMajor(trimmed, agent);
       pushAction({
         label: "REVIEW",
@@ -399,7 +546,12 @@ const dispatchMission = (command) => {
       return;
     }
 
-    setAgentStatus(agent.id, "DONE");
+    setAgentState(agent.id, {
+      status: "DONE",
+      current_task: trimmed,
+      last_event: "Completed draft",
+      needs_major: false
+    });
     pushAction({
       label: "READY",
       title: trimmed,
@@ -409,9 +561,21 @@ const dispatchMission = (command) => {
     pushActivity(`${agent.name} completed draft`, "DONE");
 
     window.setTimeout(() => {
-      setAgentStatus(agent.id, "READY");
+      setAgentState(agent.id, {
+        status: "READY",
+        current_task: "",
+        last_event: "Ready for next mission"
+      });
     }, 1800);
   }, 2900);
+};
+
+const reviewAgentRegistry = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.agentRegistryHighlighted = true;
+  saveState();
+  renderAgents();
+  pushActivity("Agent registry reviewed", "SYNCED");
 };
 
 const reviewGithubLogs = (mission, command) => {
@@ -580,14 +744,25 @@ const renderApps = () => {
 
 const renderAgents = () => {
   const target = document.querySelector("#agent-status");
+  document.querySelector("#agents").classList.toggle(
+    "review-highlight",
+    Boolean(state.agentRegistryHighlighted)
+  );
   target.innerHTML = state.agents.map((agent) => `
-    <div class="agent-row ${agent.status === "WORKING" ? "is-working" : ""}">
+    <div class="agent-row ${agent.status === "WORKING" ? "is-working" : ""} ${agent.status === "WAITING" ? "is-waiting" : ""} ${agent.status === "BLOCKED" ? "is-blocked" : ""}">
       <span class="agent-code">${escapeHtml(agent.id)}</span>
-      <strong>${escapeHtml(agent.name)}</strong>
-      <span class="${labelClass(agent.status)}">
-        ${agent.status === "WORKING" ? "<span class=\"work-dot\" aria-hidden=\"true\"></span>" : ""}
-        ${escapeHtml(agent.status)}
-      </span>
+      <div class="agent-main">
+        <strong>${escapeHtml(agent.name)}</strong>
+        <span class="meta">${escapeHtml(agent.role)}</span>
+        <span class="agent-task">${escapeHtml(agent.current_task || agent.last_event)}</span>
+      </div>
+      <div class="agent-signals">
+        ${agent.needs_major ? "<span class=\"signal waiting\">NEEDS MAJOR</span>" : ""}
+        <span class="${labelClass(agent.status)}">
+          ${agent.status === "WORKING" ? "<span class=\"work-dot\" aria-hidden=\"true\"></span>" : ""}
+          ${escapeHtml(agent.status)}
+        </span>
+      </div>
     </div>
   `).join("");
 };
