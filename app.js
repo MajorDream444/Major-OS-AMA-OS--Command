@@ -6,6 +6,7 @@ const seedState = {
   heartbeatVisible: false,
   needsMajor: null,
   commands: [],
+  githubLogsHighlighted: false,
   leads: [
     {
       name: "Systems audit inquiry",
@@ -77,6 +78,62 @@ const seedState = {
       title: "Choose first live sync target",
       owner: "Major",
       next: "Approve Airtable or Notion first"
+    }
+  ],
+  githubLogs: [
+    {
+      title: "Latest commit: Persist command center local state",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "main@f700b0a",
+      type: "commit",
+      status: "SYNCED",
+      timestamp: "2026-04-27 19:48",
+      next: "Add local GitHub Logs panel"
+    },
+    {
+      title: "Daily brief protocol",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "docs/DAILY_BRIEF_PROTOCOL.md",
+      type: "doc",
+      status: "SYNCED",
+      timestamp: "2026-04-26 10:24",
+      next: "Use as daily operating loop"
+    },
+    {
+      title: "Agent logging standard",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "docs/AGENT_LOGGING_STANDARD.md",
+      type: "doc",
+      status: "SYNCED",
+      timestamp: "2026-04-26 10:24",
+      next: "Apply to future agent events"
+    },
+    {
+      title: "System map",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "docs/SYSTEM_MAP.md",
+      type: "doc",
+      status: "NEEDS REVIEW",
+      timestamp: "2026-04-26 10:24",
+      next: "Add GitHub logs read path"
+    },
+    {
+      title: "Handoff command center",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "HANDOFF_COMMAND_CENTER.md",
+      type: "handoff",
+      status: "STALE",
+      timestamp: "2026-04-26 08:53",
+      next: "Refresh after persistence and log panels"
+    },
+    {
+      title: "Local persistence commit",
+      repo: "MajorDream444/Major-OS-AMA-OS--Command",
+      path: "f700b0a Persist command center local state",
+      type: "commit",
+      status: "SYNCED",
+      timestamp: "2026-04-27 19:48",
+      next: "Verify state survival after refresh"
     }
   ],
   pipelines: {
@@ -152,6 +209,8 @@ const mergeSeedState = (savedState) => {
   };
 
   merged.commands = Array.isArray(savedState.commands) ? savedState.commands : [];
+  merged.githubLogs = Array.isArray(savedState.githubLogs) ? savedState.githubLogs : cloneState(seedState.githubLogs);
+  merged.githubLogsHighlighted = Boolean(savedState.githubLogsHighlighted);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
   merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
@@ -200,6 +259,8 @@ const routes = [
   { pattern: /\b(shopify|gumroad|store|product)\b/i, agentId: "A009" }
 ];
 
+const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
+
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({
     "&": "&amp;",
@@ -228,6 +289,17 @@ const routeCommand = (command) => {
 
 const shouldRequestReview = (command, missionId) =>
   /\b(review|major|approve|diagnose|audit|contour)\b/i.test(command) || missionId % 3 === 0;
+
+const logSubmittedCommand = (mission, command, agent) => {
+  state.commands.unshift({
+    id: mission.id,
+    command,
+    agent,
+    time: nowStamp()
+  });
+  state.commands = state.commands.slice(0, 20);
+  saveState();
+};
 
 const setAgentStatus = (agentId, status) => {
   const agent = findAgent(agentId);
@@ -284,17 +356,16 @@ const dispatchMission = (command) => {
     id: `M-${String(state.missionId).padStart(3, "0")}`,
     command: trimmed
   };
+
+  if (githubLogCommandPattern.test(trimmed)) {
+    reviewGithubLogs(mission, trimmed);
+    return;
+  }
+
   const agent = routeCommand(trimmed);
   const reviewRequired = shouldRequestReview(trimmed, state.missionId);
 
-  state.commands.unshift({
-    id: mission.id,
-    command: trimmed,
-    agent: agentLabel(agent),
-    time: nowStamp()
-  });
-  state.commands = state.commands.slice(0, 20);
-  saveState();
+  logSubmittedCommand(mission, trimmed, agentLabel(agent));
   updateNeedsMajor(null);
   pushAction({
     label: "ACTION",
@@ -341,6 +412,27 @@ const dispatchMission = (command) => {
       setAgentStatus(agent.id, "READY");
     }, 1800);
   }, 2900);
+};
+
+const reviewGithubLogs = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.githubLogsHighlighted = true;
+  saveState();
+  renderGithubLogs();
+  pushActivity("GitHub logs reviewed", "SYNCED");
+
+  const attentionLog = state.githubLogs.find((log) =>
+    ["NEEDS REVIEW", "STALE"].includes(log.status)
+  );
+
+  if (attentionLog) {
+    pushAction({
+      label: attentionLog.status,
+      title: `Review GitHub log: ${attentionLog.title}`,
+      next: attentionLog.next,
+      agent: "A004 Ops Watcher"
+    });
+  }
 };
 
 const renderUnread = () => {
@@ -399,6 +491,8 @@ const renderActions = () => {
 
 const renderDailyBrief = () => {
   const target = document.querySelector("#daily-brief-list");
+  const latestLog = state.githubLogs[0];
+
   target.innerHTML = state.dailyBrief.map((item) => `
     <article class="brief-row">
       <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
@@ -410,6 +504,30 @@ const renderDailyBrief = () => {
         <span class="meta">${escapeHtml(item.owner)}</span>
         <span class="meta">${escapeHtml(item.next)}</span>
       </div>
+    </article>
+  `).join("");
+
+  document.querySelector("#latest-github-log").innerHTML = latestLog
+    ? `<span class="meta">Latest GitHub log:</span><strong>${escapeHtml(latestLog.title)}</strong>`
+    : `<span class="meta">Latest GitHub log:</span><strong>No local log loaded</strong>`;
+};
+
+const renderGithubLogs = () => {
+  const panel = document.querySelector("#github-logs");
+  const target = document.querySelector("#github-logs-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.githubLogsHighlighted));
+  target.innerHTML = state.githubLogs.map((log, index) => `
+    <article class="github-log-row ${index === 0 ? "selected" : ""}">
+      <div>
+        <strong>${escapeHtml(log.title)}</strong>
+        <span class="meta">${escapeHtml(log.repo)}</span>
+      </div>
+      <span class="meta path">${escapeHtml(log.path)}</span>
+      <span class="signal">${escapeHtml(log.type)}</span>
+      <span class="${labelClass(log.status)}">${escapeHtml(log.status)}</span>
+      <time>${escapeHtml(log.timestamp)}</time>
+      <span class="meta">${escapeHtml(log.next)}</span>
     </article>
   `).join("");
 };
@@ -520,6 +638,7 @@ const renderAll = () => {
   renderLeads();
   renderActions();
   renderDailyBrief();
+  renderGithubLogs();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
   renderPipeline("#pipeline-saf", state.pipelines.saf);

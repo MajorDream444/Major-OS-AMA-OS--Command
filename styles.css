@@ -310,7 +310,8 @@ h3 {
 .agent-list,
 .activity-list,
 .lead-list,
-.brief-list {
+.brief-list,
+.github-log-list {
   display: grid;
 }
 
@@ -424,6 +425,62 @@ time {
   gap: 3px;
 }
 
+.latest-log {
+  min-height: 34px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-hard);
+}
+
+.latest-log strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--green);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.github-logs-panel.review-highlight {
+  border-color: rgba(255, 176, 32, 0.55);
+  box-shadow: inset 2px 0 0 var(--amber);
+}
+
+.github-log-row {
+  min-height: 42px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: minmax(160px, 1.1fr) minmax(150px, 1fr) 60px 92px 90px minmax(150px, 0.8fr);
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.github-log-row:first-child {
+  border-top: 0;
+}
+
+.github-log-row strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.github-log-row .path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .lead-row {
   min-height: 48px;
   padding: 8px 10px;
@@ -499,6 +556,13 @@ time {
   color: var(--green);
   background: var(--green-dim);
   border-color: rgba(32, 245, 138, 0.38);
+}
+
+.needs,
+.stale {
+  color: var(--amber);
+  background: var(--amber-dim);
+  border-color: rgba(255, 176, 32, 0.35);
 }
 
 .idle {
@@ -674,6 +738,7 @@ td strong {
   .pipeline-stage,
   .lead-row,
   .brief-row,
+  .github-log-row,
   .action-list li,
   .command-console {
     grid-template-columns: 1fr;
