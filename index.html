@@ -37,6 +37,8 @@
           </div>
           <nav class="nav-list" aria-label="Primary">
             <a class="nav-item active" href="#actions">ACTIONS</a>
+            <a class="nav-item" href="#system-status">SYSTEM STATUS</a>
+            <a class="nav-item" href="#next-move">NEXT MOVE</a>
             <a class="nav-item" href="#mission-board">MISSION BOARD</a>
             <a class="nav-item" href="#artifacts">ARTIFACTS</a>
             <a class="nav-item" href="#daily-brief">DAILY BRIEF</a>
@@ -81,6 +83,28 @@
           </div>
           <span class="signal ready" id="needs-major-signal">READY</span>
         </section>
+
+        <section class="panel system-status-panel" id="system-status">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Narrator</p>
+              <h2>System Status</h2>
+            </div>
+            <span class="signal synced">LOCAL GUIDE</span>
+          </div>
+          <div id="system-status-lines" class="system-status-lines"></div>
+        </section>
+
+        <button class="panel next-move-panel" id="next-move" type="button">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Guidance</p>
+              <h2>Next Move</h2>
+            </div>
+            <span class="signal action">COMMAND</span>
+          </div>
+          <div id="next-move-body" class="next-move-body"></div>
+        </button>
 
         <section class="panel mission-board-panel" id="mission-board">
           <div class="panel-header inline">

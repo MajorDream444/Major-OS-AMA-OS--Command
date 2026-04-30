@@ -259,6 +259,69 @@ h3 {
   background: linear-gradient(90deg, var(--amber-dim), rgba(11, 15, 14, 0.96) 70%);
 }
 
+.system-status-lines {
+  padding: 8px 10px;
+  display: grid;
+  gap: 5px;
+}
+
+.system-status-lines p {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.next-move-panel {
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.next-move-panel:hover {
+  border-color: rgba(32, 245, 138, 0.55);
+  box-shadow: inset 2px 0 0 var(--green);
+}
+
+.next-move-body {
+  padding: 8px 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.next-move-body div {
+  display: grid;
+  gap: 3px;
+}
+
+.next-move-body strong,
+.next-move-body code {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.next-move-body p {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.next-move-body code {
+  display: block;
+  padding: 6px 7px;
+  color: var(--amber);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  font-family: inherit;
+  text-transform: none;
+}
+
 .panel {
   background: rgba(11, 15, 14, 0.96);
   border: 1px solid var(--line);

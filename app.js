@@ -93,6 +93,18 @@ const seedState = {
   missionBoardHighlighted: false,
   artifactsHighlighted: false,
   skillRequestsHighlighted: false,
+  systemGuidance: {
+    statusLines: [
+      "Mission Control is loaded in local simulation mode.",
+      "Agents are standing by for the next operator command.",
+      "System is ready for Major to dispatch a mission."
+    ],
+    nextMove: {
+      action: "Launch a lead generation mission",
+      why: "The command center needs one clear revenue action in the daily loop.",
+      command: "find contour leads"
+    }
+  },
   leads: [
     {
       name: "Systems audit inquiry",
@@ -626,6 +638,7 @@ const mergeSeedState = (savedState) => {
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
   merged.artifactsHighlighted = Boolean(savedState.artifactsHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
+  merged.systemGuidance = savedState.systemGuidance || cloneState(seedState.systemGuidance);
   merged.missions = (Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions))
     .map(normalizeMission);
   merged.artifacts = (Array.isArray(savedState.artifacts) ? savedState.artifacts : cloneState(seedState.artifacts))
@@ -845,6 +858,7 @@ const createArtifactsForMission = (missionId) => {
   saveState();
   renderArtifacts();
   renderMissionBoard();
+  refreshSystemGuidance({ announce: true });
 
   const reviewArtifact = newArtifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
   if (reviewArtifact) {
@@ -894,6 +908,7 @@ const updateArtifactStatus = (title, status) => {
   saveState();
   renderArtifacts();
   renderMissionBoard();
+  refreshSystemGuidance({ announce: true });
   pushActivity(status === "APPROVED" ? "Artifact approved" : "Artifact archived", status);
 };
 
@@ -922,6 +937,7 @@ const setAgentState = (agentId, updates) => {
   Object.assign(agent, updates);
   saveState();
   renderAgents();
+  refreshSystemGuidance();
 };
 
 const setAgentStatus = (agentId, status) => {
@@ -957,6 +973,128 @@ const pushAction = ({ label, title, next, agent }) => {
 
 const findMission = (missionId) => state.missions.find((mission) => mission.id === missionId);
 
+const intentLabel = (intent) => ({
+  lead_generation: "lead generation",
+  audit: "audit",
+  content_media: "content/media",
+  outreach: "outreach",
+  commerce: "commerce",
+  operations: "operations"
+})[intent] || "operations";
+
+const getLatestMission = () => state.missions[0] || null;
+
+const getReviewArtifact = () =>
+  state.artifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
+
+const getReviewMission = () =>
+  state.missions.find((mission) => mission.status === "NEEDS MAJOR" || mission.needs_major);
+
+const buildStatusLines = () => {
+  const activeMissions = state.missions.filter((mission) =>
+    ["PLANNED", "RUNNING", "NEEDS MAJOR", "REVIEW"].includes(mission.status)
+  );
+  const latestMission = activeMissions[0] || getLatestMission();
+  const workingAgents = state.agents.filter((agent) =>
+    ["WORKING", "WAITING", "BLOCKED"].includes(agent.status) || agent.current_task || agent.needs_major
+  );
+  const reviewArtifacts = state.artifacts.filter((artifact) => artifact.status === "NEEDS REVIEW");
+  const lines = [];
+
+  if (latestMission) {
+    lines.push(`You launched a ${intentLabel(latestMission.intent)} mission: ${latestMission.command}.`);
+    lines.push(`Mission is ${latestMission.status} at "${latestMission.current_step}".`);
+  } else {
+    lines.push("Mission Control is ready for a local command.");
+  }
+
+  if (workingAgents.length) {
+    const agentSummary = workingAgents.slice(0, 3).map((agent) =>
+      `${agent.name} is ${agent.status.toLowerCase()}`
+    ).join("; ");
+    lines.push(agentSummary + ".");
+  } else {
+    lines.push("Agents are standing by.");
+  }
+
+  if (latestMission) {
+    const missionArtifacts = state.artifacts.filter((artifact) => artifact.mission_id === latestMission.id);
+    const artifactNames = missionArtifacts.slice(0, 2).map((artifact) => artifact.type.replace(/_/g, " "));
+    lines.push(missionArtifacts.length
+      ? `${missionArtifacts.length} artifacts created: ${artifactNames.join(", ")}.`
+      : "No artifacts created for the latest mission yet.");
+  }
+
+  if (reviewArtifacts.length) {
+    lines.push(`${reviewArtifacts.length} artifact${reviewArtifacts.length === 1 ? "" : "s"} need review.`);
+  }
+
+  lines.push(getReviewMission() || state.needsMajor
+    ? "System is waiting for Major review."
+    : "System is not blocked on Major.");
+
+  return lines.slice(0, 6);
+};
+
+const commandTitle = (value = "") =>
+  value.replace(/^(Lead List|Audit Report|Outreach Draft|Substack Draft|Video Script|Product Page|Workflow Plan|Daily Brief|Memory Note):\s*/i, "").trim();
+
+const buildNextMove = () => {
+  const artifact = getReviewArtifact();
+  if (artifact) {
+    return {
+      action: `Approve artifact: ${artifact.title}`,
+      why: "A generated artifact is ready, but the system cannot treat it as approved until Major reviews it.",
+      command: `approve artifact ${commandTitle(artifact.title)}`
+    };
+  }
+
+  const mission = getReviewMission();
+  if (mission) {
+    return {
+      action: `Review mission: ${mission.command}`,
+      why: "The mission reached the Major review gate and needs direction before the next handoff.",
+      command: "show missions"
+    };
+  }
+
+  const latestMission = getLatestMission();
+  if (latestMission?.intent === "content_media") {
+    return {
+      action: "Queue distribution for the latest content item",
+      why: "Content work should move toward a visible outbound handoff once the draft path is clear.",
+      command: `distribute ${latestMission.command.replace(/^make\s+/i, "").replace(/^draft\s+/i, "")}`
+    };
+  }
+
+  return {
+    action: "Launch the next revenue mission",
+    why: "No review gate is blocking the system, so the next useful move is a revenue-facing command.",
+    command: "find contour leads"
+  };
+};
+
+const buildSystemGuidance = () => ({
+  statusLines: buildStatusLines(),
+  nextMove: buildNextMove()
+});
+
+const refreshSystemGuidance = ({ announce = false } = {}) => {
+  const nextGuidance = buildSystemGuidance();
+  const changed = JSON.stringify(state.systemGuidance) !== JSON.stringify(nextGuidance);
+  state.systemGuidance = nextGuidance;
+
+  if (changed) {
+    saveState();
+    renderGuidance();
+    if (announce) {
+      pushActivity("System guidance updated", "SYNCED");
+    }
+  }
+
+  return changed;
+};
+
 const updateMission = (missionId, updates) => {
   const mission = findMission(missionId);
   if (!mission) return null;
@@ -967,6 +1105,7 @@ const updateMission = (missionId, updates) => {
   mission.last_event = updates.last_event || mission.last_event;
   saveState();
   renderMissionBoard();
+  refreshSystemGuidance();
   return mission;
 };
 
@@ -1766,6 +1905,32 @@ const renderNeedsMajor = () => {
   signal.textContent = "WAITING";
 };
 
+const renderGuidance = () => {
+  const statusTarget = document.querySelector("#system-status-lines");
+  const nextTarget = document.querySelector("#next-move-body");
+  const guidance = state.systemGuidance || buildSystemGuidance();
+  const nextMove = guidance.nextMove || buildNextMove();
+
+  statusTarget.innerHTML = guidance.statusLines.map((line) => `
+    <p>${escapeHtml(line)}</p>
+  `).join("");
+
+  nextTarget.innerHTML = `
+    <div>
+      <span class="meta">NEXT MOVE:</span>
+      <strong>${escapeHtml(nextMove.action)}</strong>
+    </div>
+    <div>
+      <span class="meta">WHY:</span>
+      <p>${escapeHtml(nextMove.why)}</p>
+    </div>
+    <div>
+      <span class="meta">COMMAND:</span>
+      <code>${escapeHtml(nextMove.command)}</code>
+    </div>
+  `;
+};
+
 const renderLeads = () => {
   const target = document.querySelector("#todays-leads");
   target.innerHTML = state.leads.map((lead, index) => `
@@ -2088,6 +2253,17 @@ const bindResetControl = () => {
   });
 };
 
+const bindNextMove = () => {
+  const button = document.querySelector("#next-move");
+  const input = document.querySelector("#command-input");
+
+  button.addEventListener("click", () => {
+    const guidance = state.systemGuidance || buildSystemGuidance();
+    input.value = guidance.nextMove.command;
+    input.focus();
+  });
+};
+
 const startHeartbeat = () => {
   window.setInterval(() => {
     pushActivity("Ops Watcher heartbeat", "SYNCED", { heartbeat: true });
@@ -2095,8 +2271,10 @@ const startHeartbeat = () => {
 };
 
 const renderAll = () => {
+  refreshSystemGuidance();
   renderUnread();
   renderNeedsMajor();
+  renderGuidance();
   renderMissionBoard();
   renderLeads();
   renderActions();
@@ -2116,5 +2294,6 @@ const renderAll = () => {
 
 bindCommandInput();
 bindResetControl();
+bindNextMove();
 renderAll();
 startHeartbeat();
