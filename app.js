@@ -2264,6 +2264,79 @@ const bindNextMove = () => {
   });
 };
 
+const navLinks = () => Array.from(document.querySelectorAll(".nav-item[href^='#']"));
+
+const setActiveNav = (targetId) => {
+  navLinks().forEach((link) => {
+    link.classList.toggle("active", link.getAttribute("href") === `#${targetId}`);
+  });
+};
+
+const navSections = () =>
+  navLinks()
+    .map((link) => {
+      const id = link.getAttribute("href").slice(1);
+      const section = document.getElementById(id);
+      return section ? { id, section } : null;
+    })
+    .filter(Boolean);
+
+const currentVisibleSectionId = () => {
+  const sections = navSections();
+  if (!sections.length) return "";
+
+  const viewportProbe = Math.min(window.innerHeight * 0.34, 180);
+  const current = sections.find(({ section }) => {
+    const rect = section.getBoundingClientRect();
+    return rect.top <= viewportProbe && rect.bottom > viewportProbe;
+  });
+
+  if (current) return current.id;
+
+  return sections.reduce((closest, candidate) => {
+    const distance = Math.abs(candidate.section.getBoundingClientRect().top - viewportProbe);
+    return distance < closest.distance
+      ? { id: candidate.id, distance }
+      : closest;
+  }, { id: sections[0].id, distance: Infinity }).id;
+};
+
+const updateActiveNavFromScroll = () => {
+  const activeId = currentVisibleSectionId();
+  if (activeId) {
+    setActiveNav(activeId);
+  }
+};
+
+const bindNavigationState = () => {
+  let ticking = false;
+
+  navLinks().forEach((link) => {
+    link.addEventListener("click", () => {
+      setActiveNav(link.getAttribute("href").slice(1));
+    });
+  });
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      updateActiveNavFromScroll();
+      ticking = false;
+    });
+  }, { passive: true });
+
+  window.addEventListener("hashchange", () => {
+    const id = window.location.hash.replace("#", "");
+    if (id) {
+      setActiveNav(id);
+    }
+  });
+
+  const initialId = window.location.hash.replace("#", "") || currentVisibleSectionId() || "actions";
+  setActiveNav(initialId);
+};
+
 const startHeartbeat = () => {
   window.setInterval(() => {
     pushActivity("Ops Watcher heartbeat", "SYNCED", { heartbeat: true });
@@ -2295,5 +2368,6 @@ const renderAll = () => {
 bindCommandInput();
 bindResetControl();
 bindNextMove();
+bindNavigationState();
 renderAll();
 startHeartbeat();
