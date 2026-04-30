@@ -712,10 +712,25 @@ time {
 
 .mission-card p,
 .mission-card-meta,
+.mission-agents,
+.mission-next,
 .empty-lane {
   color: var(--muted);
   font-size: 9px;
   font-weight: 800;
+}
+
+.mission-agents,
+.mission-next {
+  min-width: 0;
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mission-next {
+  color: var(--green);
 }
 
 .mission-thread {

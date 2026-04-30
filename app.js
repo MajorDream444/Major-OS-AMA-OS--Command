@@ -15,6 +15,62 @@ const mediaStages = [
 
 const missionLanes = ["INBOX", "RUNNING", "NEEDS MAJOR", "REVIEW", "DONE", "BLOCKED"];
 
+const missionStatusLanes = ["PLANNED", "RUNNING", "NEEDS MAJOR", "REVIEW", "DONE", "BLOCKED"];
+
+const missionIntentRules = [
+  { intent: "lead_generation", pattern: /\b(lead|find|scout|contour leads|saf leads)\b/i },
+  { intent: "audit", pattern: /\b(audit|diagnose|review business)\b/i },
+  { intent: "content_media", pattern: /\b(content|substack|article|video|remotion|heygen)\b/i },
+  { intent: "outreach", pattern: /\b(email|outreach|follow up|dm)\b/i },
+  { intent: "commerce", pattern: /\b(shopify|gumroad|product|store)\b/i },
+  { intent: "operations", pattern: /\b(daily brief|report|status)\b/i }
+];
+
+const orchestratorPlans = {
+  lead_generation: [
+    "Identify lead source",
+    "Qualify lead fit",
+    "Draft outreach angle",
+    "Ask Major for review"
+  ],
+  audit: [
+    "Review business context",
+    "Diagnose operating gaps",
+    "Summarize blockers",
+    "Ask Major for review"
+  ],
+  content_media: [
+    "Capture core idea",
+    "Draft content angle",
+    "Prepare video/script route",
+    "Ask Major for review"
+  ],
+  outreach: [
+    "Review target context",
+    "Draft message",
+    "Ask Major before sending"
+  ],
+  commerce: [
+    "Identify product/offer",
+    "Draft listing/action plan",
+    "Ask Major for review"
+  ],
+  operations: [
+    "Review system state",
+    "Summarize status",
+    "Recommend next action"
+  ]
+};
+
+const orchestratorAgentMap = {
+  lead_generation: ["A001", "A002", "A006"],
+  audit: ["A002", "A004"],
+  content_media: ["A003", "A007"],
+  outreach: ["A006", "A002"],
+  commerce: ["A009", "A007"],
+  operations: ["A004"]
+};
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -74,9 +130,19 @@ const seedState = {
     {
       id: "M-SEED-001",
       title: "Review Contour lead queue",
+      command: "Review Contour lead queue",
+      intent: "lead_generation",
       assigned_agent: "A001 Scout",
+      assigned_agents: ["A001 Scout", "A002 Audit", "A006 Outreach"],
       status: "REVIEW",
+      created_at: "2026-04-26T09:00:00.000Z",
+      updated_at: "2026-04-26T09:03:00.000Z",
+      plan: orchestratorPlans.lead_generation,
+      current_step: "Ask Major for review",
+      steps_completed: 3,
       next_action: "Major approves outreach angle",
+      needs_major: true,
+      output_summary: "Lead queue prepared for Major review",
       artifacts_count: 1,
       last_event: "Lead packet attached",
       thread: [
@@ -106,9 +172,19 @@ const seedState = {
     {
       id: "M-SEED-002",
       title: "Draft Substack authority note",
+      command: "Draft Substack authority note",
+      intent: "content_media",
       assigned_agent: "A003 Content Catcher",
+      assigned_agents: ["A003 Content Catcher", "A007 Offer Builder"],
       status: "RUNNING",
+      created_at: "2026-04-26T09:05:00.000Z",
+      updated_at: "2026-04-26T09:06:00.000Z",
+      plan: orchestratorPlans.content_media,
+      current_step: "Draft content angle",
+      steps_completed: 1,
       next_action: "Turn draft into media handoff",
+      needs_major: false,
+      output_summary: "Content mission in local simulation",
       artifacts_count: 0,
       last_event: "Content Catcher working...",
       thread: [
@@ -458,6 +534,37 @@ const normalizeAgent = (agent, seedAgent) => ({
   workflow: agent.workflow || seedAgent.workflow
 });
 
+const normalizeMission = (mission) => {
+  const intent = mission.intent || "operations";
+  const plan = Array.isArray(mission.plan) && mission.plan.length
+    ? mission.plan
+    : (orchestratorPlans[intent] || orchestratorPlans.operations);
+  const assignedAgents = Array.isArray(mission.assigned_agents)
+    ? mission.assigned_agents
+    : (mission.assigned_agent ? [mission.assigned_agent] : ["A004 Ops Watcher"]);
+
+  return {
+    id: mission.id,
+    command: mission.command || mission.title || "Untitled mission",
+    title: mission.title || mission.command || "Untitled mission",
+    intent,
+    status: mission.status || "PLANNED",
+    created_at: mission.created_at || new Date().toISOString(),
+    updated_at: mission.updated_at || mission.created_at || new Date().toISOString(),
+    assigned_agent: mission.assigned_agent || assignedAgents[0],
+    assigned_agents: assignedAgents,
+    plan,
+    current_step: mission.current_step || plan[0] || "Review system state",
+    steps_completed: Number.isFinite(mission.steps_completed) ? mission.steps_completed : 0,
+    next_action: mission.next_action || "Run local mission simulation",
+    needs_major: Boolean(mission.needs_major),
+    output_summary: mission.output_summary || "Local mission state",
+    artifacts_count: Number.isFinite(mission.artifacts_count) ? mission.artifacts_count : 0,
+    last_event: mission.last_event || "Mission planned",
+    thread: Array.isArray(mission.thread) ? mission.thread : []
+  };
+};
+
 const mergeSeedState = (savedState) => {
   const merged = {
     ...cloneState(seedState),
@@ -474,7 +581,8 @@ const mergeSeedState = (savedState) => {
   merged.distributionQueue = Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue);
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
-  merged.missions = Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions);
+  merged.missions = (Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions))
+    .map(normalizeMission);
   merged.skillRequests = Array.isArray(savedState.skillRequests) ? savedState.skillRequests : cloneState(seedState.skillRequests);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
@@ -531,6 +639,7 @@ const routes = [
 
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
 const agentRegistryCommandPattern = /\bshow agents\b/i;
+const missionBoardCommandPattern = /\bshow missions\b/i;
 const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
 const distributionCommandPattern = /\b(distribute|send to x|send to substack|save to memory)\b/i;
 const skillRequestCommandPattern = /^propose skill\s+(.+)$/i;
@@ -555,6 +664,50 @@ const nowStamp = () =>
   }).format(new Date());
 
 const findAgent = (agentId) => state.agents.find((agent) => agent.id === agentId);
+
+const detectMissionIntent = (command) => {
+  const match = missionIntentRules.find((rule) => rule.pattern.test(command));
+  return match ? match.intent : "operations";
+};
+
+const agentLabelsForIntent = (intent) =>
+  (orchestratorAgentMap[intent] || orchestratorAgentMap.operations)
+    .map(findAgent)
+    .filter(Boolean)
+    .map(agentLabel);
+
+const agentsForIntent = (intent) =>
+  (orchestratorAgentMap[intent] || orchestratorAgentMap.operations)
+    .map(findAgent)
+    .filter(Boolean);
+
+const createOrchestratorMission = (mission, command) => {
+  const intent = detectMissionIntent(command);
+  const now = new Date().toISOString();
+  const plan = orchestratorPlans[intent] || orchestratorPlans.operations;
+  const assignedAgents = agentLabelsForIntent(intent);
+
+  return {
+    id: mission.id,
+    command,
+    title: command,
+    intent,
+    status: "PLANNED",
+    created_at: now,
+    updated_at: now,
+    assigned_agent: assignedAgents[0],
+    assigned_agents: assignedAgents,
+    plan,
+    current_step: plan[0],
+    steps_completed: 0,
+    next_action: plan[0],
+    needs_major: false,
+    output_summary: "Mission planned locally",
+    artifacts_count: 0,
+    last_event: "Mission created",
+    thread: []
+  };
+};
 
 const routeCommand = (command) => {
   const match = routes.find((route) => route.pattern.test(command));
@@ -616,6 +769,19 @@ const pushAction = ({ label, title, next, agent }) => {
 
 const findMission = (missionId) => state.missions.find((mission) => mission.id === missionId);
 
+const updateMission = (missionId, updates) => {
+  const mission = findMission(missionId);
+  if (!mission) return null;
+  Object.assign(mission, {
+    ...updates,
+    updated_at: new Date().toISOString()
+  });
+  mission.last_event = updates.last_event || mission.last_event;
+  saveState();
+  renderMissionBoard();
+  return mission;
+};
+
 const appendMissionThread = (missionId, event, agent, status, artifact = "") => {
   const mission = findMission(missionId);
   if (!mission) return;
@@ -656,6 +822,135 @@ const createMissionCard = (mission, command, agent) => {
   pushActivity("Mission card created", "ACTIVE");
   renderMissionBoard();
   return card;
+};
+
+const appendOrchestratorThread = (missionId, event, agent, status) => {
+  appendMissionThread(missionId, event, agent, status);
+};
+
+const runOrchestratorMission = (missionSeed, command) => {
+  const orchestratedMission = createOrchestratorMission(missionSeed, command);
+  state.missions.unshift(orchestratedMission);
+  state.missionBoardHighlighted = true;
+  saveState();
+  renderMissionBoard();
+
+  logSubmittedCommand(missionSeed, command, orchestratedMission.assigned_agents.join(", "));
+  updateNeedsMajor(null);
+  pushActivity("Mission created", "ACTIVE");
+  appendOrchestratorThread(
+    orchestratedMission.id,
+    "Mission created",
+    "A004 Ops Watcher",
+    "PLANNED"
+  );
+
+  window.setTimeout(() => {
+    updateMission(orchestratedMission.id, {
+      status: "RUNNING",
+      next_action: orchestratedMission.plan[0],
+      current_step: orchestratedMission.plan[0],
+      output_summary: "Agents assigned by local orchestrator",
+      last_event: "Orchestrator assigned agents"
+    });
+    pushActivity("Orchestrator assigned agents", "ACTION");
+    appendOrchestratorThread(
+      orchestratedMission.id,
+      "Orchestrator assigned agents",
+      orchestratedMission.assigned_agents.join(", "),
+      "RUNNING"
+    );
+
+    agentsForIntent(orchestratedMission.intent).forEach((agent) => {
+      setAgentState(agent.id, {
+        status: "WORKING",
+        current_task: command,
+        last_event: `Running mission ${orchestratedMission.id}`,
+        needs_major: false
+      });
+    });
+  }, 250);
+
+  orchestratedMission.plan.forEach((step, index) => {
+    window.setTimeout(() => {
+      const completed = index + 1;
+      updateMission(orchestratedMission.id, {
+        status: "RUNNING",
+        current_step: step,
+        steps_completed: completed,
+        next_action: orchestratedMission.plan[completed] || "Prepare review handoff",
+        output_summary: `Step ${completed}/${orchestratedMission.plan.length}: ${step}`,
+        last_event: step
+      });
+      pushActivity(`Mission step: ${step}`, "WORKING");
+      appendOrchestratorThread(
+        orchestratedMission.id,
+        step,
+        orchestratedMission.assigned_agents[index % orchestratedMission.assigned_agents.length],
+        "RUNNING"
+      );
+      const activeAgent = agentsForIntent(orchestratedMission.intent)[index % agentsForIntent(orchestratedMission.intent).length];
+      if (activeAgent) {
+        setAgentState(activeAgent.id, {
+          status: "WORKING",
+          current_task: command,
+          last_event: step,
+          needs_major: false
+        });
+      }
+    }, 700 + (index * 650));
+  });
+
+  window.setTimeout(() => {
+    const finishAsDone = /\b(auto|status|daily brief)\b/i.test(command);
+    const finalStatus = finishAsDone ? "DONE" : "NEEDS MAJOR";
+    const needsMajor = finalStatus === "NEEDS MAJOR";
+    updateMission(orchestratedMission.id, {
+      status: finalStatus,
+      current_step: orchestratedMission.plan[orchestratedMission.plan.length - 1],
+      steps_completed: orchestratedMission.plan.length,
+      next_action: needsMajor ? "Major reviews mission plan" : "Review completed status",
+      needs_major: needsMajor,
+      output_summary: needsMajor
+        ? "Mission plan simulated and waiting for Major review"
+        : "Mission plan simulated and ready for review",
+      last_event: needsMajor ? "Mission needs Major" : "Mission completed"
+    });
+    appendOrchestratorThread(
+      orchestratedMission.id,
+      needsMajor ? "Mission needs Major" : "Mission completed",
+      "A004 Ops Watcher",
+      finalStatus
+    );
+
+    if (needsMajor) {
+      state.needsMajor = {
+        mission: command,
+        agent: orchestratedMission.assigned_agents.join(", ")
+      };
+      pushAction({
+        label: "REVIEW",
+        title: `Review mission: ${command}`,
+        next: "Approve or redirect local plan",
+        agent: orchestratedMission.assigned_agents.join(", ")
+      });
+      pushActivity("Mission needs Major", "WAITING");
+    } else {
+      pushActivity("Mission completed", "DONE");
+    }
+
+    agentsForIntent(orchestratedMission.intent).forEach((agent) => {
+      setAgentState(agent.id, {
+        status: needsMajor ? "WAITING" : "READY",
+        current_task: needsMajor ? command : "",
+        last_event: needsMajor ? "Needs Major review" : "Ready for next mission",
+        needs_major: needsMajor
+      });
+    });
+    saveState();
+    renderNeedsMajor();
+    renderMissionBoard();
+  }, 950 + (orchestratedMission.plan.length * 650));
 };
 
 const moveMissionCard = (missionId, status, nextAction, agent, event, artifact = "") => {
@@ -1158,6 +1453,11 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (missionBoardCommandPattern.test(trimmed)) {
+    reviewMissionBoard(mission, trimmed);
+    return;
+  }
+
   if (skillRequestCommandPattern.test(trimmed)) {
     proposeSkillRequest(mission, trimmed);
     return;
@@ -1173,87 +1473,7 @@ const dispatchMission = (command) => {
     return;
   }
 
-  const agent = routeCommand(trimmed);
-  const reviewRequired = shouldRequestReview(trimmed, state.missionId);
-
-  logSubmittedCommand(mission, trimmed, agentLabel(agent));
-  updateNeedsMajor(null);
-  startMissionCard(mission, trimmed, agent);
-  pushAction({
-    label: "ACTION",
-    title: trimmed,
-    next: "Mission dispatched",
-    agent: agentLabel(agent)
-  });
-  pushActivity(`${mission.id} dispatched -> ${agent.name}`, "ACTION");
-  setAgentState(agent.id, {
-    status: "WORKING",
-    current_task: trimmed,
-    last_event: `${mission.id} dispatched`,
-    needs_major: false
-  });
-
-  window.setTimeout(() => {
-    pushActivity(`${agent.name} accepted mission`, "ACTIVE");
-    setAgentState(agent.id, {
-      status: "WORKING",
-      current_task: trimmed,
-      last_event: `${mission.id} accepted`
-    });
-  }, 650);
-
-  window.setTimeout(() => {
-    pushActivity(`${agent.name} working...`, "WORKING");
-    setAgentState(agent.id, {
-      status: "WORKING",
-      current_task: trimmed,
-      last_event: "Working..."
-    });
-  }, 1500);
-
-  window.setTimeout(() => {
-    if (reviewRequired) {
-      setAgentState(agent.id, {
-        status: "WAITING",
-        current_task: trimmed,
-        last_event: "Needs Major review",
-        needs_major: true
-      });
-      updateNeedsMajor(trimmed, agent);
-      moveMissionCard(mission.id, "NEEDS MAJOR", "Needs Major review", agentLabel(agent), "Mission needs Major");
-      pushAction({
-        label: "REVIEW",
-        title: trimmed,
-        next: "Needs Major review",
-        agent: agentLabel(agent)
-      });
-      pushActivity(`${agent.name} needs Major review`, "WAITING");
-      return;
-    }
-
-    setAgentState(agent.id, {
-      status: "DONE",
-      current_task: trimmed,
-      last_event: "Completed draft",
-      needs_major: false
-    });
-    completeMissionCard(mission.id, agentLabel(agent), "Mission completed", "Review local handoff");
-    pushAction({
-      label: "READY",
-      title: trimmed,
-      next: "Completed draft",
-      agent: agentLabel(agent)
-    });
-    pushActivity(`${agent.name} completed draft`, "DONE");
-
-    window.setTimeout(() => {
-      setAgentState(agent.id, {
-        status: "READY",
-        current_task: "",
-        last_event: "Ready for next mission"
-      });
-    }, 1800);
-  }, 2900);
+  runOrchestratorMission(mission, trimmed);
 };
 
 const reviewAgentRegistry = (mission, command) => {
@@ -1262,6 +1482,14 @@ const reviewAgentRegistry = (mission, command) => {
   saveState();
   renderAgents();
   pushActivity("Agent registry reviewed", "SYNCED");
+};
+
+const reviewMissionBoard = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.missionBoardHighlighted = true;
+  saveState();
+  renderMissionBoard();
+  pushActivity("Mission board reviewed", "SYNCED");
 };
 
 const reviewGithubLogs = (mission, command) => {
@@ -1438,7 +1666,7 @@ const renderMissionBoard = () => {
   const target = document.querySelector("#mission-board-lanes");
 
   panel.classList.toggle("review-highlight", Boolean(state.missionBoardHighlighted));
-  target.innerHTML = missionLanes.map((lane) => {
+  target.innerHTML = missionStatusLanes.map((lane) => {
     const cards = state.missions.filter((mission) => mission.status === lane);
     return `
       <section class="mission-lane">
@@ -1450,14 +1678,18 @@ const renderMissionBoard = () => {
           ${cards.map((mission) => `
             <article class="mission-card">
               <div class="mission-card-head">
-                <strong>${escapeHtml(mission.title)}</strong>
+                <strong>${escapeHtml(mission.id)}</strong>
                 <span class="${labelClass(mission.status)}">${escapeHtml(mission.status)}</span>
               </div>
+              <p>${escapeHtml(mission.command || mission.title)}</p>
               <div class="mission-card-meta">
-                <span>${escapeHtml(mission.assigned_agent)}</span>
-                <span>${escapeHtml(mission.artifacts_count)} artifacts</span>
+                <span>${escapeHtml(mission.intent || "operations")}</span>
+                <span>${escapeHtml(mission.steps_completed || 0)}/${escapeHtml((mission.plan || []).length || 0)}</span>
               </div>
-              <p>${escapeHtml(mission.next_action)}</p>
+              <span class="mission-agents">${escapeHtml((mission.assigned_agents || [mission.assigned_agent]).join(" / "))}</span>
+              <p>${escapeHtml(mission.current_step || "No active step")}</p>
+              <span class="mission-next">${escapeHtml(mission.next_action || "Review mission")}</span>
+              ${mission.needs_major ? "<span class=\"signal waiting\">NEEDS MAJOR</span>" : ""}
               <div class="mission-thread">
                 ${(mission.thread || []).slice(0, 3).map((entry) => `
                   <div>
