@@ -497,6 +497,7 @@ time {
 }
 
 .mission-board-panel.review-highlight,
+.artifacts-panel.review-highlight,
 .skill-requests-panel.review-highlight {
   border-color: rgba(32, 245, 138, 0.5);
   box-shadow: inset 2px 0 0 var(--green);
@@ -733,6 +734,33 @@ time {
   color: var(--green);
 }
 
+.mission-artifacts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--line);
+}
+
+.mission-artifacts span:not(.signal),
+.mission-artifacts a {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mission-artifacts a {
+  grid-column: 1 / -1;
+  color: var(--green);
+  text-decoration: none;
+}
+
 .mission-thread {
   display: grid;
   gap: 4px;
@@ -761,6 +789,51 @@ time {
   grid-column: 2;
   color: var(--green);
   font-style: normal;
+}
+
+.artifact-list {
+  display: grid;
+}
+
+.artifact-row {
+  min-height: 54px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: minmax(190px, 1.1fr) 112px 72px 96px minmax(130px, 0.7fr) 92px 82px;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.artifact-row:first-child {
+  border-top: 0;
+}
+
+.artifact-row strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.artifact-row .meta,
+.artifact-row p {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artifact-row p {
+  grid-column: 1 / -1;
+  color: var(--green);
 }
 
 .skill-request-list {
@@ -840,7 +913,8 @@ time {
 
 .active,
 .ready,
-.synced {
+.synced,
+.approved {
   color: var(--green);
   background: var(--green-dim);
   border-color: rgba(32, 245, 138, 0.38);
@@ -874,6 +948,13 @@ time {
   color: var(--green);
   background: var(--green-dim);
   border-color: rgba(32, 245, 138, 0.38);
+}
+
+.draft,
+.archived {
+  color: var(--muted);
+  background: #0b1110;
+  border-color: var(--line);
 }
 
 .needs,
@@ -1059,6 +1140,7 @@ td strong {
   .github-log-row,
   .media-workflow-row,
   .distribution-row,
+  .artifact-row,
   .skill-request-row,
   .action-list li,
   .command-console {

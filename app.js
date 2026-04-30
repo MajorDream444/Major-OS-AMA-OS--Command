@@ -71,6 +71,15 @@ const orchestratorAgentMap = {
   operations: ["A004"]
 };
 
+const artifactTypesByIntent = {
+  lead_generation: ["lead_list", "outreach_draft"],
+  audit: ["audit_report"],
+  content_media: ["substack_draft", "video_script"],
+  outreach: ["outreach_draft"],
+  commerce: ["product_page", "workflow_plan"],
+  operations: ["daily_brief", "workflow_plan"]
+};
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -82,6 +91,7 @@ const seedState = {
   mediaEngineHighlighted: false,
   distributionHighlighted: false,
   missionBoardHighlighted: false,
+  artifactsHighlighted: false,
   skillRequestsHighlighted: false,
   leads: [
     {
@@ -144,6 +154,7 @@ const seedState = {
       needs_major: true,
       output_summary: "Lead queue prepared for Major review",
       artifacts_count: 1,
+      latest_artifact_title: "Contour Lead List",
       last_event: "Lead packet attached",
       thread: [
         {
@@ -186,6 +197,7 @@ const seedState = {
       needs_major: false,
       output_summary: "Content mission in local simulation",
       artifacts_count: 0,
+      latest_artifact_title: "",
       last_event: "Content Catcher working...",
       thread: [
         {
@@ -214,6 +226,22 @@ const seedState = {
       output: "daily GitHub-ready handoff",
       risk: "LOW",
       status: "REVIEW"
+    }
+  ],
+  artifacts: [
+    {
+      id: "ART-SEED-001",
+      mission_id: "M-SEED-001",
+      title: "Contour Lead List",
+      type: "lead_list",
+      lane: "Contour",
+      status: "NEEDS REVIEW",
+      created_at: "2026-04-26T09:03:00.000Z",
+      updated_at: "2026-04-26T09:03:00.000Z",
+      owner_agent: "A001 Scout",
+      summary: "Placeholder lead list prepared from local mission context.",
+      preview: "3 mock Contour leads queued for review.",
+      source_command: "Review Contour lead queue"
     }
   ],
   dailyBrief: [
@@ -560,10 +588,26 @@ const normalizeMission = (mission) => {
     needs_major: Boolean(mission.needs_major),
     output_summary: mission.output_summary || "Local mission state",
     artifacts_count: Number.isFinite(mission.artifacts_count) ? mission.artifacts_count : 0,
+    latest_artifact_title: mission.latest_artifact_title || "",
     last_event: mission.last_event || "Mission planned",
     thread: Array.isArray(mission.thread) ? mission.thread : []
   };
 };
+
+const normalizeArtifact = (artifact) => ({
+  id: artifact.id,
+  mission_id: artifact.mission_id || "",
+  title: artifact.title || "Untitled Artifact",
+  type: artifact.type || "workflow_plan",
+  lane: artifact.lane || "Operations",
+  status: artifact.status || "DRAFT",
+  created_at: artifact.created_at || new Date().toISOString(),
+  updated_at: artifact.updated_at || artifact.created_at || new Date().toISOString(),
+  owner_agent: artifact.owner_agent || "A004 Ops Watcher",
+  summary: artifact.summary || "Local placeholder artifact.",
+  preview: artifact.preview || "No preview available.",
+  source_command: artifact.source_command || ""
+});
 
 const mergeSeedState = (savedState) => {
   const merged = {
@@ -580,9 +624,12 @@ const mergeSeedState = (savedState) => {
   merged.distributionHighlighted = Boolean(savedState.distributionHighlighted);
   merged.distributionQueue = Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue);
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
+  merged.artifactsHighlighted = Boolean(savedState.artifactsHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
   merged.missions = (Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions))
     .map(normalizeMission);
+  merged.artifacts = (Array.isArray(savedState.artifacts) ? savedState.artifacts : cloneState(seedState.artifacts))
+    .map(normalizeArtifact);
   merged.skillRequests = Array.isArray(savedState.skillRequests) ? savedState.skillRequests : cloneState(seedState.skillRequests);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
@@ -640,6 +687,9 @@ const routes = [
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
 const agentRegistryCommandPattern = /\bshow agents\b/i;
 const missionBoardCommandPattern = /\bshow missions\b/i;
+const artifactsCommandPattern = /\bshow artifacts\b/i;
+const approveArtifactCommandPattern = /^approve artifact\s+(.+)$/i;
+const archiveArtifactCommandPattern = /^archive artifact\s+(.+)$/i;
 const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
 const distributionCommandPattern = /\b(distribute|send to x|send to substack|save to memory)\b/i;
 const skillRequestCommandPattern = /^propose skill\s+(.+)$/i;
@@ -662,6 +712,15 @@ const nowStamp = () =>
     minute: "2-digit",
     hour12: false
   }).format(new Date());
+
+const nowStampFromIso = (value) =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(new Date(value || Date.now()));
 
 const findAgent = (agentId) => state.agents.find((agent) => agent.id === agentId);
 
@@ -707,6 +766,135 @@ const createOrchestratorMission = (mission, command) => {
     last_event: "Mission created",
     thread: []
   };
+};
+
+const laneForIntent = (intent, command = "") => {
+  if (/\bcontour\b/i.test(command)) return "Contour";
+  if (/\bsaf\b/i.test(command)) return "SAF";
+  if (/\bbwyh|heal\b/i.test(command)) return "BWYH";
+  if (intent === "content_media") return "Doctrine";
+  if (intent === "commerce") return "Commerce";
+  return "Operations";
+};
+
+const artifactTitle = (type, command) => {
+  const cleanCommand = command.replace(/\s+/g, " ").trim();
+  const titles = {
+    lead_list: "Lead List",
+    audit_report: "Audit Report",
+    outreach_draft: "Outreach Draft",
+    substack_draft: "Substack Draft",
+    video_script: "Video Script",
+    product_page: "Product Page",
+    workflow_plan: "Workflow Plan",
+    daily_brief: "Daily Brief",
+    memory_note: "Memory Note"
+  };
+  return `${titles[type] || "Artifact"}: ${cleanCommand}`;
+};
+
+const artifactOwner = (mission, type) => {
+  if (type === "lead_list") return "A001 Scout";
+  if (type === "audit_report") return "A002 Audit";
+  if (["substack_draft", "video_script", "memory_note"].includes(type)) return "A003 Content Catcher";
+  if (type === "outreach_draft") return "A006 Outreach";
+  if (type === "product_page") return "A009 Storefront Operator";
+  if (type === "workflow_plan") return mission.assigned_agents?.[0] || "A004 Ops Watcher";
+  return mission.assigned_agents?.[0] || "A004 Ops Watcher";
+};
+
+const createArtifact = (mission, type, index) => {
+  const now = new Date().toISOString();
+  const title = artifactTitle(type, mission.command);
+  const lane = laneForIntent(mission.intent, mission.command);
+
+  return {
+    id: `${mission.id}-ART-${String(index + 1).padStart(2, "0")}`,
+    mission_id: mission.id,
+    title,
+    type,
+    lane,
+    status: "NEEDS REVIEW",
+    created_at: now,
+    updated_at: now,
+    owner_agent: artifactOwner(mission, type),
+    summary: `Local ${type.replace(/_/g, " ")} created from mission ${mission.id}.`,
+    preview: `Placeholder output for "${mission.command}".`,
+    source_command: mission.command
+  };
+};
+
+const createArtifactsForMission = (missionId) => {
+  const mission = findMission(missionId);
+  if (!mission) return [];
+
+  const types = artifactTypesByIntent[mission.intent] || artifactTypesByIntent.operations;
+  const artifacts = types.map((type, index) => createArtifact(mission, type, index));
+  const existingIds = new Set(state.artifacts.map((artifact) => artifact.id));
+  const newArtifacts = artifacts.filter((artifact) => !existingIds.has(artifact.id));
+
+  state.artifacts.unshift(...newArtifacts);
+  state.artifacts = state.artifacts.slice(0, 40);
+  mission.artifacts_count = state.artifacts.filter((artifact) => artifact.mission_id === mission.id).length;
+  mission.latest_artifact_title = newArtifacts[0]?.title || mission.latest_artifact_title || "";
+  mission.next_action = newArtifacts.some((artifact) => artifact.status === "NEEDS REVIEW")
+    ? "Review generated artifacts"
+    : mission.next_action;
+  mission.updated_at = new Date().toISOString();
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  renderMissionBoard();
+
+  const reviewArtifact = newArtifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
+  if (reviewArtifact) {
+    pushAction({
+      label: "REVIEW",
+      title: `Review artifact: ${reviewArtifact.title}`,
+      next: "Approve or archive artifact",
+      agent: reviewArtifact.owner_agent
+    });
+  }
+
+  return newArtifacts;
+};
+
+const findArtifactByTitle = (title) => {
+  const needle = title.trim().toLowerCase();
+  const typedMatch = state.artifacts.find((artifact) =>
+    artifact.type.replace(/_/g, " ").toLowerCase() === needle
+  );
+  if (typedMatch) return typedMatch;
+
+  const titleStartMatch = state.artifacts.find((artifact) =>
+    artifact.title.toLowerCase().startsWith(needle)
+  );
+  if (titleStartMatch) return titleStartMatch;
+
+  return state.artifacts.find((artifact) => artifact.title.toLowerCase().includes(needle));
+};
+
+const updateArtifactStatus = (title, status) => {
+  const artifact = findArtifactByTitle(title);
+  if (!artifact) {
+    pushActivity(`Artifact not found: ${title}`, "REVIEW");
+    return;
+  }
+
+  artifact.status = status;
+  artifact.updated_at = new Date().toISOString();
+  const mission = findMission(artifact.mission_id);
+  if (mission) {
+    mission.next_action = status === "APPROVED"
+      ? `Artifact approved: ${artifact.title}`
+      : `Artifact archived: ${artifact.title}`;
+    mission.updated_at = new Date().toISOString();
+  }
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  renderMissionBoard();
+  pushActivity(status === "APPROVED" ? "Artifact approved" : "Artifact archived", status);
 };
 
 const routeCommand = (command) => {
@@ -922,6 +1110,16 @@ const runOrchestratorMission = (missionSeed, command) => {
       "A004 Ops Watcher",
       finalStatus
     );
+    const createdArtifacts = createArtifactsForMission(orchestratedMission.id);
+    if (createdArtifacts.length) {
+      appendOrchestratorThread(
+        orchestratedMission.id,
+        `Artifacts created: ${createdArtifacts.map((artifact) => artifact.type).join(", ")}`,
+        "A004 Ops Watcher",
+        finalStatus
+      );
+      pushActivity("Artifacts created", "READY");
+    }
 
     if (needsMajor) {
       state.needsMajor = {
@@ -1458,6 +1656,21 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (artifactsCommandPattern.test(trimmed)) {
+    reviewArtifacts(mission, trimmed);
+    return;
+  }
+
+  if (approveArtifactCommandPattern.test(trimmed)) {
+    handleArtifactStatusCommand(mission, trimmed, "APPROVED");
+    return;
+  }
+
+  if (archiveArtifactCommandPattern.test(trimmed)) {
+    handleArtifactStatusCommand(mission, trimmed, "ARCHIVED");
+    return;
+  }
+
   if (skillRequestCommandPattern.test(trimmed)) {
     proposeSkillRequest(mission, trimmed);
     return;
@@ -1490,6 +1703,22 @@ const reviewMissionBoard = (mission, command) => {
   saveState();
   renderMissionBoard();
   pushActivity("Mission board reviewed", "SYNCED");
+};
+
+const reviewArtifacts = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  pushActivity("Artifacts reviewed", "SYNCED");
+};
+
+const handleArtifactStatusCommand = (mission, command, status) => {
+  const pattern = status === "APPROVED" ? approveArtifactCommandPattern : archiveArtifactCommandPattern;
+  const match = command.match(pattern);
+  const title = match ? match[1] : command;
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  updateArtifactStatus(title, status);
 };
 
 const reviewGithubLogs = (mission, command) => {
@@ -1689,6 +1918,11 @@ const renderMissionBoard = () => {
               <span class="mission-agents">${escapeHtml((mission.assigned_agents || [mission.assigned_agent]).join(" / "))}</span>
               <p>${escapeHtml(mission.current_step || "No active step")}</p>
               <span class="mission-next">${escapeHtml(mission.next_action || "Review mission")}</span>
+              <div class="mission-artifacts">
+                <span class="signal">${escapeHtml(mission.artifacts_count || 0)} ARTIFACTS</span>
+                <span>${escapeHtml(mission.latest_artifact_title || "No artifact yet")}</span>
+                <a href="#artifacts">View artifacts</a>
+              </div>
               ${mission.needs_major ? "<span class=\"signal waiting\">NEEDS MAJOR</span>" : ""}
               <div class="mission-thread">
                 ${(mission.thread || []).slice(0, 3).map((entry) => `
@@ -1705,6 +1939,28 @@ const renderMissionBoard = () => {
       </section>
     `;
   }).join("");
+};
+
+const renderArtifacts = () => {
+  const panel = document.querySelector("#artifacts");
+  const target = document.querySelector("#artifact-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
+  target.innerHTML = state.artifacts.map((artifact, index) => `
+    <article class="artifact-row ${index === 0 ? "selected" : ""}">
+      <div class="artifact-main">
+        <strong>${escapeHtml(artifact.title)}</strong>
+        <span class="meta">${escapeHtml(artifact.preview || artifact.summary)}</span>
+      </div>
+      <span class="signal">${escapeHtml(artifact.type)}</span>
+      <span class="signal">${escapeHtml(artifact.lane)}</span>
+      <span class="${labelClass(artifact.status)}">${escapeHtml(artifact.status)}</span>
+      <span class="meta">${escapeHtml(artifact.owner_agent)}</span>
+      <span class="meta">${escapeHtml(artifact.mission_id)}</span>
+      <span class="meta">${escapeHtml(nowStampFromIso(artifact.created_at))}</span>
+      <p>${escapeHtml(artifact.summary)}</p>
+    </article>
+  `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
 
 const renderSkillRequests = () => {
@@ -1848,6 +2104,7 @@ const renderAll = () => {
   renderGithubLogs();
   renderMediaEngine();
   renderDistributionQueue();
+  renderArtifacts();
   renderSkillRequests();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
