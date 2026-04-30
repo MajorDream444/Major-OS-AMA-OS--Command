@@ -496,6 +496,12 @@ time {
   box-shadow: inset 2px 0 0 var(--amber);
 }
 
+.mission-board-panel.review-highlight,
+.skill-requests-panel.review-highlight {
+  border-color: rgba(32, 245, 138, 0.5);
+  box-shadow: inset 2px 0 0 var(--green);
+}
+
 .github-log-row {
   min-height: 42px;
   padding: 7px 10px;
@@ -639,6 +645,139 @@ time {
 }
 
 .distribution-row .meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mission-board {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(128px, 1fr));
+  overflow-x: auto;
+}
+
+.mission-lane {
+  min-width: 128px;
+  border-right: 1px solid var(--line);
+}
+
+.mission-lane:last-child {
+  border-right: 0;
+}
+
+.mission-lane header {
+  min-height: 34px;
+  padding: 7px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface-hard);
+  border-bottom: 1px solid var(--line);
+}
+
+.mission-card-list {
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+}
+
+.mission-card {
+  padding: 7px;
+  display: grid;
+  gap: 6px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+
+.mission-card-head,
+.mission-card-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mission-card strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mission-card p,
+.mission-card-meta,
+.empty-lane {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.mission-thread {
+  display: grid;
+  gap: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.mission-thread div {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.mission-thread span,
+.mission-thread em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mission-thread em {
+  grid-column: 2;
+  color: var(--green);
+  font-style: normal;
+}
+
+.skill-request-list {
+  display: grid;
+}
+
+.skill-request-row {
+  min-height: 46px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(120px, 0.7fr) minmax(130px, 0.8fr) minmax(130px, 0.8fr) 58px 76px;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.skill-request-row:first-child {
+  border-top: 0;
+}
+
+.skill-request-row strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.skill-request-row .meta {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -905,10 +1044,20 @@ td strong {
   .github-log-row,
   .media-workflow-row,
   .distribution-row,
+  .skill-request-row,
   .action-list li,
   .command-console {
     grid-template-columns: 1fr;
     align-items: start;
+  }
+
+  .mission-board {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-lane {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 
   .media-stage-strip {

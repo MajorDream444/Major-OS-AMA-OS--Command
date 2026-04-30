@@ -37,9 +37,11 @@
           </div>
           <nav class="nav-list" aria-label="Primary">
             <a class="nav-item active" href="#actions">ACTIONS</a>
+            <a class="nav-item" href="#mission-board">MISSION BOARD</a>
             <a class="nav-item" href="#daily-brief">DAILY BRIEF</a>
             <a class="nav-item" href="#media-engine">MEDIA ENGINE</a>
             <a class="nav-item" href="#distribution-queue">DISTRIBUTION</a>
+            <a class="nav-item" href="#skill-requests">SKILLS</a>
             <a class="nav-item" href="#github-logs">GITHUB LOGS</a>
             <a class="nav-item" href="#leads">LEADS</a>
             <a class="nav-item" href="#pipelines">PIPELINES</a>
@@ -77,6 +79,17 @@
             <strong id="needs-major-text">No review holds</strong>
           </div>
           <span class="signal ready" id="needs-major-signal">READY</span>
+        </section>
+
+        <section class="panel mission-board-panel" id="mission-board">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Agent Work</p>
+              <h2>Mission Board</h2>
+            </div>
+            <span class="signal action">LOCAL KANBAN</span>
+          </div>
+          <div id="mission-board-lanes" class="mission-board"></div>
         </section>
 
         <section class="panel daily-brief-panel" id="daily-brief">
@@ -123,6 +136,17 @@
             <span class="signal queued">LOCAL ONLY</span>
           </div>
           <div id="distribution-list" class="distribution-list"></div>
+        </section>
+
+        <section class="panel skill-requests-panel" id="skill-requests">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Evergreen Loop</p>
+              <h2>Skill Requests</h2>
+            </div>
+            <span class="signal review">APPROVAL ONLY</span>
+          </div>
+          <div id="skill-request-list" class="skill-request-list"></div>
         </section>
 
         <section class="focus-strip panel" id="actions">

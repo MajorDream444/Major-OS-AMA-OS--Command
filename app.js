@@ -13,6 +13,8 @@ const mediaStages = [
   "Memory Update"
 ];
 
+const missionLanes = ["INBOX", "RUNNING", "NEEDS MAJOR", "REVIEW", "DONE", "BLOCKED"];
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -23,6 +25,8 @@ const seedState = {
   agentRegistryHighlighted: false,
   mediaEngineHighlighted: false,
   distributionHighlighted: false,
+  missionBoardHighlighted: false,
+  skillRequestsHighlighted: false,
   leads: [
     {
       name: "Systems audit inquiry",
@@ -64,6 +68,76 @@ const seedState = {
       title: "Map new app ideas",
       next: "GitHub / Airtable / Notion",
       agent: "A004 Ops Watcher"
+    }
+  ],
+  missions: [
+    {
+      id: "M-SEED-001",
+      title: "Review Contour lead queue",
+      assigned_agent: "A001 Scout",
+      status: "REVIEW",
+      next_action: "Major approves outreach angle",
+      artifacts_count: 1,
+      last_event: "Lead packet attached",
+      thread: [
+        {
+          timestamp: "08:59",
+          event: "Mission card created",
+          agent: "A001 Scout",
+          status: "INBOX",
+          artifact: ""
+        },
+        {
+          timestamp: "09:00",
+          event: "Mission moved to Running",
+          agent: "A001 Scout",
+          status: "RUNNING",
+          artifact: ""
+        },
+        {
+          timestamp: "09:03",
+          event: "Lead packet attached",
+          agent: "A001 Scout",
+          status: "REVIEW",
+          artifact: "local lead packet"
+        }
+      ]
+    },
+    {
+      id: "M-SEED-002",
+      title: "Draft Substack authority note",
+      assigned_agent: "A003 Content Catcher",
+      status: "RUNNING",
+      next_action: "Turn draft into media handoff",
+      artifacts_count: 0,
+      last_event: "Content Catcher working...",
+      thread: [
+        {
+          timestamp: "09:05",
+          event: "Mission card created",
+          agent: "A003 Content Catcher",
+          status: "INBOX",
+          artifact: ""
+        },
+        {
+          timestamp: "09:06",
+          event: "Mission moved to Running",
+          agent: "A003 Content Catcher",
+          status: "RUNNING",
+          artifact: ""
+        }
+      ]
+    }
+  ],
+  skillRequests: [
+    {
+      proposed_by: "A004 Ops Watcher",
+      skill_name: "daily handoff summarizer",
+      why_needed: "Reduce repeated operator context loading",
+      input: "mission threads and activity feed",
+      output: "daily GitHub-ready handoff",
+      risk: "LOW",
+      status: "REVIEW"
     }
   ],
   dailyBrief: [
@@ -398,6 +472,10 @@ const mergeSeedState = (savedState) => {
   merged.mediaWorkflow = Array.isArray(savedState.mediaWorkflow) ? savedState.mediaWorkflow : cloneState(seedState.mediaWorkflow);
   merged.distributionHighlighted = Boolean(savedState.distributionHighlighted);
   merged.distributionQueue = Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue);
+  merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
+  merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
+  merged.missions = Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions);
+  merged.skillRequests = Array.isArray(savedState.skillRequests) ? savedState.skillRequests : cloneState(seedState.skillRequests);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
   merged.dailyBrief = Array.isArray(savedState.dailyBrief) ? savedState.dailyBrief : cloneState(seedState.dailyBrief);
@@ -455,6 +533,7 @@ const githubLogCommandPattern = /\b(show github logs|check repo logs|what change
 const agentRegistryCommandPattern = /\bshow agents\b/i;
 const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
 const distributionCommandPattern = /\b(distribute|send to x|send to substack|save to memory)\b/i;
+const skillRequestCommandPattern = /^propose skill\s+(.+)$/i;
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => ({
@@ -533,6 +612,125 @@ const pushAction = ({ label, title, next, agent }) => {
   state.actions = state.actions.slice(0, 3);
   saveState();
   renderActions();
+};
+
+const findMission = (missionId) => state.missions.find((mission) => mission.id === missionId);
+
+const appendMissionThread = (missionId, event, agent, status, artifact = "") => {
+  const mission = findMission(missionId);
+  if (!mission) return;
+
+  mission.thread = Array.isArray(mission.thread) ? mission.thread : [];
+  mission.thread.unshift({
+    timestamp: nowStamp(),
+    event,
+    agent,
+    status,
+    artifact
+  });
+  mission.thread = mission.thread.slice(0, 12);
+  mission.last_event = event;
+  saveState();
+  renderMissionBoard();
+};
+
+const createMissionCard = (mission, command, agent) => {
+  const existing = findMission(mission.id);
+  if (existing) return existing;
+
+  const card = {
+    id: mission.id,
+    title: command,
+    assigned_agent: agentLabel(agent),
+    status: "INBOX",
+    next_action: "Route to agent",
+    artifacts_count: 0,
+    last_event: "Mission card created",
+    thread: []
+  };
+
+  state.missions.unshift(card);
+  state.missionBoardHighlighted = true;
+  saveState();
+  appendMissionThread(mission.id, "Mission card created", agentLabel(agent), "INBOX");
+  pushActivity("Mission card created", "ACTIVE");
+  renderMissionBoard();
+  return card;
+};
+
+const moveMissionCard = (missionId, status, nextAction, agent, event, artifact = "") => {
+  const mission = findMission(missionId);
+  if (!mission) return;
+
+  mission.status = status;
+  mission.next_action = nextAction;
+  mission.assigned_agent = agent;
+  if (artifact) {
+    mission.artifacts_count += 1;
+  }
+  appendMissionThread(missionId, event, agent, status, artifact);
+
+  if (event === "Mission moved to Running") {
+    pushActivity("Mission moved to Running", "WORKING");
+  } else if (event === "Mission needs Major") {
+    pushActivity("Mission needs Major", "WAITING");
+  } else if (event === "Artifact attached") {
+    pushActivity("Artifact attached", "READY");
+  }
+
+  saveState();
+  renderMissionBoard();
+};
+
+const startMissionCard = (mission, command, agent) => {
+  createMissionCard(mission, command, agent);
+  moveMissionCard(mission.id, "RUNNING", "Agent working", agentLabel(agent), "Mission moved to Running");
+};
+
+const completeMissionCard = (missionId, agent, event = "Mission completed", nextAction = "Review local handoff") => {
+  moveMissionCard(missionId, "DONE", nextAction, agent, event);
+};
+
+const attachMissionArtifact = (missionId, agent, artifact) => {
+  moveMissionCard(missionId, "REVIEW", "Review attached artifact", agent, "Artifact attached", artifact);
+};
+
+const proposeSkillRequest = (mission, command) => {
+  const match = command.match(skillRequestCommandPattern);
+  const skillName = normalizeTitle(match ? match[1] : command.replace(/^propose skill\s+/i, ""));
+  const agent = findAgent("A004");
+  const proposedBy = agentLabel(agent);
+
+  logSubmittedCommand(mission, command, proposedBy);
+  updateNeedsMajor(null);
+  startMissionCard(mission, command, agent);
+  state.skillRequests.unshift({
+    proposed_by: proposedBy,
+    skill_name: skillName,
+    why_needed: "Convert repeated local work into an approved reusable workflow",
+    input: "operator command and mission thread",
+    output: `${skillName} workflow handoff`,
+    risk: "MED",
+    status: "REVIEW"
+  });
+  state.skillRequests = state.skillRequests.slice(0, 12);
+  state.skillRequestsHighlighted = true;
+  saveState();
+  renderSkillRequests();
+  pushActivity("Skill request proposed", "REVIEW");
+  moveMissionCard(mission.id, "REVIEW", "Major approves or rejects skill", proposedBy, "Skill request proposed", `skill:${skillName}`);
+  pushAction({
+    label: "REVIEW",
+    title: `Approve skill: ${skillName}`,
+    next: "Map workflow and leverage",
+    agent: proposedBy
+  });
+  setAgentState("A004", {
+    status: "READY",
+    current_task: "",
+    last_event: "Skill request queued",
+    needs_major: false
+  });
 };
 
 const inferMediaLane = (title) => {
@@ -725,18 +923,20 @@ const addDistributionActions = (title) => {
 const handleDistributionCommand = (mission, command) => {
   const topic = normalizeTitle(extractDistributionTopic(command));
   const agent = findAgent("A003");
+  const agentName = agentLabel(agent);
   let event = "Distribution queued";
 
-  logSubmittedCommand(mission, command, agentLabel(agent));
+  logSubmittedCommand(mission, command, agentName);
   updateNeedsMajor(null);
   state.distributionHighlighted = true;
+  startMissionCard(mission, command, agent);
 
   if (/^distribute\b/i.test(command)) {
     upsertDistributionBatch(topic);
     upsertMediaWorkflowItem(topic, {
       stage: "Distribution",
       next_action: "Queue outbound channels",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "ACTION"
     });
     event = "Distribution queued";
@@ -748,7 +948,7 @@ const handleDistributionCommand = (mission, command) => {
       asset_type: "hook",
       status: "QUEUED",
       next_action: "Local X handoff queued",
-      owner_agent: agentLabel(agent)
+      owner_agent: agentName
     });
     event = "X handoff queued";
   } else if (/^send to substack\b/i.test(command)) {
@@ -759,7 +959,7 @@ const handleDistributionCommand = (mission, command) => {
       asset_type: "article",
       status: "QUEUED",
       next_action: "Local Substack handoff queued",
-      owner_agent: agentLabel(agent)
+      owner_agent: agentName
     });
     event = "Substack handoff queued";
   } else {
@@ -770,13 +970,14 @@ const handleDistributionCommand = (mission, command) => {
       asset_type: "memory note",
       status: "READY",
       next_action: "Save local memory note",
-      owner_agent: agentLabel(agent)
+      owner_agent: agentName
     });
     event = "Memory save queued";
   }
 
   pushActivity(event, "QUEUED");
   addDistributionActions(topic);
+  attachMissionArtifact(mission.id, agentName, `distribution:${topic}`);
   simulateContentCatcher(mission, command, event);
   saveState();
   renderDistributionQueue();
@@ -825,6 +1026,7 @@ const simulateContentCatcher = (mission, command, finalEvent = "Media workflow u
 const handleMediaWorkflowCommand = (mission, command) => {
   const topic = extractMediaTopic(command);
   const agent = findAgent("A003");
+  const agentName = agentLabel(agent);
   let update;
   let events;
   let action;
@@ -834,7 +1036,7 @@ const handleMediaWorkflowCommand = (mission, command) => {
     update = {
       stage: "Draft",
       next_action: "Editorial Polish",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "ACTION"
     };
     events = [["Substack draft captured", "ACTION"]];
@@ -842,14 +1044,14 @@ const handleMediaWorkflowCommand = (mission, command) => {
       label: "CONTENT ACTION",
       title: `Draft Substack: ${topic}`,
       next: "Editorial Polish",
-      agent: agentLabel(agent)
+      agent: agentName
     };
     finalEvent = "Substack draft captured";
   } else if (/^make video from\b/i.test(command)) {
     update = {
       stage: "Video Script",
       next_action: "Queue Remotion / HeyGen",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "ACTION"
     };
     events = [["Hooks extracted", "ACTION"], ["Video script ready", "READY"]];
@@ -857,14 +1059,14 @@ const handleMediaWorkflowCommand = (mission, command) => {
       label: "ACTION",
       title: `Queue media render: ${topic}`,
       next: "Remotion / HeyGen queue",
-      agent: agentLabel(agent)
+      agent: agentName
     };
     finalEvent = "Video script ready";
   } else if (/^queue remotion\b/i.test(command)) {
     update = {
       stage: "Remotion Queue",
       next_action: "Queue HeyGen or Distribution",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "QUEUED"
     };
     events = [["Remotion render queued", "QUEUED"]];
@@ -872,14 +1074,14 @@ const handleMediaWorkflowCommand = (mission, command) => {
       label: "QUEUED",
       title: `Remotion queued: ${topic}`,
       next: "Review render output later",
-      agent: agentLabel(agent)
+      agent: agentName
     };
     finalEvent = "Remotion render queued";
   } else if (/^queue heygen\b/i.test(command)) {
     update = {
       stage: "HeyGen Queue",
       next_action: "Distribution",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "QUEUED"
     };
     events = [["HeyGen personalization queued", "QUEUED"]];
@@ -887,14 +1089,14 @@ const handleMediaWorkflowCommand = (mission, command) => {
       label: "QUEUED",
       title: `HeyGen queued: ${topic}`,
       next: "Prepare distribution",
-      agent: agentLabel(agent)
+      agent: agentName
     };
     finalEvent = "HeyGen personalization queued";
   } else {
     update = {
       stage: "Publish",
       next_action: "Memory Update",
-      assigned_agent: agentLabel(agent),
+      assigned_agent: agentName,
       status: "REVIEW"
     };
     events = [["Memory update needed", "REVIEW"]];
@@ -902,17 +1104,19 @@ const handleMediaWorkflowCommand = (mission, command) => {
       label: "REVIEW",
       title: `Publish / memory update: ${topic}`,
       next: "Log insight to memory graph",
-      agent: agentLabel(agent)
+      agent: agentName
     };
     finalEvent = "Memory update needed";
   }
 
-  logSubmittedCommand(mission, command, agentLabel(agent));
+  logSubmittedCommand(mission, command, agentName);
   updateNeedsMajor(null);
   state.mediaEngineHighlighted = true;
+  startMissionCard(mission, command, agent);
   upsertMediaWorkflowItem(topic, update);
   syncDistributionFromMediaStage(topic, update.stage);
   addDistributionActions(topic);
+  attachMissionArtifact(mission.id, agentName, `media:${topic}:${update.stage}`);
   pushAction(action);
   pushActivity(`${mission.id} media workflow -> Content Catcher`, "ACTION");
   events.forEach(([event, label], index) => {
@@ -954,6 +1158,11 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (skillRequestCommandPattern.test(trimmed)) {
+    proposeSkillRequest(mission, trimmed);
+    return;
+  }
+
   if (distributionCommandPattern.test(trimmed)) {
     handleDistributionCommand(mission, trimmed);
     return;
@@ -969,6 +1178,7 @@ const dispatchMission = (command) => {
 
   logSubmittedCommand(mission, trimmed, agentLabel(agent));
   updateNeedsMajor(null);
+  startMissionCard(mission, trimmed, agent);
   pushAction({
     label: "ACTION",
     title: trimmed,
@@ -1010,6 +1220,7 @@ const dispatchMission = (command) => {
         needs_major: true
       });
       updateNeedsMajor(trimmed, agent);
+      moveMissionCard(mission.id, "NEEDS MAJOR", "Needs Major review", agentLabel(agent), "Mission needs Major");
       pushAction({
         label: "REVIEW",
         title: trimmed,
@@ -1026,6 +1237,7 @@ const dispatchMission = (command) => {
       last_event: "Completed draft",
       needs_major: false
     });
+    completeMissionCard(mission.id, agentLabel(agent), "Mission completed", "Review local handoff");
     pushAction({
       label: "READY",
       title: trimmed,
@@ -1221,6 +1433,68 @@ const renderDistributionQueue = () => {
   `).join("");
 };
 
+const renderMissionBoard = () => {
+  const panel = document.querySelector("#mission-board");
+  const target = document.querySelector("#mission-board-lanes");
+
+  panel.classList.toggle("review-highlight", Boolean(state.missionBoardHighlighted));
+  target.innerHTML = missionLanes.map((lane) => {
+    const cards = state.missions.filter((mission) => mission.status === lane);
+    return `
+      <section class="mission-lane">
+        <header>
+          <h3>${escapeHtml(lane)}</h3>
+          <span class="signal">${cards.length}</span>
+        </header>
+        <div class="mission-card-list">
+          ${cards.map((mission) => `
+            <article class="mission-card">
+              <div class="mission-card-head">
+                <strong>${escapeHtml(mission.title)}</strong>
+                <span class="${labelClass(mission.status)}">${escapeHtml(mission.status)}</span>
+              </div>
+              <div class="mission-card-meta">
+                <span>${escapeHtml(mission.assigned_agent)}</span>
+                <span>${escapeHtml(mission.artifacts_count)} artifacts</span>
+              </div>
+              <p>${escapeHtml(mission.next_action)}</p>
+              <div class="mission-thread">
+                ${(mission.thread || []).slice(0, 3).map((entry) => `
+                  <div>
+                    <time>${escapeHtml(entry.timestamp)}</time>
+                    <span>${escapeHtml(entry.event)}</span>
+                    ${entry.artifact ? `<em>${escapeHtml(entry.artifact)}</em>` : ""}
+                  </div>
+                `).join("")}
+              </div>
+            </article>
+          `).join("") || "<p class=\"empty-lane\">No missions</p>"}
+        </div>
+      </section>
+    `;
+  }).join("");
+};
+
+const renderSkillRequests = () => {
+  const panel = document.querySelector("#skill-requests");
+  const target = document.querySelector("#skill-request-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.skillRequestsHighlighted));
+  target.innerHTML = state.skillRequests.map((request, index) => `
+    <article class="skill-request-row ${index === 0 ? "selected" : ""}">
+      <div>
+        <strong>${escapeHtml(request.skill_name)}</strong>
+        <span class="meta">${escapeHtml(request.why_needed)}</span>
+      </div>
+      <span class="meta">${escapeHtml(request.proposed_by)}</span>
+      <span class="meta">${escapeHtml(request.input)}</span>
+      <span class="meta">${escapeHtml(request.output)}</span>
+      <span class="${labelClass(request.risk)}">${escapeHtml(request.risk)}</span>
+      <span class="${labelClass(request.status)}">${escapeHtml(request.status)}</span>
+    </article>
+  `).join("");
+};
+
 const renderPipeline = (id, stages) => {
   const target = document.querySelector(id);
   target.innerHTML = `
@@ -1335,12 +1609,14 @@ const startHeartbeat = () => {
 const renderAll = () => {
   renderUnread();
   renderNeedsMajor();
+  renderMissionBoard();
   renderLeads();
   renderActions();
   renderDailyBrief();
   renderGithubLogs();
   renderMediaEngine();
   renderDistributionQueue();
+  renderSkillRequests();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
   renderPipeline("#pipeline-saf", state.pipelines.saf);
