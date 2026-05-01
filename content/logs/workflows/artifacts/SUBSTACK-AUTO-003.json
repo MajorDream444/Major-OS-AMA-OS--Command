@@ -1,0 +1,18 @@
+{
+  "artifact_id": "SUBSTACK-AUTO-003",
+  "mission_id": "SUBSTACK-M-003",
+  "artifact_type": "hook",
+  "source": "SUBSTACK_ENGINE",
+  "status": "READY",
+  "lane": "Operations",
+  "title": "Daily System Improvement Hook",
+  "github_path": "content/logs/workflows/artifacts/SUBSTACK-AUTO-003.json",
+  "airtable_record_id": "",
+  "requires_major_review": false,
+  "score": 96,
+  "confidence": 0.92,
+  "risk_level": "LOW",
+  "publish_mode": "AUTO",
+  "next_action": "Ready for local publish handoff",
+  "system_underneath": "Daily operating improvements can be converted into lightweight authority hooks."
+}

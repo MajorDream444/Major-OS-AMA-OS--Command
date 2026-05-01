@@ -1,0 +1,18 @@
+{
+  "artifact_id": "SUBSTACK-RD-002",
+  "mission_id": "SUBSTACK-M-002",
+  "artifact_type": "substack_draft",
+  "source": "SUBSTACK_ENGINE",
+  "status": "BLOCKED",
+  "lane": "Reaction Doctrine",
+  "title": "Joe Budden Clip Lane: Pattern Needs System",
+  "github_path": "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-002.json",
+  "airtable_record_id": "",
+  "requires_major_review": true,
+  "score": 72,
+  "confidence": 0.61,
+  "risk_level": "HIGH",
+  "publish_mode": "REVIEW",
+  "next_action": "Add system_underneath before review",
+  "system_underneath": ""
+}

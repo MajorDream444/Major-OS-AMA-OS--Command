@@ -167,6 +167,24 @@ const externalArtifactSeed = [
     publish_mode: "REVIEW",
     next_action: "Add system_underneath before review",
     system_underneath: ""
+  },
+  {
+    artifact_id: "SUBSTACK-AUTO-003",
+    mission_id: "SUBSTACK-M-003",
+    artifact_type: "hook",
+    source: "SUBSTACK_ENGINE",
+    status: "READY",
+    lane: "Operations",
+    title: "Daily System Improvement Hook",
+    github_path: "content/logs/workflows/artifacts/SUBSTACK-AUTO-003.json",
+    airtable_record_id: "",
+    requires_major_review: false,
+    score: 96,
+    confidence: 0.92,
+    risk_level: "LOW",
+    publish_mode: "AUTO",
+    next_action: "Ready for local publish handoff",
+    system_underneath: "Daily operating improvements can be converted into lightweight authority hooks."
   }
 ];
 
@@ -817,8 +835,12 @@ const mergeSeedState = (savedState) => {
   merged.systemGuidance = savedState.systemGuidance || cloneState(seedState.systemGuidance);
   merged.missions = (Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions))
     .map(normalizeMission);
-  merged.artifacts = (Array.isArray(savedState.artifacts) ? savedState.artifacts : cloneState(seedState.artifacts))
-    .map(normalizeArtifact);
+  const savedArtifacts = Array.isArray(savedState.artifacts) ? savedState.artifacts : [];
+  const artifactKeys = new Set(savedArtifacts.map((artifact) => artifact.artifact_id || artifact.id));
+  merged.artifacts = [
+    ...savedArtifacts,
+    ...cloneState(seedState.artifacts).filter((artifact) => !artifactKeys.has(artifact.artifact_id || artifact.id))
+  ].map(normalizeArtifact);
   merged.skillRequests = Array.isArray(savedState.skillRequests) ? savedState.skillRequests : cloneState(seedState.skillRequests);
   merged.leads = Array.isArray(savedState.leads) ? savedState.leads : cloneState(seedState.leads);
   merged.actions = Array.isArray(savedState.actions) ? savedState.actions : cloneState(seedState.actions);
@@ -1096,13 +1118,44 @@ const findArtifactByTitle = (title) => {
   return state.artifacts.find((artifact) => artifact.title.toLowerCase().includes(needle));
 };
 
+const hasStrongSystemUnderneath = (artifact) =>
+  artifact.lane !== "Reaction Doctrine" ||
+  (artifact.system_underneath && artifact.system_underneath.trim().length >= 24);
+
+const artifactPriorityRank = (artifact) => {
+  if (artifact.status === "BLOCKED") return 1;
+  if (artifact.requires_major_review || artifact.status === "NEEDS REVIEW") return 2;
+  if (artifact.status === "READY" && Number(artifact.score || 0) >= 85) return 3;
+  if (artifact.status === "SCHEDULED" || artifact.publish_mode === "SCHEDULED" || artifact.delay_until) return 4;
+  if (["PUBLISHED", "APPROVED"].includes(artifact.status)) return 5;
+  return 6;
+};
+
+const artifactPriorityLabel = (artifact) => ({
+  1: "BLOCKED",
+  2: "NEEDS REVIEW",
+  3: "HIGH SCORE READY",
+  4: "SCHEDULED",
+  5: "RECENT PUBLISHED",
+  6: "WATCH"
+})[artifactPriorityRank(artifact)];
+
+const sortedArtifacts = (artifacts) =>
+  [...artifacts].sort((a, b) => {
+    const rank = artifactPriorityRank(a) - artifactPriorityRank(b);
+    if (rank !== 0) return rank;
+    const score = Number(b.score || 0) - Number(a.score || 0);
+    if (score !== 0) return score;
+    return new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime();
+  });
+
 const shouldBlockArtifactPublish = (artifact) => {
   if (!artifact) return "Artifact not found";
   if (artifact.risk_level === "HIGH" && artifact.publish_mode === "AUTO") {
     return "High risk artifacts cannot auto-publish";
   }
-  if (artifact.lane === "Reaction Doctrine" && !artifact.system_underneath) {
-    return "Reaction Doctrine artifacts require system_underneath";
+  if (!hasStrongSystemUnderneath(artifact)) {
+    return "Reaction Doctrine artifacts require strong system_underneath";
   }
   if (artifact.requires_major_review && artifact.status !== "APPROVED") {
     return "Command Center approval required before publish";
@@ -1115,8 +1168,8 @@ const hardArtifactBlocker = (artifact) => {
   if (artifact.risk_level === "HIGH" && artifact.publish_mode === "AUTO") {
     return "High risk artifacts cannot auto-publish";
   }
-  if (artifact.lane === "Reaction Doctrine" && !artifact.system_underneath) {
-    return "Reaction Doctrine artifacts require system_underneath";
+  if (!hasStrongSystemUnderneath(artifact)) {
+    return "Reaction Doctrine artifacts require strong system_underneath";
   }
   return "";
 };
@@ -1262,10 +1315,16 @@ const intentLabel = (intent) => ({
 
 const getLatestMission = () => state.missions[0] || null;
 
-const getReviewArtifact = () =>
-  state.artifacts.find((artifact) =>
-    artifact.source === "SUBSTACK_ENGINE" && artifact.requires_major_review
-  ) || state.artifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
+const isActionableArtifact = (artifact) =>
+  artifact.status === "BLOCKED" ||
+  artifact.requires_major_review ||
+  artifact.status === "NEEDS REVIEW" ||
+  (artifact.publish_mode === "AUTO" && artifact.risk_level === "LOW" && artifact.status === "READY");
+
+const getPriorityArtifact = () =>
+  sortedArtifacts(state.artifacts).find((artifact) =>
+    artifact.source === "SUBSTACK_ENGINE" && isActionableArtifact(artifact)
+  ) || sortedArtifacts(state.artifacts).find(isActionableArtifact);
 
 const getReviewMission = () =>
   state.missions.find((mission) => mission.status === "NEEDS MAJOR" || mission.needs_major);
@@ -1320,13 +1379,29 @@ const commandTitle = (value = "") =>
   value.replace(/^(Lead List|Audit Report|Outreach Draft|Substack Draft|Video Script|Product Page|Workflow Plan|Daily Brief|Memory Note):\s*/i, "").trim();
 
 const buildNextMove = () => {
-  const artifact = getReviewArtifact();
+  const artifact = getPriorityArtifact();
   if (artifact) {
-    if (artifact.source === "SUBSTACK_ENGINE" && artifact.requires_major_review) {
+    if (artifact.status === "BLOCKED") {
       return {
-        action: `Review Substack artifact: ${artifact.title}`,
-        why: "Substack Engine can produce artifacts, but Command Center owns final approval.",
+        action: `Rewrite artifact: ${artifact.title}`,
+        why: "Blocked artifacts must be rewritten before approval or publish handoff.",
+        command: `rewrite artifact ${artifact.artifact_id || artifact.id}`
+      };
+    }
+
+    if (artifact.requires_major_review) {
+      return {
+        action: `Review artifact: ${artifact.title}`,
+        why: "Command Center owns final approval before this external artifact can move.",
         command: `approve artifact ${artifact.artifact_id || artifact.id}`
+      };
+    }
+
+    if (artifact.publish_mode === "AUTO" && artifact.risk_level === "LOW" && artifact.status === "READY") {
+      return {
+        action: `Ready to publish: ${artifact.title}`,
+        why: "This artifact is low risk, high confidence, and does not require Major review.",
+        command: `publish artifact ${artifact.artifact_id || artifact.id}`
       };
     }
 
@@ -2502,9 +2577,9 @@ const renderArtifacts = () => {
   const panel = document.querySelector("#artifacts");
   const target = document.querySelector("#artifact-list");
   const filter = state.artifactSourceFilter || "ALL";
-  const artifacts = state.artifacts.filter((artifact) =>
+  const artifacts = sortedArtifacts(state.artifacts.filter((artifact) =>
     filter === "ALL" || artifact.source === filter
-  );
+  ));
 
   panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
   document.querySelectorAll("#artifact-source-filter button").forEach((button) => {
@@ -2517,20 +2592,19 @@ const renderArtifacts = () => {
         <span class="meta">${escapeHtml(artifact.preview || artifact.summary)}</span>
         ${artifact.source === "SUBSTACK_ENGINE" ? "<span class=\"signal source-substack\">SOURCE: SUBSTACK</span>" : "<span class=\"signal\">SOURCE: LOCAL</span>"}
       </div>
+      <span class="${labelClass(artifactPriorityLabel(artifact))}">${escapeHtml(artifactPriorityLabel(artifact))}</span>
       <span class="signal">${escapeHtml(artifact.type)}</span>
       <span class="signal">${escapeHtml(artifact.lane)}</span>
       <span class="${labelClass(artifact.risk_mode || "REVIEW")}">${escapeHtml(artifact.risk_mode || "REVIEW")}</span>
       <span class="${labelClass(artifact.status)}">${escapeHtml(artifact.status)}</span>
-      <span class="meta">${escapeHtml(artifact.owner_agent)}</span>
-      <span class="meta">${escapeHtml(artifact.mission_id)}</span>
-      <span class="meta">${escapeHtml(nowStampFromIso(artifact.created_at))}</span>
       <div class="artifact-intel">
         <span>score ${artifact.score ?? "n/a"}</span>
         <span>confidence ${artifact.confidence ?? "n/a"}</span>
         <span>risk ${escapeHtml(artifact.risk_level || "MED")}</span>
         <span>publish ${escapeHtml(artifact.publish_mode || artifact.risk_mode || "REVIEW")}</span>
+        <span>status ${escapeHtml(artifact.status)}</span>
       </div>
-      <p>${escapeHtml(artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
+      <p>${escapeHtml(artifact.next_action || artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
     </article>
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };

@@ -15,7 +15,7 @@ External systems may recommend a publish mode, risk level, score, and next actio
 ## Hard Rules
 
 - High risk artifacts cannot auto-publish.
-- Reaction Doctrine artifacts without `system_underneath` must be blocked.
+- Reaction Doctrine artifacts without strong `system_underneath` must be blocked.
 - Imported artifacts requiring Major review must appear in Next Move before publish handoff.
 - Substack Engine only produces artifacts.
 - Command Center owns final approval.
@@ -39,8 +39,10 @@ airtable_record_id
 The current build:
 
 - loads sample `SUBSTACK_ENGINE` artifacts as local seed data
+- mirrors a sample export at `content/logs/workflows/mission_control_export.json`
 - displays source, score, confidence, risk level, and publish mode
 - filters artifacts by `ALL`, `LOCAL`, or `SUBSTACK_ENGINE`
+- ranks artifacts using the hybrid priority order
 - routes imported review-needed artifacts into Next Move
 - supports local approval, rejection, rewrite, and publish-handoff commands
 

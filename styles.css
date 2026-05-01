@@ -956,7 +956,7 @@ time {
   min-height: 54px;
   padding: 8px 10px;
   display: grid;
-  grid-template-columns: minmax(190px, 1.1fr) 112px 72px 86px 96px minmax(130px, 0.7fr) 92px 82px;
+  grid-template-columns: minmax(190px, 1.1fr) 128px 112px 82px 86px 96px;
   align-items: center;
   gap: 8px;
   border-top: 1px solid var(--line);

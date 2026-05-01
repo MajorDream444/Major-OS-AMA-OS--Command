@@ -31,9 +31,8 @@ Boundary:
 ## Expected Import Files
 
 ```text
-mission_control_export.json
-mission_control_export.md
-artifacts/*.json
+content/logs/workflows/mission_control_export.json
+content/logs/workflows/artifacts/*.json
 ```
 
 Artifact JSON fields:
@@ -63,6 +62,7 @@ Current implementation uses local fixtures under:
 
 ```text
 fixtures/substack/
+content/logs/workflows/
 ```
 
 No file watcher, API, webhook, GitHub API, Airtable API, or Substack API is active.
