@@ -1,0 +1,18 @@
+{
+  "artifact_id": "SUBSTACK-RD-001",
+  "mission_id": "SUBSTACK-M-001",
+  "artifact_type": "substack_draft",
+  "source": "SUBSTACK_ENGINE",
+  "status": "NEEDS REVIEW",
+  "lane": "Reaction Doctrine",
+  "title": "Hip-Hop Is the Real Media System",
+  "github_path": "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-001.json",
+  "airtable_record_id": "",
+  "requires_major_review": true,
+  "score": 91,
+  "confidence": 0.84,
+  "risk_level": "HIGH",
+  "publish_mode": "REVIEW",
+  "next_action": "Review source framing and system underneath before approval",
+  "system_underneath": "Media power moved through hip-hop distribution before institutions could name it."
+}

@@ -921,6 +921,37 @@ time {
   display: grid;
 }
 
+.artifact-filter {
+  min-height: 34px;
+  padding: 6px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-hard);
+}
+
+.artifact-filter button {
+  height: 22px;
+  padding: 0 8px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.artifact-filter button:hover,
+.artifact-filter button.active {
+  color: var(--green);
+  background: var(--green-dim);
+  border-color: rgba(32, 245, 138, 0.5);
+}
+
 .artifact-row {
   min-height: 54px;
   padding: 8px 10px;
@@ -960,6 +991,36 @@ time {
 .artifact-row p {
   grid-column: 1 / -1;
   color: var(--green);
+}
+
+.artifact-main {
+  display: grid;
+  gap: 4px;
+}
+
+.source-substack {
+  width: fit-content;
+  color: var(--blue);
+  background: var(--blue-dim);
+  border-color: rgba(56, 168, 255, 0.36);
+}
+
+.artifact-intel {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.artifact-intel span {
+  min-height: 18px;
+  padding: 2px 6px;
+  color: var(--muted);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .skill-request-list {
@@ -1060,6 +1121,7 @@ time {
 }
 
 .blocked,
+.rejected,
 .high {
   color: var(--red);
   background: var(--red-dim);
@@ -1079,6 +1141,7 @@ time {
 }
 
 .draft,
+.rewrite,
 .archived {
   color: var(--muted);
   background: #0b1110;

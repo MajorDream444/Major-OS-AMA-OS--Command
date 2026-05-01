@@ -131,6 +131,45 @@ const riskRuleSeed = [
   }
 ];
 
+const externalArtifactSeed = [
+  {
+    artifact_id: "SUBSTACK-RD-001",
+    mission_id: "SUBSTACK-M-001",
+    artifact_type: "substack_draft",
+    source: "SUBSTACK_ENGINE",
+    status: "NEEDS REVIEW",
+    lane: "Reaction Doctrine",
+    title: "Hip-Hop Is the Real Media System",
+    github_path: "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-001.json",
+    airtable_record_id: "",
+    requires_major_review: true,
+    score: 91,
+    confidence: 0.84,
+    risk_level: "HIGH",
+    publish_mode: "REVIEW",
+    next_action: "Review source framing and system underneath before approval",
+    system_underneath: "Media power moved through hip-hop distribution before institutions could name it."
+  },
+  {
+    artifact_id: "SUBSTACK-RD-002",
+    mission_id: "SUBSTACK-M-002",
+    artifact_type: "substack_draft",
+    source: "SUBSTACK_ENGINE",
+    status: "BLOCKED",
+    lane: "Reaction Doctrine",
+    title: "Joe Budden Clip Lane: Pattern Needs System",
+    github_path: "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-002.json",
+    airtable_record_id: "",
+    requires_major_review: true,
+    score: 72,
+    confidence: 0.61,
+    risk_level: "HIGH",
+    publish_mode: "REVIEW",
+    next_action: "Add system_underneath before review",
+    system_underneath: ""
+  }
+];
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -145,6 +184,7 @@ const seedState = {
   artifactsHighlighted: false,
   riskGovernanceHighlighted: false,
   skillRequestsHighlighted: false,
+  artifactSourceFilter: "ALL",
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -312,7 +352,8 @@ const seedState = {
       delay_until: "",
       governance_override: false,
       risk_note: "Lane rule: Contour"
-    }
+    },
+    ...externalArtifactSeed
   ],
   dailyBrief: [
     {
@@ -686,25 +727,48 @@ const calculateDelayUntil = (rule, baseTime = new Date()) => {
   return new Date(baseTime.getTime() + (rule.delay_hours * 60 * 60 * 1000)).toISOString();
 };
 
-const normalizeArtifact = (artifact) => ({
-  id: artifact.id,
-  mission_id: artifact.mission_id || "",
-  title: artifact.title || "Untitled Artifact",
-  type: artifact.type || "workflow_plan",
-  lane: artifact.lane || "Operations",
-  status: artifact.status || "DRAFT",
-  created_at: artifact.created_at || new Date().toISOString(),
-  updated_at: artifact.updated_at || artifact.created_at || new Date().toISOString(),
-  owner_agent: artifact.owner_agent || "A004 Ops Watcher",
-  summary: artifact.summary || "Local placeholder artifact.",
-  preview: artifact.preview || "No preview available.",
-  source_command: artifact.source_command || "",
-  risk_mode: artifact.risk_mode || riskRuleForLane(artifact.lane || "Operations").mode,
-  publish_rule: artifact.publish_rule || riskRuleForLane(artifact.lane || "Operations").rule,
-  delay_until: artifact.delay_until || calculateDelayUntil(riskRuleForLane(artifact.lane || "Operations"), new Date(artifact.created_at || Date.now())),
-  governance_override: Boolean(artifact.governance_override),
-  risk_note: artifact.risk_note || ""
-});
+const normalizeArtifact = (artifact) => {
+  const lane = artifact.lane || "Operations";
+  const createdAt = artifact.created_at || new Date().toISOString();
+  const source = artifact.source || (artifact.artifact_id ? "SUBSTACK_ENGINE" : "LOCAL");
+  const type = artifact.type || artifact.artifact_type || "workflow_plan";
+  const id = artifact.id || artifact.artifact_id;
+  const rule = riskRuleForLane(lane);
+  const publishMode = artifact.publish_mode || artifact.risk_mode || rule.mode;
+  const riskLevel = artifact.risk_level || (publishMode === "AUTO" ? "LOW" : "MED");
+
+  return {
+    id,
+    artifact_id: artifact.artifact_id || id,
+    mission_id: artifact.mission_id || "",
+    title: artifact.title || "Untitled Artifact",
+    type,
+    artifact_type: artifact.artifact_type || type,
+    source,
+    lane,
+    status: artifact.status || "DRAFT",
+    created_at: createdAt,
+    updated_at: artifact.updated_at || artifact.created_at || createdAt,
+    owner_agent: artifact.owner_agent || (source === "SUBSTACK_ENGINE" ? "A003 Content Catcher" : "A004 Ops Watcher"),
+    summary: artifact.summary || artifact.next_action || "Local placeholder artifact.",
+    preview: artifact.preview || artifact.next_action || "No preview available.",
+    source_command: artifact.source_command || "",
+    github_path: artifact.github_path || "",
+    airtable_record_id: artifact.airtable_record_id || "",
+    requires_major_review: Boolean(artifact.requires_major_review),
+    score: Number.isFinite(artifact.score) ? artifact.score : null,
+    confidence: Number.isFinite(artifact.confidence) ? artifact.confidence : null,
+    risk_level: riskLevel,
+    publish_mode: publishMode,
+    next_action: artifact.next_action || "Review artifact",
+    system_underneath: artifact.system_underneath || "",
+    risk_mode: artifact.risk_mode || publishMode,
+    publish_rule: artifact.publish_rule || rule.rule,
+    delay_until: artifact.delay_until || calculateDelayUntil(rule, new Date(createdAt)),
+    governance_override: Boolean(artifact.governance_override),
+    risk_note: artifact.risk_note || ""
+  };
+};
 
 const normalizeRiskRule = (rule, seedRule) => ({
   ...seedRule,
@@ -743,6 +807,7 @@ const mergeSeedState = (savedState) => {
   merged.artifactsHighlighted = Boolean(savedState.artifactsHighlighted);
   merged.riskGovernanceHighlighted = Boolean(savedState.riskGovernanceHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
+  merged.artifactSourceFilter = savedState.artifactSourceFilter || "ALL";
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
       ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
@@ -814,6 +879,9 @@ const missionBoardCommandPattern = /\bshow missions\b/i;
 const artifactsCommandPattern = /\bshow artifacts\b/i;
 const approveArtifactCommandPattern = /^approve artifact\s+(.+)$/i;
 const archiveArtifactCommandPattern = /^archive artifact\s+(.+)$/i;
+const rejectArtifactCommandPattern = /^reject artifact\s+(.+)$/i;
+const rewriteArtifactCommandPattern = /^rewrite artifact\s+(.+)$/i;
+const publishArtifactCommandPattern = /^publish artifact\s+(.+)$/i;
 const mediaWorkflowCommandPattern = /\b(draft substack|make video from|queue remotion|queue heygen|publish)\b/i;
 const distributionCommandPattern = /\b(distribute|send to x|send to substack|save to memory)\b/i;
 const skillRequestCommandPattern = /^propose skill\s+(.+)$/i;
@@ -1009,6 +1077,12 @@ const createArtifactsForMission = (missionId) => {
 
 const findArtifactByTitle = (title) => {
   const needle = title.trim().toLowerCase();
+  const idMatch = state.artifacts.find((artifact) =>
+    artifact.id?.toLowerCase() === needle ||
+    artifact.artifact_id?.toLowerCase() === needle
+  );
+  if (idMatch) return idMatch;
+
   const typedMatch = state.artifacts.find((artifact) =>
     artifact.type.replace(/_/g, " ").toLowerCase() === needle
   );
@@ -1022,6 +1096,31 @@ const findArtifactByTitle = (title) => {
   return state.artifacts.find((artifact) => artifact.title.toLowerCase().includes(needle));
 };
 
+const shouldBlockArtifactPublish = (artifact) => {
+  if (!artifact) return "Artifact not found";
+  if (artifact.risk_level === "HIGH" && artifact.publish_mode === "AUTO") {
+    return "High risk artifacts cannot auto-publish";
+  }
+  if (artifact.lane === "Reaction Doctrine" && !artifact.system_underneath) {
+    return "Reaction Doctrine artifacts require system_underneath";
+  }
+  if (artifact.requires_major_review && artifact.status !== "APPROVED") {
+    return "Command Center approval required before publish";
+  }
+  return "";
+};
+
+const hardArtifactBlocker = (artifact) => {
+  if (!artifact) return "Artifact not found";
+  if (artifact.risk_level === "HIGH" && artifact.publish_mode === "AUTO") {
+    return "High risk artifacts cannot auto-publish";
+  }
+  if (artifact.lane === "Reaction Doctrine" && !artifact.system_underneath) {
+    return "Reaction Doctrine artifacts require system_underneath";
+  }
+  return "";
+};
+
 const updateArtifactStatus = (title, status) => {
   const artifact = findArtifactByTitle(title);
   if (!artifact) {
@@ -1029,13 +1128,30 @@ const updateArtifactStatus = (title, status) => {
     return;
   }
 
+  const blocker = status === "APPROVED" ? hardArtifactBlocker(artifact) : "";
+  if (blocker) {
+    artifact.status = "BLOCKED";
+    artifact.next_action = blocker;
+    artifact.updated_at = new Date().toISOString();
+    state.artifactsHighlighted = true;
+    saveState();
+    renderArtifacts();
+    refreshSystemGuidance({ announce: true });
+    pushActivity(blocker, "BLOCKED");
+    return;
+  }
+
   artifact.status = status;
   artifact.updated_at = new Date().toISOString();
+  if (["APPROVED", "REJECTED", "REWRITE"].includes(status)) {
+    artifact.requires_major_review = false;
+  }
+  if (status === "APPROVED") {
+    artifact.publish_mode = artifact.risk_level === "HIGH" ? "REVIEW" : artifact.publish_mode;
+  }
   const mission = findMission(artifact.mission_id);
   if (mission) {
-    mission.next_action = status === "APPROVED"
-      ? `Artifact approved: ${artifact.title}`
-      : `Artifact archived: ${artifact.title}`;
+    mission.next_action = `Artifact ${status.toLowerCase()}: ${artifact.title}`;
     mission.updated_at = new Date().toISOString();
   }
   state.artifactsHighlighted = true;
@@ -1043,7 +1159,35 @@ const updateArtifactStatus = (title, status) => {
   renderArtifacts();
   renderMissionBoard();
   refreshSystemGuidance({ announce: true });
-  pushActivity(status === "APPROVED" ? "Artifact approved" : "Artifact archived", status);
+  pushActivity(`Artifact ${status.toLowerCase()}`, status);
+};
+
+const publishArtifact = (title) => {
+  const artifact = findArtifactByTitle(title);
+  const blocker = shouldBlockArtifactPublish(artifact);
+  if (blocker) {
+    if (artifact) {
+      artifact.status = "BLOCKED";
+      artifact.next_action = blocker;
+      artifact.updated_at = new Date().toISOString();
+      state.artifactsHighlighted = true;
+      saveState();
+      renderArtifacts();
+    }
+    pushActivity(blocker, "BLOCKED");
+    return;
+  }
+
+  artifact.status = artifact.publish_mode === "SCHEDULED" ? "SCHEDULED" : "APPROVED";
+  artifact.next_action = artifact.publish_mode === "SCHEDULED"
+    ? "Hold until local delay buffer clears"
+    : "Approved for future publish handoff";
+  artifact.updated_at = new Date().toISOString();
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  refreshSystemGuidance({ announce: true });
+  pushActivity("Artifact publish handoff approved", artifact.publish_mode);
 };
 
 const routeCommand = (command) => {
@@ -1119,7 +1263,9 @@ const intentLabel = (intent) => ({
 const getLatestMission = () => state.missions[0] || null;
 
 const getReviewArtifact = () =>
-  state.artifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
+  state.artifacts.find((artifact) =>
+    artifact.source === "SUBSTACK_ENGINE" && artifact.requires_major_review
+  ) || state.artifacts.find((artifact) => artifact.status === "NEEDS REVIEW");
 
 const getReviewMission = () =>
   state.missions.find((mission) => mission.status === "NEEDS MAJOR" || mission.needs_major);
@@ -1176,6 +1322,14 @@ const commandTitle = (value = "") =>
 const buildNextMove = () => {
   const artifact = getReviewArtifact();
   if (artifact) {
+    if (artifact.source === "SUBSTACK_ENGINE" && artifact.requires_major_review) {
+      return {
+        action: `Review Substack artifact: ${artifact.title}`,
+        why: "Substack Engine can produce artifacts, but Command Center owns final approval.",
+        command: `approve artifact ${artifact.artifact_id || artifact.id}`
+      };
+    }
+
     return {
       action: `Approve artifact: ${artifact.title}`,
       why: "A generated artifact is ready, but the system cannot treat it as approved until Major reviews it.",
@@ -1986,6 +2140,21 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (rejectArtifactCommandPattern.test(trimmed)) {
+    handleArtifactStatusCommand(mission, trimmed, "REJECTED");
+    return;
+  }
+
+  if (rewriteArtifactCommandPattern.test(trimmed)) {
+    handleArtifactStatusCommand(mission, trimmed, "REWRITE");
+    return;
+  }
+
+  if (publishArtifactCommandPattern.test(trimmed)) {
+    handlePublishArtifactCommand(mission, trimmed);
+    return;
+  }
+
   if (archiveArtifactCommandPattern.test(trimmed)) {
     handleArtifactStatusCommand(mission, trimmed, "ARCHIVED");
     return;
@@ -2034,11 +2203,24 @@ const reviewArtifacts = (mission, command) => {
 };
 
 const handleArtifactStatusCommand = (mission, command, status) => {
-  const pattern = status === "APPROVED" ? approveArtifactCommandPattern : archiveArtifactCommandPattern;
+  const patterns = {
+    APPROVED: approveArtifactCommandPattern,
+    REJECTED: rejectArtifactCommandPattern,
+    REWRITE: rewriteArtifactCommandPattern,
+    ARCHIVED: archiveArtifactCommandPattern
+  };
+  const pattern = patterns[status] || archiveArtifactCommandPattern;
   const match = command.match(pattern);
   const title = match ? match[1] : command;
   logSubmittedCommand(mission, command, "A004 Ops Watcher");
   updateArtifactStatus(title, status);
+};
+
+const handlePublishArtifactCommand = (mission, command) => {
+  const match = command.match(publishArtifactCommandPattern);
+  const title = match ? match[1] : command;
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  publishArtifact(title);
 };
 
 const reviewGithubLogs = (mission, command) => {
@@ -2319,13 +2501,21 @@ const renderMissionBoard = () => {
 const renderArtifacts = () => {
   const panel = document.querySelector("#artifacts");
   const target = document.querySelector("#artifact-list");
+  const filter = state.artifactSourceFilter || "ALL";
+  const artifacts = state.artifacts.filter((artifact) =>
+    filter === "ALL" || artifact.source === filter
+  );
 
   panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
-  target.innerHTML = state.artifacts.map((artifact, index) => `
+  document.querySelectorAll("#artifact-source-filter button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.source === filter);
+  });
+  target.innerHTML = artifacts.map((artifact, index) => `
     <article class="artifact-row ${index === 0 ? "selected" : ""}">
       <div class="artifact-main">
         <strong>${escapeHtml(artifact.title)}</strong>
         <span class="meta">${escapeHtml(artifact.preview || artifact.summary)}</span>
+        ${artifact.source === "SUBSTACK_ENGINE" ? "<span class=\"signal source-substack\">SOURCE: SUBSTACK</span>" : "<span class=\"signal\">SOURCE: LOCAL</span>"}
       </div>
       <span class="signal">${escapeHtml(artifact.type)}</span>
       <span class="signal">${escapeHtml(artifact.lane)}</span>
@@ -2334,7 +2524,13 @@ const renderArtifacts = () => {
       <span class="meta">${escapeHtml(artifact.owner_agent)}</span>
       <span class="meta">${escapeHtml(artifact.mission_id)}</span>
       <span class="meta">${escapeHtml(nowStampFromIso(artifact.created_at))}</span>
-      <p>${escapeHtml(artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
+      <div class="artifact-intel">
+        <span>score ${artifact.score ?? "n/a"}</span>
+        <span>confidence ${artifact.confidence ?? "n/a"}</span>
+        <span>risk ${escapeHtml(artifact.risk_level || "MED")}</span>
+        <span>publish ${escapeHtml(artifact.publish_mode || artifact.risk_mode || "REVIEW")}</span>
+      </div>
+      <p>${escapeHtml(artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
     </article>
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
@@ -2489,6 +2685,20 @@ const bindRiskGovernance = () => {
   });
 };
 
+const bindArtifactFilter = () => {
+  const target = document.querySelector("#artifact-source-filter");
+
+  target.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-source]");
+    if (!button) return;
+    state.artifactSourceFilter = button.dataset.source;
+    state.artifactsHighlighted = true;
+    saveState();
+    renderArtifacts();
+    pushActivity(`Artifact source filter -> ${state.artifactSourceFilter}`, "SYNCED");
+  });
+};
+
 const navLinks = () => Array.from(document.querySelectorAll(".nav-item[href^='#']"));
 
 const setActiveNav = (targetId) => {
@@ -2595,6 +2805,7 @@ bindCommandInput();
 bindResetControl();
 bindNextMove();
 bindRiskGovernance();
+bindArtifactFilter();
 bindNavigationState();
 renderAll();
 startHeartbeat();
