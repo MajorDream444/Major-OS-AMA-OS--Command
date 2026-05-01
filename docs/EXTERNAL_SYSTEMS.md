@@ -67,6 +67,33 @@ content/logs/workflows/
 
 No file watcher, API, webhook, GitHub API, Airtable API, or Substack API is active.
 
+## Import Refresh Flow
+
+```text
+Substack Engine export
+-> content/logs/workflows/mission_control_export.json
+-> Mission Control refresh
+-> ARTIFACTS panel
+-> hybrid priority ranking
+-> NEXT MOVE
+```
+
+Mission Control can refresh the local artifact stream with:
+
+```text
+refresh artifacts
+refresh substack artifacts
+reload artifacts
+```
+
+The ARTIFACTS panel also exposes `Refresh Artifacts`.
+
+The static fallback path is:
+
+```text
+fixtures/substack/mission_control_export.json
+```
+
 ## Authority Rule
 
 External systems produce artifacts.

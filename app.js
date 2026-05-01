@@ -131,62 +131,35 @@ const riskRuleSeed = [
   }
 ];
 
-const externalArtifactSeed = [
-  {
-    artifact_id: "SUBSTACK-RD-001",
-    mission_id: "SUBSTACK-M-001",
-    artifact_type: "substack_draft",
-    source: "SUBSTACK_ENGINE",
-    status: "NEEDS REVIEW",
-    lane: "Reaction Doctrine",
-    title: "Hip-Hop Is the Real Media System",
-    github_path: "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-001.json",
-    airtable_record_id: "",
-    requires_major_review: true,
-    score: 91,
-    confidence: 0.84,
-    risk_level: "HIGH",
-    publish_mode: "REVIEW",
-    next_action: "Review source framing and system underneath before approval",
-    system_underneath: "Media power moved through hip-hop distribution before institutions could name it."
-  },
-  {
-    artifact_id: "SUBSTACK-RD-002",
-    mission_id: "SUBSTACK-M-002",
-    artifact_type: "substack_draft",
-    source: "SUBSTACK_ENGINE",
-    status: "BLOCKED",
-    lane: "Reaction Doctrine",
-    title: "Joe Budden Clip Lane: Pattern Needs System",
-    github_path: "SUBSTACK-AUTOMATION-ENGINE/exports/artifacts/SUBSTACK-RD-002.json",
-    airtable_record_id: "",
-    requires_major_review: true,
-    score: 72,
-    confidence: 0.61,
-    risk_level: "HIGH",
-    publish_mode: "REVIEW",
-    next_action: "Add system_underneath before review",
-    system_underneath: ""
-  },
-  {
-    artifact_id: "SUBSTACK-AUTO-003",
-    mission_id: "SUBSTACK-M-003",
-    artifact_type: "hook",
-    source: "SUBSTACK_ENGINE",
-    status: "READY",
-    lane: "Operations",
-    title: "Daily System Improvement Hook",
-    github_path: "content/logs/workflows/artifacts/SUBSTACK-AUTO-003.json",
-    airtable_record_id: "",
-    requires_major_review: false,
-    score: 96,
-    confidence: 0.92,
-    risk_level: "LOW",
-    publish_mode: "AUTO",
-    next_action: "Ready for local publish handoff",
-    system_underneath: "Daily operating improvements can be converted into lightweight authority hooks."
-  }
-];
+const externalArtifactSources = {
+  SUBSTACK_ENGINE: [
+    "content/logs/workflows/mission_control_export.json",
+    "fixtures/substack/mission_control_export.json"
+  ]
+};
+
+const fallbackExternalArtifacts = {
+  SUBSTACK_ENGINE: [
+    {
+      artifact_id: "SUBSTACK_EXPORT_MISSING",
+      mission_id: "SUBSTACK-MISSING",
+      artifact_type: "workflow_plan",
+      source: "SUBSTACK_ENGINE",
+      status: "BLOCKED",
+      lane: "Operations",
+      title: "Substack export missing",
+      github_path: "content/logs/workflows/mission_control_export.json",
+      airtable_record_id: "",
+      requires_major_review: true,
+      score: 0,
+      confidence: 0,
+      risk_level: "HIGH",
+      publish_mode: "REVIEW",
+      next_action: "Create or refresh Substack mission_control_export.json",
+      system_underneath: "Mission Control requires a local export file before external artifact routing can proceed."
+    }
+  ]
+};
 
 const seedState = {
   unread: 3,
@@ -370,8 +343,7 @@ const seedState = {
       delay_until: "",
       governance_override: false,
       risk_note: "Lane rule: Contour"
-    },
-    ...externalArtifactSeed
+    }
   ],
   dailyBrief: [
     {
@@ -899,6 +871,7 @@ const githubLogCommandPattern = /\b(show github logs|check repo logs|what change
 const agentRegistryCommandPattern = /\bshow agents\b/i;
 const missionBoardCommandPattern = /\bshow missions\b/i;
 const artifactsCommandPattern = /\bshow artifacts\b/i;
+const refreshArtifactsCommandPattern = /\b(refresh artifacts|refresh substack artifacts|reload artifacts)\b/i;
 const approveArtifactCommandPattern = /^approve artifact\s+(.+)$/i;
 const archiveArtifactCommandPattern = /^archive artifact\s+(.+)$/i;
 const rejectArtifactCommandPattern = /^reject artifact\s+(.+)$/i;
@@ -1293,6 +1266,95 @@ const pushActivity = (item, label = "ACTIVE", options = {}) => {
   saveState();
   renderActivity();
   renderUnread();
+};
+
+const fetchJsonFile = async (path) => {
+  if (typeof fetch !== "function") {
+    throw new Error("Static fetch unavailable");
+  }
+
+  const response = await fetch(path, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`${path} returned ${response.status}`);
+  }
+  return response.json();
+};
+
+const loadExternalArtifactExport = async (source) => {
+  const paths = externalArtifactSources[source] || [];
+  const errors = [];
+
+  for (const path of paths) {
+    try {
+      const payload = await fetchJsonFile(path);
+      const artifacts = Array.isArray(payload.artifacts) ? payload.artifacts : [];
+      return { path, artifacts };
+    } catch (error) {
+      errors.push(`${path}: ${error.message}`);
+    }
+  }
+
+  throw new Error(errors.join(" | ") || `${source} export unavailable`);
+};
+
+const setMissingExternalExport = (source, error) => {
+  const fallbackArtifacts = (fallbackExternalArtifacts[source] || []).map(normalizeArtifact);
+  state.artifacts = [
+    ...state.artifacts.filter((artifact) => artifact.source !== source),
+    ...fallbackArtifacts
+  ];
+  state.needsMajor = {
+    mission: "Substack export missing",
+    agent: "A004 Ops Watcher"
+  };
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  renderNeedsMajor();
+  refreshSystemGuidance({ announce: true });
+  pushActivity(`${source} export missing: ${error.message}`, "BLOCKED");
+};
+
+const applyExternalArtifactExport = ({ source, path, artifacts, silent = false }) => {
+  const importedArtifacts = artifacts.map((artifact) =>
+    normalizeArtifact({ ...artifact, source })
+  );
+
+  state.artifacts = [
+    ...state.artifacts.filter((artifact) => artifact.source !== source),
+    ...importedArtifacts
+  ];
+  state.artifactsHighlighted = true;
+
+  if (state.needsMajor?.mission === "Substack export missing") {
+    state.needsMajor = null;
+  }
+
+  saveState();
+  renderArtifacts();
+  renderNeedsMajor();
+  refreshSystemGuidance({ announce: !silent });
+
+  if (!silent) {
+    pushActivity(`Refreshed ${source} artifacts from export`, "SYNCED");
+  }
+
+  return { source, path, count: importedArtifacts.length };
+};
+
+const refreshExternalArtifacts = async (source = "SUBSTACK_ENGINE", options = {}) => {
+  try {
+    const exportPayload = await loadExternalArtifactExport(source);
+    return applyExternalArtifactExport({
+      source,
+      path: exportPayload.path,
+      artifacts: exportPayload.artifacts,
+      silent: Boolean(options.silent)
+    });
+  } catch (error) {
+    setMissingExternalExport(source, error);
+    return { source, path: "", count: 0, error };
+  }
 };
 
 const pushAction = ({ label, title, next, agent }) => {
@@ -2210,6 +2272,10 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (refreshArtifactsCommandPattern.test(trimmed)) {
+    return refreshArtifactsFromCommand(mission, trimmed);
+  }
+
   if (approveArtifactCommandPattern.test(trimmed)) {
     handleArtifactStatusCommand(mission, trimmed, "APPROVED");
     return;
@@ -2275,6 +2341,14 @@ const reviewArtifacts = (mission, command) => {
   saveState();
   renderArtifacts();
   pushActivity("Artifacts reviewed", "SYNCED");
+};
+
+const refreshArtifactsFromCommand = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  return refreshExternalArtifacts("SUBSTACK_ENGINE");
 };
 
 const handleArtifactStatusCommand = (mission, command, status) => {
@@ -2731,6 +2805,7 @@ const bindResetControl = () => {
     state = cloneState(seedState);
     saveState();
     renderAll();
+    refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
   });
 };
 
@@ -2770,6 +2845,15 @@ const bindArtifactFilter = () => {
     saveState();
     renderArtifacts();
     pushActivity(`Artifact source filter -> ${state.artifactSourceFilter}`, "SYNCED");
+  });
+};
+
+const bindArtifactRefresh = () => {
+  const button = document.querySelector("#refresh-artifacts-button");
+  if (!button) return;
+
+  button.addEventListener("click", () => {
+    refreshExternalArtifacts("SUBSTACK_ENGINE");
   });
 };
 
@@ -2880,6 +2964,8 @@ bindResetControl();
 bindNextMove();
 bindRiskGovernance();
 bindArtifactFilter();
+bindArtifactRefresh();
 bindNavigationState();
 renderAll();
+refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
 startHeartbeat();

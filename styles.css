@@ -235,6 +235,23 @@ h3 {
   background: rgba(32, 245, 138, 0.2);
 }
 
+.command-button {
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(32, 245, 138, 0.28);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.command-button:hover {
+  border-color: rgba(32, 245, 138, 0.55);
+  background: rgba(32, 245, 138, 0.16);
+}
+
 .needs-major {
   min-height: 42px;
   padding: 7px 10px;

@@ -1,0 +1,68 @@
+# Artifact Import Refresh
+
+## Purpose
+
+Mission Control ingests external artifacts from local export files. External systems produce artifacts; Command Center ranks, displays, routes, and approves them.
+
+## Current Source
+
+```text
+content/logs/workflows/mission_control_export.json
+```
+
+Static browser fallback:
+
+```text
+fixtures/substack/mission_control_export.json
+```
+
+## Refresh Flow
+
+```text
+Substack Engine export
+-> Mission Control refresh
+-> ARTIFACTS panel
+-> hybrid priority ranking
+-> NEXT MOVE
+```
+
+## Commands
+
+```text
+refresh artifacts
+refresh substack artifacts
+reload artifacts
+```
+
+## UI Control
+
+The ARTIFACTS panel includes:
+
+```text
+Refresh Artifacts
+```
+
+Clicking it reloads the local export, preserves the active source filter, re-runs ranking, updates NEXT MOVE, and appends:
+
+```text
+Refreshed SUBSTACK_ENGINE artifacts from export
+```
+
+## Missing Export Behavior
+
+If the export cannot be loaded from the local path or fallback fixture, Mission Control must not crash.
+
+It should:
+
+- keep local artifacts visible
+- add a blocked fallback artifact
+- show Needs Major: `Substack export missing`
+- log the missing export in Activity Feed
+
+## Guardrails
+
+- No live APIs.
+- No secrets.
+- No external writes.
+- No Substack content generation inside Command Center.
+- Command Center owns approval and publish handoff.
