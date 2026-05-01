@@ -561,6 +561,7 @@ time {
 
 .mission-board-panel.review-highlight,
 .artifacts-panel.review-highlight,
+.risk-governance-panel.review-highlight,
 .skill-requests-panel.review-highlight {
   border-color: rgba(32, 245, 138, 0.5);
   box-shadow: inset 2px 0 0 var(--green);
@@ -687,7 +688,7 @@ time {
   min-height: 44px;
   padding: 7px 10px;
   display: grid;
-  grid-template-columns: minmax(170px, 1fr) 76px 112px 90px 92px minmax(130px, 0.65fr);
+  grid-template-columns: minmax(170px, 1fr) 76px 112px 90px 86px 92px minmax(130px, 0.65fr);
   align-items: center;
   gap: 8px;
   border-top: 1px solid var(--line);
@@ -713,6 +714,68 @@ time {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.risk-governance-list {
+  display: grid;
+}
+
+.risk-rule-row {
+  min-height: 48px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 86px 90px 96px minmax(210px, 0.8fr);
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.risk-rule-row:first-child {
+  border-top: 0;
+}
+
+.risk-rule-row strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.risk-rule-row .meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.risk-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.risk-controls button {
+  min-width: 0;
+  height: 24px;
+  color: var(--muted);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 8px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.risk-controls button:hover,
+.risk-controls button.active {
+  color: var(--green);
+  border-color: rgba(32, 245, 138, 0.5);
+  background: var(--green-dim);
 }
 
 .mission-board {
@@ -862,7 +925,7 @@ time {
   min-height: 54px;
   padding: 8px 10px;
   display: grid;
-  grid-template-columns: minmax(190px, 1.1fr) 112px 72px 96px minmax(130px, 0.7fr) 92px 82px;
+  grid-template-columns: minmax(190px, 1.1fr) 112px 72px 86px 96px minmax(130px, 0.7fr) 92px 82px;
   align-items: center;
   gap: 8px;
   border-top: 1px solid var(--line);
@@ -975,6 +1038,7 @@ time {
 }
 
 .active,
+.auto,
 .ready,
 .synced,
 .approved {
@@ -987,6 +1051,7 @@ time {
 .review,
 .med,
 .action,
+.scheduled,
 .waiting,
 .working {
   color: var(--amber);
@@ -1204,6 +1269,7 @@ td strong {
   .media-workflow-row,
   .distribution-row,
   .artifact-row,
+  .risk-rule-row,
   .skill-request-row,
   .action-list li,
   .command-console {

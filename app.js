@@ -80,6 +80,57 @@ const artifactTypesByIntent = {
   operations: ["daily_brief", "workflow_plan"]
 };
 
+const riskRuleSeed = [
+  {
+    lane: "BWYH",
+    mode: "SCHEDULED",
+    delay_hours: 12,
+    rule: "Trust-building content gets a local delay buffer before outbound handoff."
+  },
+  {
+    lane: "Contour",
+    mode: "REVIEW",
+    delay_hours: 0,
+    rule: "Sales and authority assets require Major review before publishing."
+  },
+  {
+    lane: "SAF",
+    mode: "REVIEW",
+    delay_hours: 0,
+    rule: "Narrative and research assets require source and framing review."
+  },
+  {
+    lane: "Major AI OS",
+    mode: "SCHEDULED",
+    delay_hours: 6,
+    rule: "Productization assets can queue after a short packaging buffer."
+  },
+  {
+    lane: "Doctrine",
+    mode: "REVIEW",
+    delay_hours: 0,
+    rule: "Doctrine assets require review for clarity, tone, and downstream meaning."
+  },
+  {
+    lane: "Reaction Doctrine",
+    mode: "REVIEW",
+    delay_hours: 0,
+    rule: "Reaction assets require review because they reference live cultural moments."
+  },
+  {
+    lane: "Operations",
+    mode: "AUTO",
+    delay_hours: 0,
+    rule: "Internal operating artifacts may move automatically inside local state."
+  },
+  {
+    lane: "Commerce",
+    mode: "REVIEW",
+    delay_hours: 0,
+    rule: "Product and store assets require review before any future commerce action."
+  }
+];
+
 const seedState = {
   unread: 3,
   missionId: 0,
@@ -92,7 +143,9 @@ const seedState = {
   distributionHighlighted: false,
   missionBoardHighlighted: false,
   artifactsHighlighted: false,
+  riskGovernanceHighlighted: false,
   skillRequestsHighlighted: false,
+  riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
       "Mission Control is loaded in local simulation mode.",
@@ -253,7 +306,12 @@ const seedState = {
       owner_agent: "A001 Scout",
       summary: "Placeholder lead list prepared from local mission context.",
       preview: "3 mock Contour leads queued for review.",
-      source_command: "Review Contour lead queue"
+      source_command: "Review Contour lead queue",
+      risk_mode: "REVIEW",
+      publish_rule: "Sales and authority assets require Major review before publishing.",
+      delay_until: "",
+      governance_override: false,
+      risk_note: "Lane rule: Contour"
     }
   ],
   dailyBrief: [
@@ -376,7 +434,11 @@ const seedState = {
       asset_type: "article",
       status: "READY",
       next_action: "Review local publish handoff",
-      owner_agent: "A003 Content Catcher"
+      owner_agent: "A003 Content Catcher",
+      risk_mode: "REVIEW",
+      publish_rule: "Doctrine assets require review for clarity, tone, and downstream meaning.",
+      delay_until: "",
+      governance_override: false
     },
     {
       title: "Your Business Is the Bottleneck",
@@ -385,7 +447,11 @@ const seedState = {
       asset_type: "hook",
       status: "NEEDS REVIEW",
       next_action: "Approve authority hook",
-      owner_agent: "A003 Content Catcher"
+      owner_agent: "A003 Content Catcher",
+      risk_mode: "REVIEW",
+      publish_rule: "Sales and authority assets require Major review before publishing.",
+      delay_until: "",
+      governance_override: false
     },
     {
       title: "Build While You Heal: System Before Scale",
@@ -394,7 +460,11 @@ const seedState = {
       asset_type: "short script",
       status: "READY",
       next_action: "Queue local short script",
-      owner_agent: "A003 Content Catcher"
+      owner_agent: "A003 Content Catcher",
+      risk_mode: "SCHEDULED",
+      publish_rule: "Trust-building content gets a local delay buffer before outbound handoff.",
+      delay_until: "2026-04-26T21:00:00.000Z",
+      governance_override: false
     }
   ],
   pipelines: {
@@ -606,6 +676,16 @@ const normalizeMission = (mission) => {
   };
 };
 
+const riskRuleForLane = (lane, rules = riskRuleSeed) =>
+  rules.find((rule) => rule.lane === lane) ||
+  rules.find((rule) => rule.lane === "Operations") ||
+  riskRuleSeed.find((rule) => rule.lane === "Operations");
+
+const calculateDelayUntil = (rule, baseTime = new Date()) => {
+  if (!rule || rule.mode !== "SCHEDULED" || !rule.delay_hours) return "";
+  return new Date(baseTime.getTime() + (rule.delay_hours * 60 * 60 * 1000)).toISOString();
+};
+
 const normalizeArtifact = (artifact) => ({
   id: artifact.id,
   mission_id: artifact.mission_id || "",
@@ -618,7 +698,30 @@ const normalizeArtifact = (artifact) => ({
   owner_agent: artifact.owner_agent || "A004 Ops Watcher",
   summary: artifact.summary || "Local placeholder artifact.",
   preview: artifact.preview || "No preview available.",
-  source_command: artifact.source_command || ""
+  source_command: artifact.source_command || "",
+  risk_mode: artifact.risk_mode || riskRuleForLane(artifact.lane || "Operations").mode,
+  publish_rule: artifact.publish_rule || riskRuleForLane(artifact.lane || "Operations").rule,
+  delay_until: artifact.delay_until || calculateDelayUntil(riskRuleForLane(artifact.lane || "Operations"), new Date(artifact.created_at || Date.now())),
+  governance_override: Boolean(artifact.governance_override),
+  risk_note: artifact.risk_note || ""
+});
+
+const normalizeRiskRule = (rule, seedRule) => ({
+  ...seedRule,
+  ...rule,
+  lane: rule.lane || seedRule.lane,
+  mode: rule.mode || seedRule.mode,
+  delay_hours: Number.isFinite(rule.delay_hours) ? rule.delay_hours : seedRule.delay_hours,
+  rule: rule.rule || seedRule.rule,
+  updated_at: rule.updated_at || seedRule.updated_at || ""
+});
+
+const normalizeGovernedItem = (item) => ({
+  ...item,
+  risk_mode: item.risk_mode || riskRuleForLane(item.lane || "Operations").mode,
+  publish_rule: item.publish_rule || riskRuleForLane(item.lane || "Operations").rule,
+  delay_until: item.delay_until || calculateDelayUntil(riskRuleForLane(item.lane || "Operations"), new Date()),
+  governance_override: Boolean(item.governance_override)
 });
 
 const mergeSeedState = (savedState) => {
@@ -634,10 +737,18 @@ const mergeSeedState = (savedState) => {
   merged.mediaEngineHighlighted = Boolean(savedState.mediaEngineHighlighted);
   merged.mediaWorkflow = Array.isArray(savedState.mediaWorkflow) ? savedState.mediaWorkflow : cloneState(seedState.mediaWorkflow);
   merged.distributionHighlighted = Boolean(savedState.distributionHighlighted);
-  merged.distributionQueue = Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue);
+  merged.distributionQueue = (Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue))
+    .map(normalizeGovernedItem);
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
   merged.artifactsHighlighted = Boolean(savedState.artifactsHighlighted);
+  merged.riskGovernanceHighlighted = Boolean(savedState.riskGovernanceHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
+  merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
+    const savedRule = Array.isArray(savedState.riskGovernance)
+      ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
+      : null;
+    return normalizeRiskRule(savedRule || {}, seedRule);
+  });
   merged.systemGuidance = savedState.systemGuidance || cloneState(seedState.systemGuidance);
   merged.missions = (Array.isArray(savedState.missions) ? savedState.missions : cloneState(seedState.missions))
     .map(normalizeMission);
@@ -785,9 +896,30 @@ const laneForIntent = (intent, command = "") => {
   if (/\bcontour\b/i.test(command)) return "Contour";
   if (/\bsaf\b/i.test(command)) return "SAF";
   if (/\bbwyh|heal\b/i.test(command)) return "BWYH";
+  if (/\breaction doctrine|reaction|youtube|podcast|viral|clip\b/i.test(command)) return "Reaction Doctrine";
   if (intent === "content_media") return "Doctrine";
   if (intent === "commerce") return "Commerce";
   return "Operations";
+};
+
+const activeRiskRuleForLane = (lane) => riskRuleForLane(lane, state?.riskGovernance || riskRuleSeed);
+
+const governanceMetadataForLane = (lane, baseTime = new Date()) => {
+  const rule = activeRiskRuleForLane(lane);
+  return {
+    risk_mode: rule.mode,
+    publish_rule: rule.rule,
+    delay_until: calculateDelayUntil(rule, baseTime),
+    governance_override: Boolean(rule.updated_at),
+    risk_note: `Lane rule: ${rule.lane}`
+  };
+};
+
+const statusForRiskMode = (mode, fallback = "READY") => {
+  if (mode === "REVIEW") return "NEEDS REVIEW";
+  if (mode === "SCHEDULED") return "READY";
+  if (mode === "AUTO") return fallback === "NEEDS REVIEW" ? "READY" : fallback;
+  return fallback;
 };
 
 const artifactTitle = (type, command) => {
@@ -820,6 +952,7 @@ const createArtifact = (mission, type, index) => {
   const now = new Date().toISOString();
   const title = artifactTitle(type, mission.command);
   const lane = laneForIntent(mission.intent, mission.command);
+  const governance = governanceMetadataForLane(lane, new Date(now));
 
   return {
     id: `${mission.id}-ART-${String(index + 1).padStart(2, "0")}`,
@@ -827,13 +960,14 @@ const createArtifact = (mission, type, index) => {
     title,
     type,
     lane,
-    status: "NEEDS REVIEW",
+    status: statusForRiskMode(governance.risk_mode, "READY"),
     created_at: now,
     updated_at: now,
     owner_agent: artifactOwner(mission, type),
     summary: `Local ${type.replace(/_/g, " ")} created from mission ${mission.id}.`,
     preview: `Placeholder output for "${mission.command}".`,
-    source_command: mission.command
+    source_command: mission.command,
+    ...governance
   };
 };
 
@@ -1479,10 +1613,16 @@ const distributionTemplates = (title) => {
 const upsertDistributionItem = (item) => {
   const cleanTitle = normalizeTitle(item.title);
   const existing = findDistributionItem(cleanTitle, item.channel);
+  const governance = governanceMetadataForLane(item.lane || inferMediaLane(cleanTitle));
+  const governedItem = {
+    ...item,
+    ...governance,
+    status: statusForRiskMode(governance.risk_mode, item.status || "READY")
+  };
 
   if (existing) {
     Object.assign(existing, {
-      ...item,
+      ...governedItem,
       title: cleanTitle
     });
     saveState();
@@ -1491,7 +1631,7 @@ const upsertDistributionItem = (item) => {
   }
 
   const nextItem = {
-    ...item,
+    ...governedItem,
     title: cleanTitle
   };
 
@@ -1513,6 +1653,47 @@ const upsertDistributionBatch = (title) => {
   saveState();
   renderDistributionQueue();
   return rows;
+};
+
+const applyRiskGovernanceToItem = (item) => {
+  const governance = governanceMetadataForLane(item.lane || "Operations");
+  Object.assign(item, governance);
+  if (item.status !== "APPROVED" && item.status !== "ARCHIVED") {
+    item.status = statusForRiskMode(governance.risk_mode, item.status || "READY");
+  }
+  return item;
+};
+
+const overrideRiskRule = (lane, mode) => {
+  const rule = state.riskGovernance.find((item) => item.lane === lane);
+  if (!rule || !["AUTO", "REVIEW", "SCHEDULED"].includes(mode)) return;
+
+  rule.mode = mode;
+  rule.updated_at = new Date().toISOString();
+  if (mode === "AUTO") {
+    rule.delay_hours = 0;
+  } else if (mode === "REVIEW") {
+    rule.delay_hours = 0;
+  } else if (!rule.delay_hours) {
+    rule.delay_hours = 12;
+  }
+
+  state.artifacts
+    .filter((artifact) => artifact.lane === lane)
+    .forEach(applyRiskGovernanceToItem);
+  state.distributionQueue
+    .filter((item) => item.lane === lane)
+    .forEach(applyRiskGovernanceToItem);
+
+  state.riskGovernanceHighlighted = true;
+  state.artifactsHighlighted = true;
+  state.distributionHighlighted = true;
+  saveState();
+  renderRiskGovernance();
+  renderArtifacts();
+  renderDistributionQueue();
+  refreshSystemGuidance({ announce: true });
+  pushActivity(`Risk override -> ${lane} ${mode}`, mode);
 };
 
 const extractDistributionTopic = (command) => {
@@ -2045,14 +2226,43 @@ const renderDistributionQueue = () => {
       <div>
         <strong>${escapeHtml(item.title)}</strong>
         <span class="meta">${escapeHtml(item.next_action)}</span>
+        ${item.delay_until ? `<span class="meta">Delay until ${escapeHtml(nowStampFromIso(item.delay_until))}</span>` : ""}
       </div>
       <span class="signal">${escapeHtml(item.lane)}</span>
       <span class="meta">${escapeHtml(item.channel)}</span>
       <span class="signal">${escapeHtml(item.asset_type)}</span>
+      <span class="${labelClass(item.risk_mode || "REVIEW")}">${escapeHtml(item.risk_mode || "REVIEW")}</span>
       <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
       <span class="meta">${escapeHtml(item.owner_agent)}</span>
     </article>
   `).join("");
+};
+
+const renderRiskGovernance = () => {
+  const panel = document.querySelector("#risk-governance");
+  const target = document.querySelector("#risk-governance-list");
+
+  panel.classList.toggle("review-highlight", Boolean(state.riskGovernanceHighlighted));
+  target.innerHTML = state.riskGovernance.map((rule) => {
+    const affectedArtifacts = state.artifacts.filter((artifact) => artifact.lane === rule.lane).length;
+    const affectedDistribution = state.distributionQueue.filter((item) => item.lane === rule.lane).length;
+    return `
+      <article class="risk-rule-row">
+        <div>
+          <strong>${escapeHtml(rule.lane)}</strong>
+          <span class="meta">${escapeHtml(rule.rule)}</span>
+        </div>
+        <span class="${labelClass(rule.mode)}">${escapeHtml(rule.mode)}</span>
+        <span class="meta">${rule.delay_hours ? `${escapeHtml(rule.delay_hours)}H BUFFER` : "NO BUFFER"}</span>
+        <span class="meta">${escapeHtml(affectedArtifacts)} ART / ${escapeHtml(affectedDistribution)} DIST</span>
+        <div class="risk-controls" data-lane="${escapeHtml(rule.lane)}">
+          <button class="${rule.mode === "AUTO" ? "active" : ""}" type="button" data-mode="AUTO">AUTO</button>
+          <button class="${rule.mode === "REVIEW" ? "active" : ""}" type="button" data-mode="REVIEW">REVIEW</button>
+          <button class="${rule.mode === "SCHEDULED" ? "active" : ""}" type="button" data-mode="SCHEDULED">SCHEDULED</button>
+        </div>
+      </article>
+    `;
+  }).join("");
 };
 
 const renderMissionBoard = () => {
@@ -2119,11 +2329,12 @@ const renderArtifacts = () => {
       </div>
       <span class="signal">${escapeHtml(artifact.type)}</span>
       <span class="signal">${escapeHtml(artifact.lane)}</span>
+      <span class="${labelClass(artifact.risk_mode || "REVIEW")}">${escapeHtml(artifact.risk_mode || "REVIEW")}</span>
       <span class="${labelClass(artifact.status)}">${escapeHtml(artifact.status)}</span>
       <span class="meta">${escapeHtml(artifact.owner_agent)}</span>
       <span class="meta">${escapeHtml(artifact.mission_id)}</span>
       <span class="meta">${escapeHtml(nowStampFromIso(artifact.created_at))}</span>
-      <p>${escapeHtml(artifact.summary)}</p>
+      <p>${escapeHtml(artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
     </article>
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
@@ -2264,6 +2475,20 @@ const bindNextMove = () => {
   });
 };
 
+const bindRiskGovernance = () => {
+  const target = document.querySelector("#risk-governance-list");
+
+  target.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-mode]");
+    if (!button) return;
+    const lane = button.closest("[data-lane]")?.dataset.lane;
+    const mode = button.dataset.mode;
+    if (lane && mode) {
+      overrideRiskRule(lane, mode);
+    }
+  });
+};
+
 const navLinks = () => Array.from(document.querySelectorAll(".nav-item[href^='#']"));
 
 const setActiveNav = (targetId) => {
@@ -2356,6 +2581,7 @@ const renderAll = () => {
   renderMediaEngine();
   renderDistributionQueue();
   renderArtifacts();
+  renderRiskGovernance();
   renderSkillRequests();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
   renderPipeline("#pipeline-contour", state.pipelines.contour);
@@ -2368,6 +2594,7 @@ const renderAll = () => {
 bindCommandInput();
 bindResetControl();
 bindNextMove();
+bindRiskGovernance();
 bindNavigationState();
 renderAll();
 startHeartbeat();
