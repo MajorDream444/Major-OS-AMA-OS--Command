@@ -112,3 +112,20 @@ Supported statuses:
 External systems produce artifacts.
 
 Command Center ingests, displays, routes, approves, rejects, requests rewrite, or allows future publish handoff.
+
+## Decision Export
+
+Mission Control records approval decisions locally and exposes exportable JSON for:
+
+```text
+content/logs/workflows/mission_control_decisions.json
+```
+
+Supported decisions:
+
+- `approved`
+- `rejected`
+- `rewrite_requested`
+- `publish_requested`
+
+Static browser mode cannot write the JSON file directly. Until a local CLI or automation sync is added, the ARTIFACTS panel displays the exportable decision JSON and keeps decisions in local state.

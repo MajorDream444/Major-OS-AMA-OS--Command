@@ -993,6 +993,30 @@ time {
   color: var(--red);
 }
 
+.decision-export {
+  padding: 7px 10px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  background: #050807;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.decision-export pre {
+  max-height: 98px;
+  margin: 0;
+  padding: 7px;
+  overflow: auto;
+  color: var(--green);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  font-size: 9px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
 .artifact-row {
   min-height: 54px;
   padding: 8px 10px;

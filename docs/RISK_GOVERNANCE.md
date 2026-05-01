@@ -15,6 +15,7 @@ External systems may recommend a publish mode, risk level, score, and next actio
 ## Hard Rules
 
 - High risk artifacts cannot auto-publish.
+- High risk artifacts cannot receive publish requests from Mission Control.
 - Reaction Doctrine artifacts without strong `system_underneath` must be blocked.
 - Imported artifacts requiring Major review must appear in Next Move before publish handoff.
 - Substack Engine only produces artifacts.
@@ -45,5 +46,12 @@ The current build:
 - ranks artifacts using the hybrid priority order
 - routes imported review-needed artifacts into Next Move
 - supports local approval, rejection, rewrite, and publish-handoff commands
+- appends local decision records for approved, rejected, rewrite requested, and publish requested outcomes
+
+Decision export target:
+
+```text
+content/logs/workflows/mission_control_decisions.json
+```
 
 No live publish or external write exists.

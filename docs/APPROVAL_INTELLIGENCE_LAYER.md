@@ -31,12 +31,18 @@ publish artifact <artifact_id>
 
 Behavior:
 
-- `approve artifact` marks the local artifact approved and clears `requires_major_review`.
-- `reject artifact` marks the local artifact rejected.
-- `rewrite artifact` routes the local artifact back for rewrite.
-- `publish artifact` only approves a future publish handoff if governance rules allow it.
+- `approve artifact` marks the local artifact approved, clears `requires_major_review`, and exports `approved`.
+- `reject artifact` marks the local artifact rejected and exports `rejected`.
+- `rewrite artifact` routes the local artifact back for rewrite and exports `rewrite_requested`.
+- `publish artifact` only creates a `publish_requested` decision if governance rules allow it.
 
 No command publishes externally in the current build.
+
+Decision records are stored locally in browser state and shown as exportable JSON in the ARTIFACTS panel. The handoff target is:
+
+```text
+content/logs/workflows/mission_control_decisions.json
+```
 
 ## Next Move Routing
 
@@ -78,6 +84,7 @@ publish artifact <artifact_id>
 ## Blocking Rules
 
 - High risk artifacts cannot auto-publish.
+- High risk artifacts cannot receive publish requests from Mission Control.
 - Reaction Doctrine artifacts without strong `system_underneath` are blocked.
 - Command Center owns final approval.
 - Substack Engine only produces artifacts.

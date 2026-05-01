@@ -176,6 +176,14 @@ const seedState = {
   riskGovernanceHighlighted: false,
   skillRequestsHighlighted: false,
   artifactSourceFilter: "ALL",
+  artifactDecisions: [],
+  decisionExportStatus: {
+    path: "content/logs/workflows/mission_control_decisions.json",
+    total: 0,
+    last_decision: "none",
+    updated_at: "--",
+    mode: "in-memory static export"
+  },
   externalImportStatus: {
     source: "SUBSTACK_ENGINE",
     path: "not loaded",
@@ -805,6 +813,14 @@ const mergeSeedState = (savedState) => {
   merged.riskGovernanceHighlighted = Boolean(savedState.riskGovernanceHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
   merged.artifactSourceFilter = savedState.artifactSourceFilter || "ALL";
+  merged.artifactDecisions = Array.isArray(savedState.artifactDecisions) ? savedState.artifactDecisions : [];
+  merged.decisionExportStatus = {
+    ...cloneState(seedState.decisionExportStatus),
+    ...(savedState.decisionExportStatus || {}),
+    total: Array.isArray(savedState.artifactDecisions)
+      ? savedState.artifactDecisions.length
+      : Number(savedState.decisionExportStatus?.total || 0)
+  };
   merged.externalImportStatus = {
     ...cloneState(seedState.externalImportStatus),
     ...(savedState.externalImportStatus || {})
@@ -1158,6 +1174,79 @@ const hardArtifactBlocker = (artifact) => {
   return "";
 };
 
+const decisionId = () => {
+  const now = new Date();
+  const date = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0")
+  ].join("");
+  const time = [
+    String(now.getHours()).padStart(2, "0"),
+    String(now.getMinutes()).padStart(2, "0"),
+    String(now.getSeconds()).padStart(2, "0")
+  ].join("");
+  return `D-${date}-${time}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+};
+
+const decisionForStatus = (status) => ({
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  REWRITE: "rewrite_requested",
+  PUBLISH_REQUESTED: "publish_requested"
+})[status] || status.toLowerCase();
+
+const nextActionForDecision = (decision, artifact) => ({
+  approved: "ready for Substack Engine scheduled handling",
+  rejected: "do not publish",
+  rewrite_requested: "Substack Engine rewrite artifact",
+  publish_requested: artifact?.publish_mode === "SCHEDULED"
+    ? "Substack Engine scheduled publish handling"
+    : "Substack Engine dry-run publish handling"
+})[decision] || "Review artifact decision";
+
+const appendArtifactDecision = (artifact, decision, nextAction, reason = "") => {
+  const record = {
+    decision_id: decisionId(),
+    artifact_id: artifact.artifact_id || artifact.id || "",
+    mission_id: artifact.mission_id || "",
+    source: artifact.source || "LOCAL",
+    decision,
+    decided_by: "Major",
+    decided_at: new Date().toISOString(),
+    reason,
+    next_action: nextAction,
+    artifact_snapshot: {
+      title: artifact.title || "",
+      lane: artifact.lane || "",
+      score: artifact.score ?? 0,
+      confidence: artifact.confidence ?? 0,
+      risk_level: artifact.risk_level || "",
+      publish_mode: artifact.publish_mode || "",
+      status: artifact.status || ""
+    }
+  };
+
+  state.artifactDecisions.push(record);
+  state.decisionExportStatus = {
+    path: "content/logs/workflows/mission_control_decisions.json",
+    total: state.artifactDecisions.length,
+    last_decision: `${decision} ${record.artifact_id}`,
+    updated_at: nowStamp(),
+    mode: "in-memory static export"
+  };
+
+  return record;
+};
+
+const decisionExportJson = () =>
+  JSON.stringify({
+    generated_at: new Date().toISOString(),
+    mode: state.decisionExportStatus.mode,
+    target_path: state.decisionExportStatus.path,
+    decisions: state.artifactDecisions
+  }, null, 2);
+
 const updateArtifactStatus = (title, status) => {
   const artifact = findArtifactByTitle(title);
   if (!artifact) {
@@ -1178,7 +1267,10 @@ const updateArtifactStatus = (title, status) => {
     return;
   }
 
-  artifact.status = status;
+  const decision = decisionForStatus(status);
+  const nextAction = nextActionForDecision(decision, artifact);
+  artifact.status = status === "REWRITE" ? "REWRITE_REQUESTED" : status;
+  artifact.next_action = nextAction;
   artifact.updated_at = new Date().toISOString();
   if (["APPROVED", "REJECTED", "REWRITE"].includes(status)) {
     artifact.requires_major_review = false;
@@ -1186,9 +1278,10 @@ const updateArtifactStatus = (title, status) => {
   if (status === "APPROVED") {
     artifact.publish_mode = artifact.risk_level === "HIGH" ? "REVIEW" : artifact.publish_mode;
   }
+  const decisionRecord = appendArtifactDecision(artifact, decision, nextAction, `Command: ${status.toLowerCase()} artifact`);
   const mission = findMission(artifact.mission_id);
   if (mission) {
-    mission.next_action = `Artifact ${status.toLowerCase()}: ${artifact.title}`;
+    mission.next_action = nextAction;
     mission.updated_at = new Date().toISOString();
   }
   state.artifactsHighlighted = true;
@@ -1196,12 +1289,16 @@ const updateArtifactStatus = (title, status) => {
   renderArtifacts();
   renderMissionBoard();
   refreshSystemGuidance({ announce: true });
-  pushActivity(`Artifact ${status.toLowerCase()}`, status);
+  pushActivity(`Decision exported: ${decisionRecord.decision}`, status);
 };
 
 const publishArtifact = (title) => {
   const artifact = findArtifactByTitle(title);
-  const blocker = shouldBlockArtifactPublish(artifact);
+  const blocker = artifact?.status === "BLOCKED"
+    ? "Blocked artifacts cannot publish"
+    : artifact?.risk_level === "HIGH"
+      ? "High risk artifacts cannot publish from Mission Control"
+      : shouldBlockArtifactPublish(artifact);
   if (blocker) {
     if (artifact) {
       artifact.status = "BLOCKED";
@@ -1215,16 +1312,17 @@ const publishArtifact = (title) => {
     return;
   }
 
-  artifact.status = artifact.publish_mode === "SCHEDULED" ? "SCHEDULED" : "APPROVED";
-  artifact.next_action = artifact.publish_mode === "SCHEDULED"
-    ? "Hold until local delay buffer clears"
-    : "Approved for future publish handoff";
+  const decision = "publish_requested";
+  const nextAction = nextActionForDecision(decision, artifact);
+  artifact.status = artifact.publish_mode === "SCHEDULED" ? "SCHEDULED" : "PUBLISH_REQUESTED";
+  artifact.next_action = nextAction;
   artifact.updated_at = new Date().toISOString();
+  const decisionRecord = appendArtifactDecision(artifact, decision, nextAction, "Command: publish artifact");
   state.artifactsHighlighted = true;
   saveState();
   renderArtifacts();
   refreshSystemGuidance({ announce: true });
-  pushActivity("Artifact publish handoff approved", artifact.publish_mode);
+  pushActivity(`Decision exported: ${decisionRecord.decision}`, artifact.publish_mode);
 };
 
 const routeCommand = (command) => {
@@ -2685,11 +2783,14 @@ const renderArtifacts = () => {
   const panel = document.querySelector("#artifacts");
   const target = document.querySelector("#artifact-list");
   const importStatusTarget = document.querySelector("#artifact-import-status");
+  const decisionStatusTarget = document.querySelector("#artifact-decision-status");
+  const decisionJsonTarget = document.querySelector("#artifact-decision-json");
   const filter = state.artifactSourceFilter || "ALL";
   const artifacts = sortedArtifacts(state.artifacts.filter((artifact) =>
     filter === "ALL" || artifact.source === filter
   ));
   const importStatus = state.externalImportStatus || seedState.externalImportStatus;
+  const decisionStatus = state.decisionExportStatus || seedState.decisionExportStatus;
 
   panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
   document.querySelectorAll("#artifact-source-filter button").forEach((button) => {
@@ -2698,6 +2799,9 @@ const renderArtifacts = () => {
   importStatusTarget.textContent =
     `Import: ${importStatus.source} · ${importStatus.count} artifacts · ${importStatus.path} · ${importStatus.timestamp} · ${importStatus.status}`;
   importStatusTarget.className = `import-status ${importStatus.status}`;
+  decisionStatusTarget.textContent =
+    `Decision Export: ${decisionStatus.last_decision} · ${decisionStatus.total} decisions this session · ${decisionStatus.path} · ${decisionStatus.updated_at}`;
+  decisionJsonTarget.textContent = decisionExportJson();
   target.innerHTML = artifacts.map((artifact, index) => `
     <article class="artifact-row ${index === 0 ? "selected" : ""}">
       <div class="artifact-main">
