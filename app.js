@@ -176,6 +176,13 @@ const seedState = {
   riskGovernanceHighlighted: false,
   skillRequestsHighlighted: false,
   artifactSourceFilter: "ALL",
+  externalImportStatus: {
+    source: "SUBSTACK_ENGINE",
+    path: "not loaded",
+    count: 0,
+    timestamp: "--",
+    status: "missing"
+  },
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -798,6 +805,10 @@ const mergeSeedState = (savedState) => {
   merged.riskGovernanceHighlighted = Boolean(savedState.riskGovernanceHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
   merged.artifactSourceFilter = savedState.artifactSourceFilter || "ALL";
+  merged.externalImportStatus = {
+    ...cloneState(seedState.externalImportStatus),
+    ...(savedState.externalImportStatus || {})
+  };
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
       ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
@@ -1275,7 +1286,9 @@ const fetchJsonFile = async (path) => {
 
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}`);
+    const error = new Error(`${path} returned ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 };
@@ -1284,17 +1297,23 @@ const loadExternalArtifactExport = async (source) => {
   const paths = externalArtifactSources[source] || [];
   const errors = [];
 
-  for (const path of paths) {
+  for (const [index, path] of paths.entries()) {
     try {
       const payload = await fetchJsonFile(path);
       const artifacts = Array.isArray(payload.artifacts) ? payload.artifacts : [];
-      return { path, artifacts };
+      return { path, artifacts, status: index === 0 ? "loaded" : "fallback" };
     } catch (error) {
-      errors.push(`${path}: ${error.message}`);
+      errors.push({ path, message: error.message, status: error.status || 0 });
     }
   }
 
-  throw new Error(errors.join(" | ") || `${source} export unavailable`);
+  const missingOnly = errors.length > 0 && errors.every((error) => error.status === 404);
+  const exportError = new Error(
+    errors.map((error) => `${error.path}: ${error.message}`).join(" | ") ||
+    `${source} export unavailable`
+  );
+  exportError.importStatus = missingOnly ? "missing" : "error";
+  throw exportError;
 };
 
 const setMissingExternalExport = (source, error) => {
@@ -1303,6 +1322,13 @@ const setMissingExternalExport = (source, error) => {
     ...state.artifacts.filter((artifact) => artifact.source !== source),
     ...fallbackArtifacts
   ];
+  state.externalImportStatus = {
+    source,
+    path: "export missing",
+    count: 0,
+    timestamp: nowStamp(),
+    status: error.importStatus || "missing"
+  };
   state.needsMajor = {
     mission: "Substack export missing",
     agent: "A004 Ops Watcher"
@@ -1315,11 +1341,18 @@ const setMissingExternalExport = (source, error) => {
   pushActivity(`${source} export missing: ${error.message}`, "BLOCKED");
 };
 
-const applyExternalArtifactExport = ({ source, path, artifacts, silent = false }) => {
+const applyExternalArtifactExport = ({ source, path, status = "loaded", artifacts, silent = false }) => {
   const importedArtifacts = artifacts.map((artifact) =>
     normalizeArtifact({ ...artifact, source })
   );
 
+  state.externalImportStatus = {
+    source,
+    path,
+    count: importedArtifacts.length,
+    timestamp: nowStamp(),
+    status
+  };
   state.artifacts = [
     ...state.artifacts.filter((artifact) => artifact.source !== source),
     ...importedArtifacts
@@ -1349,6 +1382,7 @@ const refreshExternalArtifacts = async (source = "SUBSTACK_ENGINE", options = {}
       source,
       path: exportPayload.path,
       artifacts: exportPayload.artifacts,
+      status: exportPayload.status,
       silent: Boolean(options.silent)
     });
   } catch (error) {
@@ -2650,15 +2684,20 @@ const renderMissionBoard = () => {
 const renderArtifacts = () => {
   const panel = document.querySelector("#artifacts");
   const target = document.querySelector("#artifact-list");
+  const importStatusTarget = document.querySelector("#artifact-import-status");
   const filter = state.artifactSourceFilter || "ALL";
   const artifacts = sortedArtifacts(state.artifacts.filter((artifact) =>
     filter === "ALL" || artifact.source === filter
   ));
+  const importStatus = state.externalImportStatus || seedState.externalImportStatus;
 
   panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
   document.querySelectorAll("#artifact-source-filter button").forEach((button) => {
     button.classList.toggle("active", button.dataset.source === filter);
   });
+  importStatusTarget.textContent =
+    `Import: ${importStatus.source} · ${importStatus.count} artifacts · ${importStatus.path} · ${importStatus.timestamp} · ${importStatus.status}`;
+  importStatusTarget.className = `import-status ${importStatus.status}`;
   target.innerHTML = artifacts.map((artifact, index) => `
     <article class="artifact-row ${index === 0 ? "selected" : ""}">
       <div class="artifact-main">

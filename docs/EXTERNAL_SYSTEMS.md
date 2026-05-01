@@ -94,6 +94,19 @@ The static fallback path is:
 fixtures/substack/mission_control_export.json
 ```
 
+The ARTIFACTS panel reports the last import:
+
+```text
+Import: SUBSTACK_ENGINE · <count> artifacts · <path> · <timestamp> · <status>
+```
+
+Supported statuses:
+
+- `loaded`
+- `fallback`
+- `missing`
+- `error`
+
 ## Authority Rule
 
 External systems produce artifacts.

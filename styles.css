@@ -969,6 +969,30 @@ time {
   border-color: rgba(32, 245, 138, 0.5);
 }
 
+.import-status {
+  min-height: 28px;
+  padding: 7px 10px;
+  color: var(--muted);
+  background: #070b0a;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.import-status.loaded {
+  color: var(--green);
+}
+
+.import-status.fallback {
+  color: var(--amber);
+}
+
+.import-status.missing,
+.import-status.error {
+  color: var(--red);
+}
+
 .artifact-row {
   min-height: 54px;
   padding: 8px 10px;

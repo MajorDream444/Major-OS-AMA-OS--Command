@@ -48,6 +48,29 @@ Clicking it reloads the local export, preserves the active source filter, re-run
 Refreshed SUBSTACK_ENGINE artifacts from export
 ```
 
+## Import Status Line
+
+The ARTIFACTS panel shows the last import status:
+
+```text
+Import: SUBSTACK_ENGINE · 3 artifacts · content/logs/workflows/mission_control_export.json · 13:42 · loaded
+```
+
+Fields:
+
+- source
+- artifact count
+- file path used
+- timestamp
+- status
+
+Statuses:
+
+- `loaded`: primary export file loaded
+- `fallback`: static fixture loaded after primary export failed
+- `missing`: primary export and fallback fixture were not found
+- `error`: refresh failed for another local parsing or fetch reason
+
 ## Missing Export Behavior
 
 If the export cannot be loaded from the local path or fallback fixture, Mission Control must not crash.
