@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "decisions:sync": "node scripts/sync_decisions.js"
+  }
+}

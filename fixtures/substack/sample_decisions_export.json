@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-01T17:37:44.827Z",
-  "mode": "local cli sync",
+  "generated_at": "2026-05-02T00:00:00.000Z",
+  "mode": "browser export fixture",
   "target_path": "content/logs/workflows/mission_control_decisions.json",
   "decisions": [
     {

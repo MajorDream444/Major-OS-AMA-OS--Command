@@ -12,6 +12,27 @@ content/logs/workflows/mission_control_decisions.json
 
 The current static UI cannot write to disk directly. Runtime decisions are stored in local state and shown as exportable JSON in the ARTIFACTS panel. The repo file is the handoff target for future CLI or automation sync.
 
+## Sync Flow
+
+```text
+Browser decision export
+-> scripts/sync_decisions.js
+-> content/logs/workflows/mission_control_decisions.json
+-> Substack Engine import
+```
+
+Run:
+
+```text
+npm run decisions:sync -- --file path/to/exported_decisions.json
+```
+
+The CLI also supports `--stdin` and the default local export path:
+
+```text
+content/logs/workflows/mission_control_decisions_export.json
+```
+
 ## Decision Schema
 
 ```json
