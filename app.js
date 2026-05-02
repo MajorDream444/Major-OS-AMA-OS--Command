@@ -235,6 +235,14 @@ const seedState = {
     status: "missing"
   },
   assetDecisionQueue: [],
+  assetQueueDecisions: [],
+  assetQueueDecisionStatus: {
+    path: "content/logs/workflows/asset_queue_decisions.json",
+    total: 0,
+    last_decision: "none",
+    updated_at: "--",
+    mode: "local_only"
+  },
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -889,6 +897,16 @@ const mergeSeedState = (savedState) => {
   merged.assetDecisionQueue = Array.isArray(savedState.assetDecisionQueue)
     ? savedState.assetDecisionQueue
     : [];
+  merged.assetQueueDecisions = Array.isArray(savedState.assetQueueDecisions)
+    ? savedState.assetQueueDecisions
+    : [];
+  merged.assetQueueDecisionStatus = {
+    ...cloneState(seedState.assetQueueDecisionStatus),
+    ...(savedState.assetQueueDecisionStatus || {}),
+    total: Array.isArray(savedState.assetQueueDecisions)
+      ? savedState.assetQueueDecisions.length
+      : Number(savedState.assetQueueDecisionStatus?.total || 0)
+  };
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
       ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
@@ -1254,6 +1272,8 @@ const decisionId = () => {
   return `D-${date}-${time}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 };
 
+const assetDecisionId = () => decisionId().replace(/^D-/, "AD-");
+
 const decisionForStatus = (status) => ({
   APPROVED: "approved",
   REJECTED: "rejected",
@@ -1310,6 +1330,71 @@ const decisionExportJson = () =>
     mode: state.decisionExportStatus.mode,
     target_path: state.decisionExportStatus.path,
     decisions: state.artifactDecisions
+  }, null, 2);
+
+const allowedAssetQueueDecisions = [
+  "hold",
+  "review_assets",
+  "request_asset_rewrite",
+  "approve_for_render_queue",
+  "approve_for_publish_queue_later",
+  "block_asset"
+];
+
+const lastAssetQueueDecision = (artifactId) =>
+  [...(state.assetQueueDecisions || [])]
+    .reverse()
+    .find((decision) => decision.artifact_id === artifactId) || null;
+
+const appendAssetQueueDecision = (asset, decision, reason = "") => {
+  if (!allowedAssetQueueDecisions.includes(decision)) {
+    pushActivity(`Asset decision rejected: ${decision}`, "BLOCKED");
+    return null;
+  }
+
+  const record = {
+    asset_decision_id: assetDecisionId(),
+    artifact_id: asset.artifact_id || "",
+    mission_id: asset.mission_id || "",
+    title: asset.title || "",
+    lane: asset.lane || "",
+    asset_state: asset.asset_state || "",
+    decision,
+    decided_by: "Major",
+    decided_at: new Date().toISOString(),
+    reason,
+    source: "MISSION_CONTROL",
+    execution_mode: "local_only"
+  };
+
+  const exists = state.assetQueueDecisions.some((item) =>
+    item.asset_decision_id === record.asset_decision_id
+  );
+  if (!exists) {
+    state.assetQueueDecisions.push(record);
+  }
+
+  state.assetQueueDecisionStatus = {
+    path: "content/logs/workflows/asset_queue_decisions.json",
+    total: state.assetQueueDecisions.length,
+    last_decision: `${decision} ${record.artifact_id}`,
+    updated_at: nowStamp(),
+    mode: "local_only"
+  };
+
+  saveState();
+  renderAssetDecisionQueue();
+  refreshSystemGuidance({ announce: true });
+  pushActivity(`Asset queue decision captured: ${decision}`, "ACTION");
+  return record;
+};
+
+const assetQueueDecisionExportJson = () =>
+  JSON.stringify({
+    generated_at: new Date().toISOString(),
+    mode: "local_only_browser_export",
+    target_path: "content/logs/workflows/asset_queue_decisions.json",
+    decisions: state.assetQueueDecisions || []
   }, null, 2);
 
 const updateArtifactStatus = (title, status) => {
@@ -3283,10 +3368,13 @@ const renderAssetDecisionQueue = () => {
   const statusTarget = document.querySelector("#asset-decision-status");
   const summaryTarget = document.querySelector("#asset-decision-summary");
   const listTarget = document.querySelector("#asset-decision-list");
+  const decisionStatusTarget = document.querySelector("#asset-queue-decision-status");
+  const decisionJsonTarget = document.querySelector("#asset-queue-decision-json");
   if (!statusTarget || !summaryTarget || !listTarget) return;
 
   const status = state.assetDecisionQueueStatus || seedState.assetDecisionQueueStatus;
   const assets = Array.isArray(state.assetDecisionQueue) ? state.assetDecisionQueue : [];
+  const decisionStatus = state.assetQueueDecisionStatus || seedState.assetQueueDecisionStatus;
   const queues = ["prepared_assets_review", "distribution_candidate_review", "blocked_asset_review"];
 
   statusTarget.textContent =
@@ -3310,6 +3398,11 @@ const renderAssetDecisionQueue = () => {
       <span>Blocked / skipped</span>
     </div>
   `;
+  if (decisionStatusTarget && decisionJsonTarget) {
+    decisionStatusTarget.textContent =
+      `Asset Decisions: ${decisionStatus.last_decision} · ${decisionStatus.total} local decisions · ${decisionStatus.path} · ${decisionStatus.updated_at}`;
+    decisionJsonTarget.textContent = assetQueueDecisionExportJson();
+  }
 
   if (!assets.length) {
     listTarget.innerHTML = "<p class=\"empty-lane asset-empty-state\">No Substack asset handoff loaded yet.</p>";
@@ -3325,7 +3418,9 @@ const renderAssetDecisionQueue = () => {
           <span class="${labelClass(queueClass(queue))}">${escapeHtml(queueLabel(queue))}</span>
         </header>
         <div class="asset-decision-cards">
-          ${queueAssets.map((asset) => `
+          ${queueAssets.map((asset) => {
+            const lastDecision = lastAssetQueueDecision(asset.artifact_id);
+            return `
             <article class="asset-decision-card">
               <div class="asset-card-head">
                 <strong>${escapeHtml(asset.title)}</strong>
@@ -3344,8 +3439,23 @@ const renderAssetDecisionQueue = () => {
                 <code>${escapeHtml(asset.next_action)}</code>
               </div>
               ${asset.blocked_reason ? `<p class="asset-blocked-reason">${escapeHtml(asset.blocked_reason)}</p>` : ""}
+              <div class="asset-decision-controls" data-artifact-id="${escapeHtml(asset.artifact_id)}">
+                <select aria-label="Asset decision for ${escapeHtml(asset.title)}">
+                  ${allowedAssetQueueDecisions.map((decision) => `
+                    <option value="${escapeHtml(decision)}">${escapeHtml(decision)}</option>
+                  `).join("")}
+                </select>
+                <input type="text" placeholder="reason / note" aria-label="Asset decision reason" />
+                <button type="button" data-asset-decision="capture">Capture</button>
+              </div>
+              <p class="asset-last-decision">
+                Last decision: ${lastDecision
+                  ? `${escapeHtml(lastDecision.decision)} / ${escapeHtml(nowStampFromIso(lastDecision.decided_at))}`
+                  : "none"}
+              </p>
             </article>
-          `).join("") || "<p class=\"empty-lane\">No assets in this queue</p>"}
+          `;
+          }).join("") || "<p class=\"empty-lane\">No assets in this queue</p>"}
         </div>
       </section>
     `;
@@ -3532,6 +3642,28 @@ const bindArtifactRefresh = () => {
   });
 };
 
+const bindAssetDecisionControls = () => {
+  const target = document.querySelector("#asset-decision-list");
+  if (!target) return;
+
+  target.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-asset-decision='capture']");
+    if (!button) return;
+
+    const controls = button.closest(".asset-decision-controls");
+    const artifactId = controls?.dataset.artifactId;
+    const asset = state.assetDecisionQueue.find((item) => item.artifact_id === artifactId);
+    if (!asset) {
+      pushActivity(`Asset decision failed: ${artifactId || "missing artifact"}`, "BLOCKED");
+      return;
+    }
+
+    const decision = controls.querySelector("select")?.value || "hold";
+    const reason = controls.querySelector("input")?.value || "";
+    appendAssetQueueDecision(asset, decision, reason);
+  });
+};
+
 const navLinks = () => Array.from(document.querySelectorAll(".nav-item[href^='#']"));
 
 const setActiveNav = (targetId) => {
@@ -3641,6 +3773,7 @@ bindNextMove();
 bindRiskGovernance();
 bindArtifactFilter();
 bindArtifactRefresh();
+bindAssetDecisionControls();
 bindNavigationState();
 renderAll();
 refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });

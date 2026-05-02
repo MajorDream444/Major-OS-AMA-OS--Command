@@ -1024,6 +1024,30 @@ time {
   white-space: pre-wrap;
 }
 
+.asset-queue-export {
+  padding: 7px 10px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  background: #050807;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.asset-queue-export pre {
+  max-height: 90px;
+  margin: 0;
+  padding: 7px;
+  overflow: auto;
+  color: var(--green);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  font-size: 9px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
 .artifact-row {
   min-height: 54px;
   padding: 8px 10px;
@@ -1225,6 +1249,49 @@ time {
   font-size: 9px;
   font-weight: 900;
   line-height: 1.4;
+}
+
+.asset-decision-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 72px;
+  gap: 6px;
+}
+
+.asset-decision-controls select,
+.asset-decision-controls input,
+.asset-decision-controls button {
+  min-width: 0;
+  height: 28px;
+  color: var(--ink);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.asset-decision-controls select,
+.asset-decision-controls input {
+  padding: 0 7px;
+}
+
+.asset-decision-controls button {
+  color: var(--green);
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.asset-decision-controls button:hover {
+  border-color: rgba(32, 245, 138, 0.55);
+  background: var(--green-dim);
+}
+
+.asset-last-decision {
+  margin: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
 }
 
 .skill-request-list {

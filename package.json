@@ -1,6 +1,7 @@
 {
   "scripts": {
     "decisions:sync": "node scripts/sync_decisions.js",
+    "asset-queue:decisions:sync": "node scripts/sync_asset_queue_decisions.js",
     "assets:intake": "node scripts/sync_asset_generation.js",
     "substack:assets:import": "node scripts/import_substack_asset_summary.js"
   }

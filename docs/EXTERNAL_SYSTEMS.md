@@ -148,7 +148,16 @@ content/logs/workflows/substack_asset_generation_summary.md
 content/logs/workflows/substack_asset_summary_handoff.json
 ```
 
-Mission Control surfaces `substack_asset_summary_handoff.json` in the read-only `Asset Decision Queue` UI panel. The panel shows prepared, ready-for-distribution, and blocked/skipped assets for review, but it does not approve, render, publish, generate assets, or call external APIs.
+Mission Control surfaces `substack_asset_summary_handoff.json` in the `Asset Decision Queue` UI panel. The panel shows prepared, ready-for-distribution, and blocked/skipped assets for review.
+
+Mission Control can capture local-only intended decisions into:
+
+```text
+content/logs/workflows/asset_queue_decisions.json
+content/logs/workflows/asset_queue_decisions.md
+```
+
+These decisions do not render, publish, generate assets, call external APIs, or mutate the imported Substack handoff.
 
 Routing rules:
 

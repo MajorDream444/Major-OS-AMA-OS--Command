@@ -51,7 +51,14 @@ content/logs/workflows/asset_generation_intake.md
 
 These are Mission Control routing summaries only.
 
-The browser UI surfaces `content/logs/workflows/substack_asset_summary_handoff.json` in the read-only `Asset Decision Queue` panel. This panel is for operator visibility only: no approve buttons, no rendering, no publishing, no asset generation, and no duplicated Substack Engine execution logic.
+The browser UI surfaces `content/logs/workflows/substack_asset_summary_handoff.json` in the `Asset Decision Queue` panel. The panel can now capture Major's intended local-only decision for each row, but it still does not render, publish, generate assets, call external APIs, or mutate the imported handoff.
+
+Decision handoff targets:
+
+```text
+content/logs/workflows/asset_queue_decisions.json
+content/logs/workflows/asset_queue_decisions.md
+```
 
 ## Routing Rules
 
