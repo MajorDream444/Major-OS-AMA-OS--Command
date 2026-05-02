@@ -1156,20 +1156,24 @@ time {
   white-space: nowrap;
 }
 
-.asset-decision-list {
+.asset-decision-list,
+.substack-queue-list {
   display: grid;
 }
 
-.asset-decision-group {
+.asset-decision-group,
+.substack-queue-group {
   display: grid;
   border-top: 1px solid var(--line);
 }
 
-.asset-decision-group:first-child {
+.asset-decision-group:first-child,
+.substack-queue-group:first-child {
   border-top: 0;
 }
 
-.asset-decision-group header {
+.asset-decision-group header,
+.substack-queue-group header {
   min-height: 34px;
   padding: 7px 10px;
   display: flex;
@@ -1180,14 +1184,16 @@ time {
   border-bottom: 1px solid var(--line);
 }
 
-.asset-decision-cards {
+.asset-decision-cards,
+.substack-queue-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 8px;
   padding: 8px;
 }
 
-.asset-decision-card {
+.asset-decision-card,
+.substack-queue-card {
   min-width: 0;
   padding: 8px;
   display: grid;

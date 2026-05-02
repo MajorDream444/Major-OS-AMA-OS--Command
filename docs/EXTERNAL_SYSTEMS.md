@@ -166,3 +166,41 @@ Routing rules:
 - skipped or blocked -> `inspect_blocked_reason` in `blocked_asset_review`
 
 Mission Control does not create assets, change asset content, render video/audio, publish live, or call external APIs.
+
+## Substack Render / Publish Queue Handoff Import
+
+Substack Engine may also export local queue manifests:
+
+```text
+content/logs/workflows/render_queue_handoff.json
+content/logs/workflows/publish_queue_handoff.json
+content/logs/workflows/render_queue_handoff_summary.json
+content/logs/workflows/publish_queue_handoff_summary.json
+```
+
+Mission Control imports them with:
+
+```text
+SUBSTACK_RENDER_QUEUE_HANDOFF_PATH="/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/render_queue_handoff.json" \
+SUBSTACK_PUBLISH_QUEUE_HANDOFF_PATH="/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/publish_queue_handoff.json" \
+npm run substack:queues:import
+```
+
+Mission Control writes:
+
+```text
+content/logs/workflows/substack_render_queue_handoff.json
+content/logs/workflows/substack_publish_queue_handoff.json
+content/logs/workflows/substack_queue_handoffs.md
+content/logs/workflows/substack_queue_handoffs_summary.json
+```
+
+The dashboard surfaces those records in `Substack Queue Handoffs` as read-only render and publish candidates.
+
+Routing rules:
+
+- render queue item -> `review_render_candidate`
+- publish queue item -> `review_publish_candidate`
+- execution mode is always `local_only`
+
+This layer does not render, publish, call external APIs, or change Substack Engine asset content.

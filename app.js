@@ -151,6 +151,12 @@ const assetDecisionQueueSources = {
   ]
 };
 
+const substackQueueHandoffSources = {
+  SUBSTACK_ENGINE: [
+    "content/logs/workflows/substack_queue_handoffs_summary.json"
+  ]
+};
+
 const requiredAssetFiles = [
   "video_script.md",
   "voice_script.txt",
@@ -243,6 +249,16 @@ const seedState = {
     updated_at: "--",
     mode: "local_only"
   },
+  substackQueueHandoffsStatus: {
+    source: "SUBSTACK_ENGINE",
+    path: "not loaded",
+    render_queue_count: 0,
+    publish_queue_count: 0,
+    blocked_skipped_count: 0,
+    timestamp: "--",
+    status: "missing"
+  },
+  substackQueueHandoffs: [],
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -907,6 +923,13 @@ const mergeSeedState = (savedState) => {
       ? savedState.assetQueueDecisions.length
       : Number(savedState.assetQueueDecisionStatus?.total || 0)
   };
+  merged.substackQueueHandoffsStatus = {
+    ...cloneState(seedState.substackQueueHandoffsStatus),
+    ...(savedState.substackQueueHandoffsStatus || {})
+  };
+  merged.substackQueueHandoffs = Array.isArray(savedState.substackQueueHandoffs)
+    ? savedState.substackQueueHandoffs
+    : [];
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
       ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
@@ -1947,6 +1970,124 @@ const refreshAssetDecisionQueue = async (source = "SUBSTACK_ENGINE", options = {
     });
   } catch (error) {
     setMissingAssetDecisionQueue(source, error);
+    return { source, path: "", count: 0, error };
+  }
+};
+
+const normalizeQueueHandoffItem = (item) => ({
+  queue_type: item.queue_type || "review",
+  artifact_id: item.artifact_id || "",
+  mission_id: item.mission_id || "",
+  title: item.title || "Untitled queue item",
+  lane: item.lane || "Operations",
+  recommended_renderer: item.recommended_renderer || "",
+  recommended_platforms: Array.isArray(item.recommended_platforms) ? item.recommended_platforms : [],
+  source_asset_folder: item.source_asset_folder || "",
+  execution_mode: item.execution_mode || "local_only",
+  next_action: item.next_action || (item.queue_type === "render" ? "review_render_candidate" : "review_publish_candidate"),
+  status: item.status || "queued",
+  queue_id: item.queue_id || ""
+});
+
+const queueHandoffCounts = (items, payload = {}) => ({
+  render_queue_count: Number.isFinite(payload.render_queue_count)
+    ? payload.render_queue_count
+    : items.filter((item) => item.queue_type === "render").length,
+  publish_queue_count: Number.isFinite(payload.publish_queue_count)
+    ? payload.publish_queue_count
+    : items.filter((item) => item.queue_type === "publish").length,
+  blocked_skipped_count: Number.isFinite(payload.blocked_skipped_count)
+    ? payload.blocked_skipped_count
+    : items.filter((item) => /blocked|skipped/i.test(item.status)).length
+});
+
+const loadSubstackQueueHandoffs = async (source) => {
+  const paths = substackQueueHandoffSources[source] || [];
+  const errors = [];
+
+  for (const [index, path] of paths.entries()) {
+    try {
+      const payload = await fetchJsonFile(path);
+      const items = Array.isArray(payload.items) ? payload.items : [];
+      return {
+        path,
+        payload,
+        items,
+        status: items.length > 0 ? (index === 0 ? "loaded" : "fallback") : "empty"
+      };
+    } catch (error) {
+      errors.push({ path, message: error.message, status: error.status || 0 });
+    }
+  }
+
+  const missingOnly = errors.length > 0 && errors.every((error) => error.status === 404);
+  const queueError = new Error(
+    errors.map((error) => `${error.path}: ${error.message}`).join(" | ") ||
+    `${source} queue handoffs unavailable`
+  );
+  queueError.importStatus = missingOnly ? "missing" : "error";
+  throw queueError;
+};
+
+const applySubstackQueueHandoffs = ({ source, path, payload, items, status = "loaded", silent = false }) => {
+  const queueItems = items
+    .map(normalizeQueueHandoffItem)
+    .sort((a, b) => {
+      if (a.queue_type !== b.queue_type) return a.queue_type.localeCompare(b.queue_type);
+      return a.title.localeCompare(b.title);
+    });
+  const counts = queueHandoffCounts(queueItems, payload);
+
+  state.substackQueueHandoffs = queueItems;
+  state.substackQueueHandoffsStatus = {
+    source,
+    path,
+    render_queue_count: counts.render_queue_count,
+    publish_queue_count: counts.publish_queue_count,
+    blocked_skipped_count: counts.blocked_skipped_count,
+    timestamp: nowStamp(),
+    status
+  };
+
+  saveState();
+  renderSubstackQueueHandoffs();
+
+  if (!silent) {
+    pushActivity(`Loaded ${source} queue handoffs`, "SYNCED");
+  }
+
+  return { source, path, count: queueItems.length };
+};
+
+const setMissingSubstackQueueHandoffs = (source, error) => {
+  state.substackQueueHandoffs = [];
+  state.substackQueueHandoffsStatus = {
+    source,
+    path: "handoff missing",
+    render_queue_count: 0,
+    publish_queue_count: 0,
+    blocked_skipped_count: 0,
+    timestamp: nowStamp(),
+    status: error.importStatus || "missing"
+  };
+  saveState();
+  renderSubstackQueueHandoffs();
+  pushActivity(`${source} queue handoffs missing: ${error.message}`, "REVIEW");
+};
+
+const refreshSubstackQueueHandoffs = async (source = "SUBSTACK_ENGINE", options = {}) => {
+  try {
+    const handoffs = await loadSubstackQueueHandoffs(source);
+    return applySubstackQueueHandoffs({
+      source,
+      path: handoffs.path,
+      payload: handoffs.payload,
+      items: handoffs.items,
+      status: handoffs.status,
+      silent: Boolean(options.silent)
+    });
+  } catch (error) {
+    setMissingSubstackQueueHandoffs(source, error);
     return { source, path: "", count: 0, error };
   }
 };
@@ -3462,6 +3603,86 @@ const renderAssetDecisionQueue = () => {
   }).join("");
 };
 
+const renderSubstackQueueHandoffs = () => {
+  const statusTarget = document.querySelector("#substack-queue-status");
+  const summaryTarget = document.querySelector("#substack-queue-summary");
+  const listTarget = document.querySelector("#substack-queue-list");
+  if (!statusTarget || !summaryTarget || !listTarget) return;
+
+  const status = state.substackQueueHandoffsStatus || seedState.substackQueueHandoffsStatus;
+  const items = Array.isArray(state.substackQueueHandoffs) ? state.substackQueueHandoffs : [];
+  const groups = ["render", "publish"];
+
+  statusTarget.textContent =
+    `Queues: ${status.source} · ${status.render_queue_count} render · ${status.publish_queue_count} publish · ${status.blocked_skipped_count} blocked/skipped · ${status.path} · ${status.timestamp} · ${status.status}`;
+  statusTarget.className = `import-status ${status.status}`;
+  summaryTarget.innerHTML = `
+    <div>
+      <strong>${escapeHtml(status.render_queue_count)}</strong>
+      <span>Render queue</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(status.publish_queue_count)}</strong>
+      <span>Publish queue</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(status.blocked_skipped_count)}</strong>
+      <span>Blocked / skipped</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(items.length)}</strong>
+      <span>Visible items</span>
+    </div>
+  `;
+
+  if (!items.length) {
+    listTarget.innerHTML = "<p class=\"empty-lane asset-empty-state\">No Substack render or publish queue handoffs loaded yet.</p>";
+    return;
+  }
+
+  listTarget.innerHTML = groups.map((queueType) => {
+    const queueItems = items.filter((item) => item.queue_type === queueType);
+    return `
+      <section class="substack-queue-group">
+        <header>
+          <h3>${escapeHtml(queueType)} queue</h3>
+          <span class="${labelClass(queueType === "render" ? "REVIEW" : "QUEUED")}">${escapeHtml(queueType === "render" ? "RENDER REVIEW" : "PUBLISH REVIEW")}</span>
+        </header>
+        <div class="substack-queue-cards">
+          ${queueItems.map((item) => `
+            <article class="substack-queue-card">
+              <div class="asset-card-head">
+                <strong>${escapeHtml(item.title)}</strong>
+                <span class="${labelClass(item.status)}">${escapeHtml(item.status)}</span>
+              </div>
+              <div class="asset-card-grid">
+                <span>artifact_id</span>
+                <code>${escapeHtml(item.artifact_id || "missing")}</code>
+                <span>mission_id</span>
+                <code>${escapeHtml(item.mission_id || "missing")}</code>
+                <span>lane</span>
+                <code>${escapeHtml(item.lane)}</code>
+                <span>queue_type</span>
+                <code>${escapeHtml(item.queue_type)}</code>
+                <span>${item.queue_type === "render" ? "renderer" : "platforms"}</span>
+                <code>${escapeHtml(item.queue_type === "render"
+                  ? (item.recommended_renderer || "none")
+                  : (item.recommended_platforms.length ? item.recommended_platforms.join(", ") : "none"))}</code>
+                <span>source_asset_folder</span>
+                <code>${escapeHtml(item.source_asset_folder || "none")}</code>
+                <span>execution_mode</span>
+                <code>${escapeHtml(item.execution_mode)}</code>
+                <span>next_action</span>
+                <code>${escapeHtml(item.next_action)}</code>
+              </div>
+            </article>
+          `).join("") || "<p class=\"empty-lane\">No items in this queue</p>"}
+        </div>
+      </section>
+    `;
+  }).join("");
+};
+
 const renderSkillRequests = () => {
   const panel = document.querySelector("#skill-requests");
   const target = document.querySelector("#skill-request-list");
@@ -3587,6 +3808,7 @@ const bindResetControl = () => {
     refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
     refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
     refreshAssetDecisionQueue("SUBSTACK_ENGINE", { silent: true });
+    refreshSubstackQueueHandoffs("SUBSTACK_ENGINE", { silent: true });
   });
 };
 
@@ -3639,6 +3861,7 @@ const bindArtifactRefresh = () => {
   if (assetButton) assetButton.addEventListener("click", () => {
     refreshAssetGenerationSummary("SUBSTACK_ENGINE");
     refreshAssetDecisionQueue("SUBSTACK_ENGINE");
+    refreshSubstackQueueHandoffs("SUBSTACK_ENGINE");
   });
 };
 
@@ -3757,6 +3980,7 @@ const renderAll = () => {
   renderDistributionQueue();
   renderArtifacts();
   renderAssetDecisionQueue();
+  renderSubstackQueueHandoffs();
   renderRiskGovernance();
   renderSkillRequests();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
@@ -3779,4 +4003,5 @@ renderAll();
 refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
 refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
 refreshAssetDecisionQueue("SUBSTACK_ENGINE", { silent: true });
+refreshSubstackQueueHandoffs("SUBSTACK_ENGINE", { silent: true });
 startHeartbeat();
