@@ -21,6 +21,18 @@ fixtures/substack/mission_control_export.json
 Mission Control also imports SUBSTACK-AUTOMATION-ENGINE asset summaries from:
 
 ```text
+SUBSTACK_ASSET_SUMMARY_PATH
+```
+
+The expected source path is:
+
+```text
+/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/asset_generation_summary.json
+```
+
+Default local path:
+
+```text
 content/logs/workflows/asset_generation_summary.json
 ```
 
@@ -31,6 +43,14 @@ fixtures/substack/asset_generation_summary.json
 ```
 
 This does not create assets. It only tells Mission Control which artifacts have prepared or ready-for-distribution asset packages and which next decision should surface.
+
+Current local import outputs:
+
+```text
+content/logs/workflows/substack_asset_generation_summary.json
+content/logs/workflows/substack_asset_generation_summary.md
+content/logs/workflows/substack_asset_summary_handoff.json
+```
 
 ## Refresh Flow
 

@@ -129,3 +129,29 @@ Supported decisions:
 - `publish_requested`
 
 Static browser mode cannot write the JSON file directly. Until a local CLI or automation sync is added, the ARTIFACTS panel displays the exportable decision JSON and keeps decisions in local state.
+
+## Substack Asset Summary Import
+
+Substack Engine produces asset files and asset generation summaries.
+
+Mission Control imports only the summary, using:
+
+```text
+SUBSTACK_ASSET_SUMMARY_PATH="/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/asset_generation_summary.json" npm run substack:assets:import
+```
+
+Mission Control writes:
+
+```text
+content/logs/workflows/substack_asset_generation_summary.json
+content/logs/workflows/substack_asset_generation_summary.md
+content/logs/workflows/substack_asset_summary_handoff.json
+```
+
+Routing rules:
+
+- `prepared` -> `review_assets` in `prepared_assets_review`
+- `ready_for_distribution` -> `approve_render_or_publish_queue_later` in `distribution_candidate_review`
+- skipped or blocked -> `inspect_blocked_reason` in `blocked_asset_review`
+
+Mission Control does not create assets, change asset content, render video/audio, publish live, or call external APIs.

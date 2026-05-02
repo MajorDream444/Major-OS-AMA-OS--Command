@@ -8,7 +8,19 @@ Mission Control does not generate assets, publish posts, render video, render au
 
 ## Source
 
-Primary local path:
+Configurable source path:
+
+```text
+SUBSTACK_ASSET_SUMMARY_PATH
+```
+
+Expected Substack Engine source:
+
+```text
+/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/asset_generation_summary.json
+```
+
+Default local path:
 
 ```text
 content/logs/workflows/asset_generation_summary.json
@@ -22,7 +34,15 @@ fixtures/substack/asset_generation_summary.json
 
 ## Intake Outputs
 
-The local CLI writes:
+The local CLI writes the current Mission Control import handoff:
+
+```text
+content/logs/workflows/substack_asset_generation_summary.json
+content/logs/workflows/substack_asset_generation_summary.md
+content/logs/workflows/substack_asset_summary_handoff.json
+```
+
+Legacy intake files may also exist:
 
 ```text
 content/logs/workflows/asset_generation_intake.json
@@ -31,15 +51,13 @@ content/logs/workflows/asset_generation_intake.md
 
 These are Mission Control routing summaries only.
 
-## Ranking Rules
+## Routing Rules
 
-Mission Control surfaces one next decision for each asset result:
+Mission Control surfaces one next action and queue for each asset result:
 
-- `request rewrite` when asset generation was skipped or blocked.
-- `hold` when required generated files are missing.
-- `review assets` when the asset state is unclear.
-- `approve for rendering queue later` when `asset_state = prepared`.
-- `approve for publishing queue later` when `asset_state = ready_for_distribution`.
+- `asset_state = prepared`: `next_action = review_assets`, `queue = prepared_assets_review`.
+- `asset_state = ready_for_distribution`: `next_action = approve_render_or_publish_queue_later`, `queue = distribution_candidate_review`.
+- skipped or blocked assets: `next_action = inspect_blocked_reason`, `queue = blocked_asset_review`.
 
 Required files:
 
@@ -56,6 +74,7 @@ Required files:
 npm run assets:intake
 npm run assets:intake -- --file fixtures/substack/asset_generation_summary.json
 npm run assets:intake -- --stdin
+SUBSTACK_ASSET_SUMMARY_PATH="/Users/majordreamwilliams/Documents/SUBSTACK-AUTOMATION-ENGINE/content/logs/workflows/asset_generation_summary.json" npm run substack:assets:import
 ```
 
 Browser command input:
