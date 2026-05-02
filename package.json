@@ -1,5 +1,6 @@
 {
   "scripts": {
-    "decisions:sync": "node scripts/sync_decisions.js"
+    "decisions:sync": "node scripts/sync_decisions.js",
+    "assets:intake": "node scripts/sync_asset_generation.js"
   }
 }

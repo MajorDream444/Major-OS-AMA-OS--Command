@@ -78,6 +78,20 @@ Artifacts persist through `localStorage`.
 
 The current system may create, review, approve, and archive artifacts locally only. No external write, publish, sync, or API action is allowed in this layer.
 
+## External Asset Summaries
+
+SUBSTACK-AUTOMATION-ENGINE may export `asset_generation_summary.json` after Mission Control decisions are imported there.
+
+Mission Control imports that summary so operators can route each artifact toward:
+
+- `hold`
+- `review assets`
+- `request rewrite`
+- `approve for rendering queue later`
+- `approve for publishing queue later`
+
+This intake does not generate assets, render video/audio, publish live, or call external APIs. It only annotates matching artifacts and surfaces routing decisions.
+
 ## Future Storage Path
 
 Later live storage should be introduced in this order:

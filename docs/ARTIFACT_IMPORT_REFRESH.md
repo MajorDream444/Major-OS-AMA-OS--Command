@@ -16,6 +16,22 @@ Static browser fallback:
 fixtures/substack/mission_control_export.json
 ```
 
+## Asset Summary Intake
+
+Mission Control also imports SUBSTACK-AUTOMATION-ENGINE asset summaries from:
+
+```text
+content/logs/workflows/asset_generation_summary.json
+```
+
+Static browser fallback:
+
+```text
+fixtures/substack/asset_generation_summary.json
+```
+
+This does not create assets. It only tells Mission Control which artifacts have prepared or ready-for-distribution asset packages and which next decision should surface.
+
 ## Refresh Flow
 
 ```text
@@ -32,6 +48,10 @@ Substack Engine export
 refresh artifacts
 refresh substack artifacts
 reload artifacts
+refresh assets
+refresh asset generation
+import asset summary
+reload assets
 ```
 
 ## UI Control
@@ -40,6 +60,7 @@ The ARTIFACTS panel includes:
 
 ```text
 Refresh Artifacts
+Refresh Assets
 ```
 
 Clicking it reloads the local export, preserves the active source filter, re-runs ranking, updates NEXT MOVE, and appends:
@@ -54,6 +75,12 @@ The ARTIFACTS panel shows the last import status:
 
 ```text
 Import: SUBSTACK_ENGINE · 3 artifacts · content/logs/workflows/mission_control_export.json · 13:42 · loaded
+```
+
+Asset summary line:
+
+```text
+Assets: SUBSTACK_ENGINE · 3 artifacts · 1 prepared · 1 distribution-ready · 1 skipped · fixtures/substack/asset_generation_summary.json · 13:42 · fallback
 ```
 
 Fields:
@@ -88,4 +115,5 @@ It should:
 - No secrets.
 - No external writes.
 - No Substack content generation inside Command Center.
+- No asset generation, rendering, or live publishing inside Command Center.
 - Command Center owns approval and publish handoff.

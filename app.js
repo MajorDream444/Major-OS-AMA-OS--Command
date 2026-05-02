@@ -138,6 +138,22 @@ const externalArtifactSources = {
   ]
 };
 
+const assetGenerationSources = {
+  SUBSTACK_ENGINE: [
+    "content/logs/workflows/asset_generation_summary.json",
+    "fixtures/substack/asset_generation_summary.json"
+  ]
+};
+
+const requiredAssetFiles = [
+  "video_script.md",
+  "voice_script.txt",
+  "hooks.json",
+  "visual_prompts.json",
+  "distribution_plan.json",
+  "asset_manifest.json"
+];
+
 const fallbackExternalArtifacts = {
   SUBSTACK_ENGINE: [
     {
@@ -191,6 +207,17 @@ const seedState = {
     timestamp: "--",
     status: "missing"
   },
+  assetGenerationStatus: {
+    source: "SUBSTACK_ENGINE",
+    path: "not loaded",
+    count: 0,
+    prepared: 0,
+    ready_for_distribution: 0,
+    skipped: 0,
+    timestamp: "--",
+    status: "missing"
+  },
+  assetGenerationIntake: [],
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -767,6 +794,12 @@ const normalizeArtifact = (artifact) => {
     publish_mode: publishMode,
     next_action: artifact.next_action || "Review artifact",
     system_underneath: artifact.system_underneath || "",
+    asset_state: artifact.asset_state || "",
+    asset_next_decision: artifact.asset_next_decision || "",
+    asset_route_rank: Number.isFinite(artifact.asset_route_rank) ? artifact.asset_route_rank : null,
+    asset_generated_files: Array.isArray(artifact.asset_generated_files) ? artifact.asset_generated_files : [],
+    asset_blocked_reason: artifact.asset_blocked_reason || "",
+    asset_routing_note: artifact.asset_routing_note || "",
     risk_mode: artifact.risk_mode || publishMode,
     publish_rule: artifact.publish_rule || rule.rule,
     delay_until: artifact.delay_until || calculateDelayUntil(rule, new Date(createdAt)),
@@ -825,6 +858,13 @@ const mergeSeedState = (savedState) => {
     ...cloneState(seedState.externalImportStatus),
     ...(savedState.externalImportStatus || {})
   };
+  merged.assetGenerationStatus = {
+    ...cloneState(seedState.assetGenerationStatus),
+    ...(savedState.assetGenerationStatus || {})
+  };
+  merged.assetGenerationIntake = Array.isArray(savedState.assetGenerationIntake)
+    ? savedState.assetGenerationIntake
+    : [];
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
       ? savedState.riskGovernance.find((rule) => rule.lane === seedRule.lane)
@@ -899,6 +939,7 @@ const agentRegistryCommandPattern = /\bshow agents\b/i;
 const missionBoardCommandPattern = /\bshow missions\b/i;
 const artifactsCommandPattern = /\bshow artifacts\b/i;
 const refreshArtifactsCommandPattern = /\b(refresh artifacts|refresh substack artifacts|reload artifacts)\b/i;
+const refreshAssetGenerationCommandPattern = /\b(refresh assets|refresh asset generation|import asset summary|reload assets)\b/i;
 const approveArtifactCommandPattern = /^approve artifact\s+(.+)$/i;
 const archiveArtifactCommandPattern = /^archive artifact\s+(.+)$/i;
 const rejectArtifactCommandPattern = /^reject artifact\s+(.+)$/i;
@@ -1473,6 +1514,206 @@ const applyExternalArtifactExport = ({ source, path, status = "loaded", artifact
   return { source, path, count: importedArtifacts.length };
 };
 
+const assetFileSet = (asset) =>
+  new Set(Array.isArray(asset.generated_files) ? asset.generated_files : []);
+
+const hasRequiredAssetFiles = (asset) => {
+  const files = Array.from(assetFileSet(asset));
+  return requiredAssetFiles.every((name) =>
+    files.some((file) => String(file).endsWith(name))
+  );
+};
+
+const nextDecisionForAsset = (asset) => {
+  if (asset.skipped || asset.blocked_reason) return "request rewrite";
+  if (!hasRequiredAssetFiles(asset)) return "hold";
+  if (asset.asset_state === "ready_for_distribution") return "approve for publishing queue later";
+  if (asset.asset_state === "prepared") return "approve for rendering queue later";
+  return "review assets";
+};
+
+const rankForAsset = (asset, decision) => {
+  if (decision === "request rewrite") return 1;
+  if (asset.asset_state === "ready_for_distribution") return 2;
+  if (asset.asset_state === "prepared") return 3;
+  if (decision === "review assets") return 4;
+  return 5;
+};
+
+const assetRoutingNote = (asset, decision) => {
+  if (decision === "request rewrite") {
+    return asset.blocked_reason || "Asset generation skipped; route back to Substack Engine for rewrite.";
+  }
+  if (decision === "approve for publishing queue later") {
+    return "Assets are ready for later publishing queue approval. No live publish now.";
+  }
+  if (decision === "approve for rendering queue later") {
+    return "Assets are prepared for later rendering queue approval. No render now.";
+  }
+  if (decision === "hold") {
+    return "Required asset files are incomplete; hold until the producer refreshes output.";
+  }
+  return "Review asset package before downstream routing.";
+};
+
+const normalizeAssetGenerationResult = (asset) => {
+  const decision = nextDecisionForAsset(asset);
+  return {
+    artifact_id: asset.artifact_id || "",
+    mission_id: asset.mission_id || "",
+    title: asset.title || "Untitled asset artifact",
+    lane: asset.lane || "Operations",
+    status: asset.status || "unknown",
+    asset_state: asset.asset_state || "none",
+    skipped: Boolean(asset.skipped),
+    blocked_reason: asset.blocked_reason || "",
+    generated_files: Array.isArray(asset.generated_files) ? asset.generated_files : [],
+    next_decision: decision,
+    route_rank: rankForAsset(asset, decision),
+    routing_note: assetRoutingNote(asset, decision)
+  };
+};
+
+const loadAssetGenerationSummary = async (source) => {
+  const paths = assetGenerationSources[source] || [];
+  const errors = [];
+
+  for (const [index, path] of paths.entries()) {
+    try {
+      const payload = await fetchJsonFile(path);
+      const results = Array.isArray(payload) ? payload : (Array.isArray(payload.results) ? payload.results : []);
+      return { path, results, status: index === 0 ? "loaded" : "fallback" };
+    } catch (error) {
+      errors.push({ path, message: error.message, status: error.status || 0 });
+    }
+  }
+
+  const missingOnly = errors.length > 0 && errors.every((error) => error.status === 404);
+  const summaryError = new Error(
+    errors.map((error) => `${error.path}: ${error.message}`).join(" | ") ||
+    `${source} asset summary unavailable`
+  );
+  summaryError.importStatus = missingOnly ? "missing" : "error";
+  throw summaryError;
+};
+
+const applyAssetGenerationSummary = ({ source, path, status = "loaded", results, silent = false }) => {
+  const routedAssets = results
+    .map(normalizeAssetGenerationResult)
+    .sort((a, b) => {
+      if (a.route_rank !== b.route_rank) return a.route_rank - b.route_rank;
+      return a.title.localeCompare(b.title);
+    });
+  const intakeByArtifact = new Map(routedAssets.map((asset) => [asset.artifact_id, asset]));
+
+  state.assetGenerationIntake = routedAssets;
+  state.assetGenerationStatus = {
+    source,
+    path,
+    count: routedAssets.length,
+    prepared: routedAssets.filter((asset) => asset.asset_state === "prepared").length,
+    ready_for_distribution: routedAssets.filter((asset) => asset.asset_state === "ready_for_distribution").length,
+    skipped: routedAssets.filter((asset) => asset.skipped).length,
+    timestamp: nowStamp(),
+    status
+  };
+
+  const matchedArtifactIds = new Set();
+  state.artifacts = state.artifacts.map((artifact) => {
+    const asset = intakeByArtifact.get(artifact.artifact_id || artifact.id);
+    if (!asset) return artifact;
+
+    matchedArtifactIds.add(asset.artifact_id);
+    return normalizeArtifact({
+      ...artifact,
+      asset_state: asset.asset_state,
+      asset_next_decision: asset.next_decision,
+      asset_route_rank: asset.route_rank,
+      asset_generated_files: asset.generated_files,
+      asset_blocked_reason: asset.blocked_reason,
+      asset_routing_note: asset.routing_note,
+      next_action: asset.next_decision || artifact.next_action,
+      updated_at: new Date().toISOString()
+    });
+  });
+  const existingKeys = new Set(state.artifacts.map((artifact) => artifact.artifact_id || artifact.id));
+  const assetOnlyArtifacts = routedAssets
+    .filter((asset) => asset.artifact_id && !matchedArtifactIds.has(asset.artifact_id) && !existingKeys.has(asset.artifact_id))
+    .map((asset) => normalizeArtifact({
+      id: asset.artifact_id,
+      artifact_id: asset.artifact_id,
+      mission_id: asset.mission_id,
+      title: asset.title,
+      type: "asset_generation_summary",
+      artifact_type: "asset_generation_summary",
+      source,
+      lane: asset.lane,
+      status: asset.status,
+      owner_agent: "A004 Ops Watcher",
+      summary: asset.routing_note,
+      preview: asset.routing_note,
+      requires_major_review: asset.next_decision !== "approve for publishing queue later",
+      score: null,
+      confidence: null,
+      risk_level: asset.lane === "Reaction Doctrine" ? "MED" : "LOW",
+      publish_mode: "REVIEW",
+      next_action: asset.next_decision,
+      asset_state: asset.asset_state,
+      asset_next_decision: asset.next_decision,
+      asset_route_rank: asset.route_rank,
+      asset_generated_files: asset.generated_files,
+      asset_blocked_reason: asset.blocked_reason,
+      asset_routing_note: asset.routing_note
+    }));
+  state.artifacts = [...assetOnlyArtifacts, ...state.artifacts];
+
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  refreshSystemGuidance({ announce: !silent });
+
+  if (!silent) {
+    pushActivity(`Imported ${source} asset summary`, "SYNCED");
+  }
+
+  return { source, path, count: routedAssets.length };
+};
+
+const setMissingAssetGenerationSummary = (source, error) => {
+  state.assetGenerationIntake = [];
+  state.assetGenerationStatus = {
+    source,
+    path: "summary missing",
+    count: 0,
+    prepared: 0,
+    ready_for_distribution: 0,
+    skipped: 0,
+    timestamp: nowStamp(),
+    status: error.importStatus || "missing"
+  };
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  refreshSystemGuidance({ announce: true });
+  pushActivity(`${source} asset summary missing: ${error.message}`, "REVIEW");
+};
+
+const refreshAssetGenerationSummary = async (source = "SUBSTACK_ENGINE", options = {}) => {
+  try {
+    const summaryPayload = await loadAssetGenerationSummary(source);
+    return applyAssetGenerationSummary({
+      source,
+      path: summaryPayload.path,
+      results: summaryPayload.results,
+      status: summaryPayload.status,
+      silent: Boolean(options.silent)
+    });
+  } catch (error) {
+    setMissingAssetGenerationSummary(source, error);
+    return { source, path: "", count: 0, error };
+  }
+};
+
 const refreshExternalArtifacts = async (source = "SUBSTACK_ENGINE", options = {}) => {
   try {
     const exportPayload = await loadExternalArtifactExport(source);
@@ -1520,6 +1761,12 @@ const getPriorityArtifact = () =>
     artifact.source === "SUBSTACK_ENGINE" && isActionableArtifact(artifact)
   ) || sortedArtifacts(state.artifacts).find(isActionableArtifact);
 
+const getPriorityAssetIntake = () =>
+  [...(state.assetGenerationIntake || [])].sort((a, b) => {
+    if (a.route_rank !== b.route_rank) return a.route_rank - b.route_rank;
+    return a.title.localeCompare(b.title);
+  })[0] || null;
+
 const getReviewMission = () =>
   state.missions.find((mission) => mission.status === "NEEDS MAJOR" || mission.needs_major);
 
@@ -1532,6 +1779,7 @@ const buildStatusLines = () => {
     ["WORKING", "WAITING", "BLOCKED"].includes(agent.status) || agent.current_task || agent.needs_major
   );
   const reviewArtifacts = state.artifacts.filter((artifact) => artifact.status === "NEEDS REVIEW");
+  const assetStatus = state.assetGenerationStatus || seedState.assetGenerationStatus;
   const lines = [];
 
   if (latestMission) {
@@ -1562,6 +1810,10 @@ const buildStatusLines = () => {
     lines.push(`${reviewArtifacts.length} artifact${reviewArtifacts.length === 1 ? "" : "s"} need review.`);
   }
 
+  if (assetStatus.count) {
+    lines.push(`Asset intake: ${assetStatus.prepared} prepared, ${assetStatus.ready_for_distribution} ready for distribution, ${assetStatus.skipped} skipped.`);
+  }
+
   lines.push(getReviewMission() || state.needsMajor
     ? "System is waiting for Major review."
     : "System is not blocked on Major.");
@@ -1573,6 +1825,17 @@ const commandTitle = (value = "") =>
   value.replace(/^(Lead List|Audit Report|Outreach Draft|Substack Draft|Video Script|Product Page|Workflow Plan|Daily Brief|Memory Note):\s*/i, "").trim();
 
 const buildNextMove = () => {
+  const assetIntake = getPriorityAssetIntake();
+  if (assetIntake) {
+    return {
+      action: `Asset decision: ${assetIntake.title}`,
+      why: `Substack Engine reports ${assetIntake.asset_state}; Mission Control should route it as "${assetIntake.next_decision}".`,
+      command: assetIntake.next_decision === "request rewrite"
+        ? `rewrite artifact ${assetIntake.artifact_id}`
+        : "show artifacts"
+    };
+  }
+
   const artifact = getPriorityArtifact();
   if (artifact) {
     if (artifact.status === "BLOCKED") {
@@ -2408,6 +2671,10 @@ const dispatchMission = (command) => {
     return refreshArtifactsFromCommand(mission, trimmed);
   }
 
+  if (refreshAssetGenerationCommandPattern.test(trimmed)) {
+    return refreshAssetGenerationFromCommand(mission, trimmed);
+  }
+
   if (approveArtifactCommandPattern.test(trimmed)) {
     handleArtifactStatusCommand(mission, trimmed, "APPROVED");
     return;
@@ -2481,6 +2748,14 @@ const refreshArtifactsFromCommand = (mission, command) => {
   saveState();
   renderArtifacts();
   return refreshExternalArtifacts("SUBSTACK_ENGINE");
+};
+
+const refreshAssetGenerationFromCommand = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.artifactsHighlighted = true;
+  saveState();
+  renderArtifacts();
+  return refreshAssetGenerationSummary("SUBSTACK_ENGINE");
 };
 
 const handleArtifactStatusCommand = (mission, command, status) => {
@@ -2783,6 +3058,7 @@ const renderArtifacts = () => {
   const panel = document.querySelector("#artifacts");
   const target = document.querySelector("#artifact-list");
   const importStatusTarget = document.querySelector("#artifact-import-status");
+  const assetStatusTarget = document.querySelector("#asset-generation-status");
   const decisionStatusTarget = document.querySelector("#artifact-decision-status");
   const decisionJsonTarget = document.querySelector("#artifact-decision-json");
   const filter = state.artifactSourceFilter || "ALL";
@@ -2790,6 +3066,7 @@ const renderArtifacts = () => {
     filter === "ALL" || artifact.source === filter
   ));
   const importStatus = state.externalImportStatus || seedState.externalImportStatus;
+  const assetStatus = state.assetGenerationStatus || seedState.assetGenerationStatus;
   const decisionStatus = state.decisionExportStatus || seedState.decisionExportStatus;
 
   panel.classList.toggle("review-highlight", Boolean(state.artifactsHighlighted));
@@ -2799,6 +3076,11 @@ const renderArtifacts = () => {
   importStatusTarget.textContent =
     `Import: ${importStatus.source} · ${importStatus.count} artifacts · ${importStatus.path} · ${importStatus.timestamp} · ${importStatus.status}`;
   importStatusTarget.className = `import-status ${importStatus.status}`;
+  if (assetStatusTarget) {
+    assetStatusTarget.textContent =
+      `Assets: ${assetStatus.source} · ${assetStatus.count} artifacts · ${assetStatus.prepared} prepared · ${assetStatus.ready_for_distribution} distribution-ready · ${assetStatus.skipped} skipped · ${assetStatus.path} · ${assetStatus.timestamp} · ${assetStatus.status}`;
+    assetStatusTarget.className = `import-status ${assetStatus.status}`;
+  }
   decisionStatusTarget.textContent =
     `Decision Export: ${decisionStatus.last_decision} · ${decisionStatus.total} decisions this session · ${decisionStatus.path} · ${decisionStatus.updated_at}`;
   decisionJsonTarget.textContent = decisionExportJson();
@@ -2820,8 +3102,10 @@ const renderArtifacts = () => {
         <span>risk ${escapeHtml(artifact.risk_level || "MED")}</span>
         <span>publish ${escapeHtml(artifact.publish_mode || artifact.risk_mode || "REVIEW")}</span>
         <span>status ${escapeHtml(artifact.status)}</span>
+        <span>asset ${escapeHtml(artifact.asset_state || "none")}</span>
+        <span>route ${escapeHtml(artifact.asset_next_decision || "none")}</span>
       </div>
-      <p>${escapeHtml(artifact.next_action || artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
+      <p>${escapeHtml(artifact.next_action || artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.asset_routing_note ? `/ asset note: ${escapeHtml(artifact.asset_routing_note)}` : ""} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
     </article>
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
@@ -2949,6 +3233,7 @@ const bindResetControl = () => {
     saveState();
     renderAll();
     refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
+    refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
   });
 };
 
@@ -2993,10 +3278,13 @@ const bindArtifactFilter = () => {
 
 const bindArtifactRefresh = () => {
   const button = document.querySelector("#refresh-artifacts-button");
-  if (!button) return;
-
-  button.addEventListener("click", () => {
+  if (button) button.addEventListener("click", () => {
     refreshExternalArtifacts("SUBSTACK_ENGINE");
+  });
+
+  const assetButton = document.querySelector("#refresh-assets-button");
+  if (assetButton) assetButton.addEventListener("click", () => {
+    refreshAssetGenerationSummary("SUBSTACK_ENGINE");
   });
 };
 
@@ -3111,4 +3399,5 @@ bindArtifactRefresh();
 bindNavigationState();
 renderAll();
 refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
+refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
 startHeartbeat();

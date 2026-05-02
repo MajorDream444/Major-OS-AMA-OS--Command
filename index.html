@@ -124,7 +124,10 @@
               <p class="eyebrow">Mission Outputs</p>
               <h2>Artifacts</h2>
             </div>
-            <button class="command-button" type="button" id="refresh-artifacts-button">Refresh Artifacts</button>
+            <div class="inline-actions">
+              <button class="command-button" type="button" id="refresh-artifacts-button">Refresh Artifacts</button>
+              <button class="command-button" type="button" id="refresh-assets-button">Refresh Assets</button>
+            </div>
           </div>
           <div class="artifact-filter" id="artifact-source-filter" aria-label="Artifact source filter">
             <button class="active" type="button" data-source="ALL">ALL</button>
@@ -132,6 +135,7 @@
             <button type="button" data-source="SUBSTACK_ENGINE">SUBSTACK_ENGINE</button>
           </div>
           <div class="import-status" id="artifact-import-status">Import: SUBSTACK_ENGINE · 0 artifacts · not loaded · -- · missing</div>
+          <div class="import-status" id="asset-generation-status">Assets: SUBSTACK_ENGINE · 0 artifacts · 0 prepared · 0 distribution-ready · 0 skipped · not loaded · -- · missing</div>
           <div class="decision-export" id="artifact-decision-export">
             <div id="artifact-decision-status">Decision Export: none · 0 decisions this session</div>
             <pre id="artifact-decision-json">{ "decisions": [] }</pre>

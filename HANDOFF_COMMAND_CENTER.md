@@ -6,6 +6,25 @@ This handoff gives the Command Center builder full context on where the system s
 
 The mission is not to rebuild from zero. The mission is to integrate what already exists, make it easier to operate, and turn the internal system into a productized AI operating system that can be used by Major and sold to clients.
 
+## Latest Update - 2026-05-02
+
+Mission Control now has a local-only intake for SUBSTACK-AUTOMATION-ENGINE `asset_generation_summary.json`.
+
+What changed:
+
+- `npm run assets:intake` imports asset generation summaries from a file or stdin.
+- The browser Artifacts panel can refresh asset summaries with `Refresh Assets`.
+- Mission Control ranks asset packages into `hold`, `review assets`, `request rewrite`, `approve for rendering queue later`, or `approve for publishing queue later`.
+- Matching artifacts are annotated with `asset_state`, route decision, generated files, and routing notes.
+- Asset-only summary rows are visible even if the main artifact export has not been refreshed yet.
+
+Boundary:
+
+- Command Center does not generate assets.
+- Command Center does not render video/audio.
+- Command Center does not publish live.
+- Command Center only imports, ranks, and routes the external producer summary.
+
 ## Core Intention
 
 Major is building an AI-powered operating system that can:

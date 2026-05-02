@@ -361,6 +361,13 @@ h3 {
   gap: 10px;
 }
 
+.inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
 .nav-panel {
   margin-bottom: 10px;
 }
