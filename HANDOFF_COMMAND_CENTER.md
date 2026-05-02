@@ -10,10 +10,13 @@ The mission is not to rebuild from zero. The mission is to integrate what alread
 
 Mission Control now has a local-only intake for SUBSTACK-AUTOMATION-ENGINE `asset_generation_summary.json`.
 
+Mission Control also surfaces `content/logs/workflows/substack_asset_summary_handoff.json` as a read-only Asset Decision Queue panel.
+
 What changed:
 
 - `npm run assets:intake` imports asset generation summaries from a file or stdin.
 - The browser Artifacts panel can refresh asset summaries with `Refresh Assets`.
+- The Asset Decision Queue panel shows prepared, ready-for-distribution, and blocked/skipped asset handoff rows.
 - Mission Control ranks asset packages into `hold`, `review assets`, `request rewrite`, `approve for rendering queue later`, or `approve for publishing queue later`.
 - Matching artifacts are annotated with `asset_state`, route decision, generated files, and routing notes.
 - Asset-only summary rows are visible even if the main artifact export has not been refreshed yet.
@@ -23,7 +26,8 @@ Boundary:
 - Command Center does not generate assets.
 - Command Center does not render video/audio.
 - Command Center does not publish live.
-- Command Center only imports, ranks, and routes the external producer summary.
+- Command Center only imports, surfaces, ranks, and routes the external producer summary.
+- The Asset Decision Queue is read-only. It has no approve, render, publish, or generation controls.
 
 ## Core Intention
 

@@ -41,6 +41,7 @@
             <a class="nav-item" href="#next-move">NEXT MOVE</a>
             <a class="nav-item" href="#mission-board">MISSION BOARD</a>
             <a class="nav-item" href="#artifacts">ARTIFACTS</a>
+            <a class="nav-item" href="#asset-decision-queue">ASSET QUEUE</a>
             <a class="nav-item" href="#risk-governance">RISK GOVERNANCE</a>
             <a class="nav-item" href="#daily-brief">DAILY BRIEF</a>
             <a class="nav-item" href="#media-engine">MEDIA ENGINE</a>
@@ -141,6 +142,19 @@
             <pre id="artifact-decision-json">{ "decisions": [] }</pre>
           </div>
           <div id="artifact-list" class="artifact-list"></div>
+        </section>
+
+        <section class="panel asset-decision-panel" id="asset-decision-queue">
+          <div class="panel-header inline">
+            <div>
+              <p class="eyebrow">Substack Handoff</p>
+              <h2>Asset Decision Queue</h2>
+            </div>
+            <span class="signal queued">READ ONLY</span>
+          </div>
+          <div class="import-status" id="asset-decision-status">Asset Queue: SUBSTACK_ENGINE · 0 assets · not loaded · -- · missing</div>
+          <div id="asset-decision-summary" class="asset-decision-summary"></div>
+          <div id="asset-decision-list" class="asset-decision-list"></div>
         </section>
 
         <section class="panel risk-governance-panel" id="risk-governance">

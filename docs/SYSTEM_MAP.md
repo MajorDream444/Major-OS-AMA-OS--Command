@@ -26,6 +26,7 @@ The Command Center currently owns:
 - Needs Major strip
 - Daily Brief mock panel
 - GitHub-tracked protocols and handoffs
+- read-only Substack asset decision queue visibility from local handoff files
 
 ## Not Yet Connected
 
@@ -41,6 +42,8 @@ Do not connect these until the sync plan is explicit:
 - Telegram
 - GitHub APIs
 - n8n
+
+SUBSTACK-AUTOMATION-ENGINE remains an external artifact producer. Mission Control imports local summaries and surfaces decision queues; it does not generate assets, render media, publish live, or call external APIs from the Asset Decision Queue.
 
 ## 30-Day Operating Rhythm
 

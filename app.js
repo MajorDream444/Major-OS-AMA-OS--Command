@@ -145,6 +145,12 @@ const assetGenerationSources = {
   ]
 };
 
+const assetDecisionQueueSources = {
+  SUBSTACK_ENGINE: [
+    "content/logs/workflows/substack_asset_summary_handoff.json"
+  ]
+};
+
 const requiredAssetFiles = [
   "video_script.md",
   "voice_script.txt",
@@ -218,6 +224,17 @@ const seedState = {
     status: "missing"
   },
   assetGenerationIntake: [],
+  assetDecisionQueueStatus: {
+    source: "SUBSTACK_ENGINE",
+    path: "not loaded",
+    total_assets: 0,
+    prepared: 0,
+    ready_for_distribution: 0,
+    blocked_skipped: 0,
+    timestamp: "--",
+    status: "missing"
+  },
+  assetDecisionQueue: [],
   riskGovernance: riskRuleSeed,
   systemGuidance: {
     statusLines: [
@@ -864,6 +881,13 @@ const mergeSeedState = (savedState) => {
   };
   merged.assetGenerationIntake = Array.isArray(savedState.assetGenerationIntake)
     ? savedState.assetGenerationIntake
+    : [];
+  merged.assetDecisionQueueStatus = {
+    ...cloneState(seedState.assetDecisionQueueStatus),
+    ...(savedState.assetDecisionQueueStatus || {})
+  };
+  merged.assetDecisionQueue = Array.isArray(savedState.assetDecisionQueue)
+    ? savedState.assetDecisionQueue
     : [];
   merged.riskGovernance = cloneState(riskRuleSeed).map((seedRule) => {
     const savedRule = Array.isArray(savedState.riskGovernance)
@@ -1714,6 +1738,134 @@ const refreshAssetGenerationSummary = async (source = "SUBSTACK_ENGINE", options
   }
 };
 
+const normalizeDecisionQueueAsset = (asset) => ({
+  artifact_id: asset.artifact_id || "",
+  mission_id: asset.mission_id || "",
+  title: asset.title || "Untitled asset",
+  lane: asset.lane || "Operations",
+  asset_state: asset.asset_state || (asset.skipped ? "skipped" : "unknown"),
+  queue: asset.queue || "blocked_asset_review",
+  next_action: asset.next_action || "review_asset_handoff",
+  blocked_reason: asset.blocked_reason || "",
+  skipped: Boolean(asset.skipped),
+  route_priority: Number.isFinite(asset.route_priority) ? asset.route_priority : 99
+});
+
+const decisionQueueCounts = (assets, routingSummary = {}) => ({
+  total_assets: Number.isFinite(routingSummary.total_assets)
+    ? routingSummary.total_assets
+    : assets.length,
+  prepared: Number.isFinite(routingSummary.by_asset_state?.prepared)
+    ? routingSummary.by_asset_state.prepared
+    : assets.filter((asset) => asset.asset_state === "prepared").length,
+  ready_for_distribution: Number.isFinite(routingSummary.by_asset_state?.ready_for_distribution)
+    ? routingSummary.by_asset_state.ready_for_distribution
+    : assets.filter((asset) => asset.asset_state === "ready_for_distribution").length,
+  blocked_skipped: Number.isFinite(routingSummary.blocked_asset_review)
+    ? routingSummary.blocked_asset_review
+    : assets.filter((asset) =>
+      asset.skipped ||
+      asset.blocked_reason ||
+      asset.asset_state === "blocked" ||
+      asset.asset_state === "skipped"
+    ).length
+});
+
+const loadAssetDecisionQueueHandoff = async (source) => {
+  const paths = assetDecisionQueueSources[source] || [];
+  const errors = [];
+
+  for (const path of paths) {
+    try {
+      const payload = await fetchJsonFile(path);
+      const routedAssets = Array.isArray(payload.routed_assets) ? payload.routed_assets : [];
+      return {
+        path,
+        routedAssets,
+        routingSummary: payload.routing_summary || {},
+        guardrails: payload.guardrails || {},
+        status: routedAssets.length > 0 ? "loaded" : "empty"
+      };
+    } catch (error) {
+      errors.push({ path, message: error.message, status: error.status || 0 });
+    }
+  }
+
+  const missingOnly = errors.length > 0 && errors.every((error) => error.status === 404);
+  const queueError = new Error(
+    errors.map((error) => `${error.path}: ${error.message}`).join(" | ") ||
+    `${source} asset decision handoff unavailable`
+  );
+  queueError.importStatus = missingOnly ? "missing" : "error";
+  throw queueError;
+};
+
+const applyAssetDecisionQueueHandoff = ({ source, path, routedAssets, routingSummary, status = "loaded", silent = false }) => {
+  const assets = routedAssets
+    .map(normalizeDecisionQueueAsset)
+    .sort((a, b) => {
+      if (a.queue !== b.queue) return a.queue.localeCompare(b.queue);
+      if (a.route_priority !== b.route_priority) return a.route_priority - b.route_priority;
+      return a.title.localeCompare(b.title);
+    });
+  const counts = decisionQueueCounts(assets, routingSummary);
+
+  state.assetDecisionQueue = assets;
+  state.assetDecisionQueueStatus = {
+    source,
+    path,
+    total_assets: counts.total_assets,
+    prepared: counts.prepared,
+    ready_for_distribution: counts.ready_for_distribution,
+    blocked_skipped: counts.blocked_skipped,
+    timestamp: nowStamp(),
+    status
+  };
+
+  saveState();
+  renderAssetDecisionQueue();
+
+  if (!silent) {
+    pushActivity(`Loaded ${source} asset decision queue`, "SYNCED");
+  }
+
+  return { source, path, count: assets.length };
+};
+
+const setMissingAssetDecisionQueue = (source, error) => {
+  state.assetDecisionQueue = [];
+  state.assetDecisionQueueStatus = {
+    source,
+    path: "handoff missing",
+    total_assets: 0,
+    prepared: 0,
+    ready_for_distribution: 0,
+    blocked_skipped: 0,
+    timestamp: nowStamp(),
+    status: error.importStatus || "missing"
+  };
+  saveState();
+  renderAssetDecisionQueue();
+  pushActivity(`${source} asset decision handoff missing: ${error.message}`, "REVIEW");
+};
+
+const refreshAssetDecisionQueue = async (source = "SUBSTACK_ENGINE", options = {}) => {
+  try {
+    const handoff = await loadAssetDecisionQueueHandoff(source);
+    return applyAssetDecisionQueueHandoff({
+      source,
+      path: handoff.path,
+      routedAssets: handoff.routedAssets,
+      routingSummary: handoff.routingSummary,
+      status: handoff.status,
+      silent: Boolean(options.silent)
+    });
+  } catch (error) {
+    setMissingAssetDecisionQueue(source, error);
+    return { source, path: "", count: 0, error };
+  }
+};
+
 const refreshExternalArtifacts = async (source = "SUBSTACK_ENGINE", options = {}) => {
   try {
     const exportPayload = await loadExternalArtifactExport(source);
@@ -1780,6 +1932,7 @@ const buildStatusLines = () => {
   );
   const reviewArtifacts = state.artifacts.filter((artifact) => artifact.status === "NEEDS REVIEW");
   const assetStatus = state.assetGenerationStatus || seedState.assetGenerationStatus;
+  const assetQueueStatus = state.assetDecisionQueueStatus || seedState.assetDecisionQueueStatus;
   const lines = [];
 
   if (latestMission) {
@@ -1812,6 +1965,10 @@ const buildStatusLines = () => {
 
   if (assetStatus.count) {
     lines.push(`Asset intake: ${assetStatus.prepared} prepared, ${assetStatus.ready_for_distribution} ready for distribution, ${assetStatus.skipped} skipped.`);
+  }
+
+  if (assetQueueStatus.total_assets) {
+    lines.push(`Asset decision queue: ${assetQueueStatus.prepared} prepared, ${assetQueueStatus.ready_for_distribution} distribution-ready, ${assetQueueStatus.blocked_skipped} blocked or skipped.`);
   }
 
   lines.push(getReviewMission() || state.needsMajor
@@ -3110,6 +3267,91 @@ const renderArtifacts = () => {
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
 
+const queueLabel = (queue) => ({
+  prepared_assets_review: "PREPARED",
+  distribution_candidate_review: "DISTRIBUTION",
+  blocked_asset_review: "BLOCKED / SKIPPED"
+})[queue] || String(queue || "REVIEW").toUpperCase();
+
+const queueClass = (queue) => ({
+  prepared_assets_review: "queued",
+  distribution_candidate_review: "ready",
+  blocked_asset_review: "blocked"
+})[queue] || "review";
+
+const renderAssetDecisionQueue = () => {
+  const statusTarget = document.querySelector("#asset-decision-status");
+  const summaryTarget = document.querySelector("#asset-decision-summary");
+  const listTarget = document.querySelector("#asset-decision-list");
+  if (!statusTarget || !summaryTarget || !listTarget) return;
+
+  const status = state.assetDecisionQueueStatus || seedState.assetDecisionQueueStatus;
+  const assets = Array.isArray(state.assetDecisionQueue) ? state.assetDecisionQueue : [];
+  const queues = ["prepared_assets_review", "distribution_candidate_review", "blocked_asset_review"];
+
+  statusTarget.textContent =
+    `Asset Queue: ${status.source} · ${status.total_assets} assets · ${status.path} · ${status.timestamp} · ${status.status}`;
+  statusTarget.className = `import-status ${status.status}`;
+  summaryTarget.innerHTML = `
+    <div>
+      <strong>${escapeHtml(status.total_assets)}</strong>
+      <span>Total assets</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(status.prepared)}</strong>
+      <span>Prepared</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(status.ready_for_distribution)}</strong>
+      <span>Ready for distribution</span>
+    </div>
+    <div>
+      <strong>${escapeHtml(status.blocked_skipped)}</strong>
+      <span>Blocked / skipped</span>
+    </div>
+  `;
+
+  if (!assets.length) {
+    listTarget.innerHTML = "<p class=\"empty-lane asset-empty-state\">No Substack asset handoff loaded yet.</p>";
+    return;
+  }
+
+  listTarget.innerHTML = queues.map((queue) => {
+    const queueAssets = assets.filter((asset) => asset.queue === queue);
+    return `
+      <section class="asset-decision-group">
+        <header>
+          <h3>${escapeHtml(queue)}</h3>
+          <span class="${labelClass(queueClass(queue))}">${escapeHtml(queueLabel(queue))}</span>
+        </header>
+        <div class="asset-decision-cards">
+          ${queueAssets.map((asset) => `
+            <article class="asset-decision-card">
+              <div class="asset-card-head">
+                <strong>${escapeHtml(asset.title)}</strong>
+                <span class="${labelClass(asset.asset_state)}">${escapeHtml(asset.asset_state)}</span>
+              </div>
+              <div class="asset-card-grid">
+                <span>artifact_id</span>
+                <code>${escapeHtml(asset.artifact_id || "missing")}</code>
+                <span>mission_id</span>
+                <code>${escapeHtml(asset.mission_id || "missing")}</code>
+                <span>lane</span>
+                <code>${escapeHtml(asset.lane)}</code>
+                <span>queue</span>
+                <code>${escapeHtml(asset.queue)}</code>
+                <span>next_action</span>
+                <code>${escapeHtml(asset.next_action)}</code>
+              </div>
+              ${asset.blocked_reason ? `<p class="asset-blocked-reason">${escapeHtml(asset.blocked_reason)}</p>` : ""}
+            </article>
+          `).join("") || "<p class=\"empty-lane\">No assets in this queue</p>"}
+        </div>
+      </section>
+    `;
+  }).join("");
+};
+
 const renderSkillRequests = () => {
   const panel = document.querySelector("#skill-requests");
   const target = document.querySelector("#skill-request-list");
@@ -3234,6 +3476,7 @@ const bindResetControl = () => {
     renderAll();
     refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
     refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
+    refreshAssetDecisionQueue("SUBSTACK_ENGINE", { silent: true });
   });
 };
 
@@ -3285,6 +3528,7 @@ const bindArtifactRefresh = () => {
   const assetButton = document.querySelector("#refresh-assets-button");
   if (assetButton) assetButton.addEventListener("click", () => {
     refreshAssetGenerationSummary("SUBSTACK_ENGINE");
+    refreshAssetDecisionQueue("SUBSTACK_ENGINE");
   });
 };
 
@@ -3380,6 +3624,7 @@ const renderAll = () => {
   renderMediaEngine();
   renderDistributionQueue();
   renderArtifacts();
+  renderAssetDecisionQueue();
   renderRiskGovernance();
   renderSkillRequests();
   renderPipeline("#pipeline-bwyh", state.pipelines.bwyh);
@@ -3400,4 +3645,5 @@ bindNavigationState();
 renderAll();
 refreshExternalArtifacts("SUBSTACK_ENGINE", { silent: true });
 refreshAssetGenerationSummary("SUBSTACK_ENGINE", { silent: true });
+refreshAssetDecisionQueue("SUBSTACK_ENGINE", { silent: true });
 startHeartbeat();

@@ -19,6 +19,7 @@ External systems may recommend a publish mode, risk level, score, and next actio
 - Reaction Doctrine artifacts without strong `system_underneath` must be blocked.
 - Imported artifacts requiring Major review must appear in Next Move before publish handoff.
 - Substack Engine only produces artifacts.
+- Asset summary handoffs are displayed read-only until Major approves future decision controls.
 - Command Center owns final approval.
 
 ## Artifact-Level Metadata
@@ -47,6 +48,7 @@ The current build:
 - routes imported review-needed artifacts into Next Move
 - supports local approval, rejection, rewrite, and publish-handoff commands
 - appends local decision records for approved, rejected, rewrite requested, and publish requested outcomes
+- surfaces `substack_asset_summary_handoff.json` in the read-only Asset Decision Queue panel
 
 Decision export target:
 

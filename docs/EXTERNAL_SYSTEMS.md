@@ -148,6 +148,8 @@ content/logs/workflows/substack_asset_generation_summary.md
 content/logs/workflows/substack_asset_summary_handoff.json
 ```
 
+Mission Control surfaces `substack_asset_summary_handoff.json` in the read-only `Asset Decision Queue` UI panel. The panel shows prepared, ready-for-distribution, and blocked/skipped assets for review, but it does not approve, render, publish, generate assets, or call external APIs.
+
 Routing rules:
 
 - `prepared` -> `review_assets` in `prepared_assets_review`

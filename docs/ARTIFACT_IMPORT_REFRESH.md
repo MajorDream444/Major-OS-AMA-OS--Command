@@ -52,12 +52,51 @@ content/logs/workflows/substack_asset_generation_summary.md
 content/logs/workflows/substack_asset_summary_handoff.json
 ```
 
+## Asset Decision Queue
+
+Mission Control surfaces the local handoff file in a read-only UI panel:
+
+```text
+content/logs/workflows/substack_asset_summary_handoff.json
+```
+
+The panel is called:
+
+```text
+Asset Decision Queue
+```
+
+It shows:
+
+- total assets
+- prepared assets
+- ready-for-distribution assets
+- blocked or skipped assets
+- grouped queues:
+  - `prepared_assets_review`
+  - `distribution_candidate_review`
+  - `blocked_asset_review`
+
+Each row displays the imported handoff fields only:
+
+- artifact ID
+- mission ID
+- title
+- lane
+- asset state
+- queue
+- next action
+- blocked reason when present
+
+This panel is visibility only. It has no approve buttons, no publish controls, no rendering controls, no audio/video generation, and no Substack Engine logic duplicated inside Mission Control.
+
 ## Refresh Flow
 
 ```text
 Substack Engine export
 -> Mission Control refresh
 -> ARTIFACTS panel
+-> ASSET DECISION QUEUE panel
 -> hybrid priority ranking
 -> NEXT MOVE
 ```
@@ -88,6 +127,8 @@ Clicking it reloads the local export, preserves the active source filter, re-run
 ```text
 Refreshed SUBSTACK_ENGINE artifacts from export
 ```
+
+`Refresh Assets` also reloads the local Asset Decision Queue handoff file.
 
 ## Import Status Line
 
@@ -136,4 +177,5 @@ It should:
 - No external writes.
 - No Substack content generation inside Command Center.
 - No asset generation, rendering, or live publishing inside Command Center.
+- Asset Decision Queue is read-only until a future approval workflow is explicitly approved.
 - Command Center owns approval and publish handoff.

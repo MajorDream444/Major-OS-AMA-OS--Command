@@ -1095,6 +1095,138 @@ time {
   text-transform: uppercase;
 }
 
+.asset-decision-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-hard);
+}
+
+.asset-decision-summary div {
+  min-height: 52px;
+  padding: 9px 10px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border-right: 1px solid var(--line);
+}
+
+.asset-decision-summary div:last-child {
+  border-right: 0;
+}
+
+.asset-decision-summary strong {
+  color: var(--green);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.asset-decision-summary span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.asset-decision-list {
+  display: grid;
+}
+
+.asset-decision-group {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
+.asset-decision-group:first-child {
+  border-top: 0;
+}
+
+.asset-decision-group header {
+  min-height: 34px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #070b0a;
+  border-bottom: 1px solid var(--line);
+}
+
+.asset-decision-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+.asset-decision-card {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+}
+
+.asset-card-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.asset-card-head strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.asset-card-grid {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 5px 8px;
+}
+
+.asset-card-grid span,
+.asset-card-grid code {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 9px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-card-grid span {
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.asset-card-grid code {
+  color: var(--green);
+  font-family: inherit;
+}
+
+.asset-blocked-reason,
+.asset-empty-state {
+  padding: 7px;
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid rgba(255, 176, 32, 0.35);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
 .skill-request-list {
   display: grid;
 }
