@@ -15,7 +15,45 @@ const mediaStages = [
 
 const missionLanes = ["INBOX", "RUNNING", "NEEDS MAJOR", "REVIEW", "DONE", "BLOCKED"];
 
-const missionStatusLanes = ["PLANNED", "RUNNING", "NEEDS MAJOR", "REVIEW", "DONE", "BLOCKED"];
+const missionStatusLanes = ["PLANNED", "RUNNING", "NEEDS_REVIEW", "NEEDS MAJOR", "APPROVED", "REVIEW", "DONE", "BLOCKED"];
+
+const agEventTypes = [
+  "MISSION_ACCEPTED",
+  "PLAN_CREATED",
+  "TOOL_SIMULATED",
+  "ARTIFACT_CREATED",
+  "NEEDS_MAJOR_REVIEW",
+  "APPROVED",
+  "COMPLETED",
+  "BLOCKED"
+];
+
+const agArtifactTypesByLane = {
+  CONTOUR: "LEAD_CARD",
+  SAF: "ACTION_PLAN",
+  BWYH: "AUDIT_SUMMARY",
+  CONTENT: "CONTENT_DRAFT",
+  OPS: "ACTION_PLAN",
+  GENERAL: "ACTION_PLAN"
+};
+
+const agAgentsByLane = {
+  CONTOUR: ["A001", "A002", "A006"],
+  SAF: ["A002", "A004"],
+  BWYH: ["A002", "A007"],
+  CONTENT: ["A003", "A007"],
+  OPS: ["A004"],
+  GENERAL: ["A004"]
+};
+
+const agPlansByLane = {
+  CONTOUR: ["Classify opportunity", "Simulate lead/audit tool", "Create lead card", "Ask Major for review"],
+  SAF: ["Map narrative lane", "Simulate research tool", "Create action plan", "Ask Major for review"],
+  BWYH: ["Read founder context", "Simulate audit tool", "Create audit summary", "Ask Major for review"],
+  CONTENT: ["Capture content angle", "Simulate drafting tool", "Create content draft", "Ask Major for review"],
+  OPS: ["Inspect system request", "Simulate repo/runtime tool", "Create action plan", "Ask Major for review"],
+  GENERAL: ["Parse command", "Simulate local tool", "Create action plan", "Ask Major for review"]
+};
 
 const missionIntentRules = [
   { intent: "lead_generation", pattern: /\b(lead|find|scout|contour leads|saf leads)\b/i },
@@ -201,8 +239,10 @@ const seedState = {
   distributionHighlighted: false,
   missionBoardHighlighted: false,
   artifactsHighlighted: false,
+  liveMissionHighlighted: false,
   riskGovernanceHighlighted: false,
   skillRequestsHighlighted: false,
+  missionEvents: [],
   artifactSourceFilter: "ALL",
   artifactDecisions: [],
   decisionExportStatus: {
@@ -758,6 +798,22 @@ const normalizeAgent = (agent, seedAgent) => ({
   workflow: agent.workflow || seedAgent.workflow
 });
 
+const laneForIntent = (intent, command = "") => {
+  if (/\b(contour|med spa|clinic|beauty|machine)\b/i.test(command)) return "CONTOUR";
+  if (/\bsaf\b/i.test(command)) return "SAF";
+  if (/\b(bwyh|retreat|audit|founder|coach|heal)\b/i.test(command)) return "BWYH";
+  if (/\b(content|substack|video|script|post|article|newsletter)\b/i.test(command)) return "CONTENT";
+  if (/\b(system|bug|dashboard|repo|agent)\b/i.test(command)) return "OPS";
+  return ({
+    lead_generation: "CONTOUR",
+    audit: "BWYH",
+    content_media: "CONTENT",
+    outreach: "CONTOUR",
+    commerce: "OPS",
+    operations: "OPS"
+  })[intent] || "GENERAL";
+};
+
 const normalizeMission = (mission) => {
   const intent = mission.intent || "operations";
   const plan = Array.isArray(mission.plan) && mission.plan.length
@@ -771,6 +827,8 @@ const normalizeMission = (mission) => {
     id: mission.id,
     command: mission.command || mission.title || "Untitled mission",
     title: mission.title || mission.command || "Untitled mission",
+    raw_command: mission.raw_command || mission.command || mission.title || "Untitled mission",
+    lane: mission.lane || laneForIntent(intent, mission.raw_command || mission.command || mission.title || ""),
     intent,
     status: mission.status || "PLANNED",
     created_at: mission.created_at || new Date().toISOString(),
@@ -792,6 +850,7 @@ const normalizeMission = (mission) => {
 
 const riskRuleForLane = (lane, rules = riskRuleSeed) =>
   rules.find((rule) => rule.lane === lane) ||
+  rules.find((rule) => rule.lane.toLowerCase() === String(lane || "").toLowerCase()) ||
   rules.find((rule) => rule.lane === "Operations") ||
   riskRuleSeed.find((rule) => rule.lane === "Operations");
 
@@ -823,6 +882,7 @@ const normalizeArtifact = (artifact) => {
     created_at: createdAt,
     updated_at: artifact.updated_at || artifact.created_at || createdAt,
     owner_agent: artifact.owner_agent || (source === "SUBSTACK_ENGINE" ? "A003 Content Catcher" : "A004 Ops Watcher"),
+    body: artifact.body || artifact.summary || artifact.preview || "Local placeholder artifact.",
     summary: artifact.summary || artifact.next_action || "Local placeholder artifact.",
     preview: artifact.preview || artifact.next_action || "No preview available.",
     source_command: artifact.source_command || "",
@@ -884,8 +944,10 @@ const mergeSeedState = (savedState) => {
     .map(normalizeGovernedItem);
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
   merged.artifactsHighlighted = Boolean(savedState.artifactsHighlighted);
+  merged.liveMissionHighlighted = Boolean(savedState.liveMissionHighlighted);
   merged.riskGovernanceHighlighted = Boolean(savedState.riskGovernanceHighlighted);
   merged.skillRequestsHighlighted = Boolean(savedState.skillRequestsHighlighted);
+  merged.missionEvents = Array.isArray(savedState.missionEvents) ? savedState.missionEvents : [];
   merged.artifactSourceFilter = savedState.artifactSourceFilter || "ALL";
   merged.artifactDecisions = Array.isArray(savedState.artifactDecisions) ? savedState.artifactDecisions : [];
   merged.decisionExportStatus = {
@@ -1088,16 +1150,6 @@ const createOrchestratorMission = (mission, command) => {
   };
 };
 
-const laneForIntent = (intent, command = "") => {
-  if (/\bcontour\b/i.test(command)) return "Contour";
-  if (/\bsaf\b/i.test(command)) return "SAF";
-  if (/\bbwyh|heal\b/i.test(command)) return "BWYH";
-  if (/\breaction doctrine|reaction|youtube|podcast|viral|clip\b/i.test(command)) return "Reaction Doctrine";
-  if (intent === "content_media") return "Doctrine";
-  if (intent === "commerce") return "Commerce";
-  return "Operations";
-};
-
 const activeRiskRuleForLane = (lane) => riskRuleForLane(lane, state?.riskGovernance || riskRuleSeed);
 
 const governanceMetadataForLane = (lane, baseTime = new Date()) => {
@@ -1203,6 +1255,265 @@ const createArtifactsForMission = (missionId) => {
   return newArtifacts;
 };
 
+const detectAgLane = (command) => laneForIntent("operations", command);
+
+const agAgentLabelsForLane = (lane) =>
+  (agAgentsByLane[lane] || agAgentsByLane.GENERAL)
+    .map(findAgent)
+    .filter(Boolean)
+    .map(agentLabel);
+
+const agAgentsForLane = (lane) =>
+  (agAgentsByLane[lane] || agAgentsByLane.GENERAL)
+    .map(findAgent)
+    .filter(Boolean);
+
+const agEventLabel = (type) => ({
+  MISSION_ACCEPTED: "ACTIVE",
+  PLAN_CREATED: "ACTION",
+  TOOL_SIMULATED: "WORKING",
+  ARTIFACT_CREATED: "READY",
+  NEEDS_MAJOR_REVIEW: "WAITING",
+  APPROVED: "APPROVED",
+  COMPLETED: "DONE",
+  BLOCKED: "BLOCKED"
+})[type] || "ACTIVE";
+
+const pushAgentEvent = ({ mission_id, agent_id, type, title, summary }) => {
+  const event = {
+    id: `EV-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+    mission_id,
+    agent_id,
+    type: agEventTypes.includes(type) ? type : "TOOL_SIMULATED",
+    title,
+    summary,
+    timestamp: new Date().toISOString()
+  };
+
+  state.missionEvents.unshift(event);
+  state.missionEvents = state.missionEvents.slice(0, 160);
+  pushActivity(title, agEventLabel(event.type));
+  return event;
+};
+
+const missionEventsFor = (missionId) =>
+  (state.missionEvents || []).filter((event) => event.mission_id === missionId);
+
+const latestLocalArtifactForMission = (missionId) =>
+  sortedArtifacts(state.artifacts.filter((artifact) => artifact.mission_id === missionId))[0] || null;
+
+const agArtifactBody = (mission, type) => {
+  const laneSummaries = {
+    LEAD_CARD: "Local lead card with target profile, likely angle, and next outreach review.",
+    AUDIT_SUMMARY: "Local audit summary covering pressure points, leverage, and next operator action.",
+    OUTREACH_DRAFT: "Local outreach draft prepared for Major approval before any external send.",
+    CONTENT_DRAFT: "Local content draft with thesis, hook, and next media handoff.",
+    ACTION_PLAN: "Local action plan with recommended next step and review gate."
+  };
+  return `${laneSummaries[type] || laneSummaries.ACTION_PLAN} Source command: ${mission.raw_command || mission.command}.`;
+};
+
+const createAgArtifact = (mission) => {
+  const now = new Date().toISOString();
+  const type = agArtifactTypesByLane[mission.lane] || "ACTION_PLAN";
+  const ownerAgent = mission.assigned_agents?.[0] || "A004 Ops Watcher";
+  const artifact = normalizeArtifact({
+    id: `${mission.id}-AG-ART-01`,
+    artifact_id: `${mission.id}-AG-ART-01`,
+    mission_id: mission.id,
+    type,
+    artifact_type: type,
+    lane: mission.lane,
+    title: `${type.replace(/_/g, " ")}: ${mission.title}`,
+    body: agArtifactBody(mission, type),
+    summary: agArtifactBody(mission, type),
+    preview: agArtifactBody(mission, type).slice(0, 140),
+    status: "NEEDS_REVIEW",
+    created_at: now,
+    updated_at: now,
+    owner_agent: ownerAgent,
+    source: "LOCAL",
+    source_command: mission.raw_command || mission.command,
+    requires_major_review: true,
+    next_action: "Major reviews and approves local artifact"
+  });
+
+  const existing = state.artifacts.find((item) => item.id === artifact.id);
+  if (existing) {
+    Object.assign(existing, artifact);
+  } else {
+    state.artifacts.unshift(artifact);
+  }
+  state.artifacts = state.artifacts.slice(0, 60);
+  mission.artifacts_count = state.artifacts.filter((item) => item.mission_id === mission.id).length;
+  mission.latest_artifact_title = artifact.title;
+  mission.updated_at = now;
+  state.artifactsHighlighted = true;
+  return artifact;
+};
+
+const createAgMission = (missionSeed, command) => {
+  const now = new Date().toISOString();
+  const lane = detectAgLane(command);
+  const plan = agPlansByLane[lane] || agPlansByLane.GENERAL;
+  const assignedAgents = agAgentLabelsForLane(lane);
+
+  return normalizeMission({
+    id: missionSeed.id,
+    title: command,
+    command,
+    raw_command: command,
+    lane,
+    intent: "operations",
+    status: "PLANNED",
+    assigned_agent: assignedAgents[0],
+    assigned_agents: assignedAgents,
+    created_at: now,
+    updated_at: now,
+    plan,
+    current_step: plan[0],
+    steps_completed: 0,
+    next_action: plan[0],
+    needs_major: false,
+    output_summary: "AG-UI local runtime mission planned",
+    artifacts_count: 0,
+    latest_artifact_title: "",
+    last_event: "Mission planned",
+    thread: []
+  });
+};
+
+const renderRuntimeState = () => {
+  saveState();
+  renderLiveMission();
+  renderNeedsMajor();
+  renderMissionBoard();
+  renderArtifacts();
+  renderAgents();
+  refreshSystemGuidance({ announce: true });
+};
+
+const runAgUiMission = (missionSeed, command) => {
+  const mission = createAgMission(missionSeed, command);
+  const agents = agAgentsForLane(mission.lane);
+  const primaryAgent = agents[0] || findAgent("A004");
+  const primaryAgentLabel = agentLabel(primaryAgent);
+
+  logSubmittedCommand(missionSeed, command, primaryAgentLabel);
+  updateNeedsMajor(null);
+  state.missions.unshift(mission);
+  state.liveMissionHighlighted = true;
+  state.missionBoardHighlighted = true;
+  appendMissionThread(mission.id, "Mission accepted", primaryAgentLabel, "PLANNED");
+  pushAgentEvent({
+    mission_id: mission.id,
+    agent_id: primaryAgent.id,
+    type: "MISSION_ACCEPTED",
+    title: "Mission accepted",
+    summary: `${primaryAgentLabel} accepted ${mission.lane} mission`
+  });
+  pushAgentEvent({
+    mission_id: mission.id,
+    agent_id: primaryAgent.id,
+    type: "PLAN_CREATED",
+    title: "Plan created",
+    summary: mission.plan.join(" -> ")
+  });
+  pushAction({
+    label: "ACTION",
+    title: `Run mission: ${mission.title}`,
+    next: mission.next_action,
+    agent: primaryAgentLabel
+  });
+  agents.forEach((agent) => setAgentState(agent.id, {
+    status: "WORKING",
+    current_task: command,
+    last_event: "AG runtime mission started",
+    needs_major: false
+  }));
+
+  updateMission(mission.id, {
+    status: "RUNNING",
+    current_step: mission.plan[1],
+    steps_completed: 1,
+    next_action: mission.plan[1],
+    last_event: "Plan created"
+  });
+  renderRuntimeState();
+
+  window.setTimeout(() => {
+    updateMission(mission.id, {
+      status: "RUNNING",
+      current_step: mission.plan[2],
+      steps_completed: 2,
+      next_action: mission.plan[2],
+      last_event: "Tool simulated"
+    });
+    appendMissionThread(mission.id, "Tool simulated", primaryAgentLabel, "RUNNING");
+    pushAgentEvent({
+      mission_id: mission.id,
+      agent_id: primaryAgent.id,
+      type: "TOOL_SIMULATED",
+      title: "Tool simulated",
+      summary: "Local-only tool execution completed. No external calls."
+    });
+    setAgentState(primaryAgent.id, {
+      status: "WORKING",
+      current_task: command,
+      last_event: "Local tool simulation complete"
+    });
+    renderRuntimeState();
+  }, 650);
+
+  window.setTimeout(() => {
+    const currentMission = findMission(mission.id);
+    if (!currentMission) return;
+    const artifact = createAgArtifact(currentMission);
+    updateMission(mission.id, {
+      status: "NEEDS_REVIEW",
+      current_step: mission.plan[3],
+      steps_completed: mission.plan.length,
+      next_action: "Major reviews artifact",
+      needs_major: true,
+      last_event: "Needs Major review",
+      output_summary: `${artifact.title} created and waiting for review`
+    });
+    appendMissionThread(mission.id, "Artifact created", primaryAgentLabel, "NEEDS_REVIEW", artifact.title);
+    appendMissionThread(mission.id, "Needs Major review", primaryAgentLabel, "NEEDS_REVIEW", artifact.title);
+    pushAgentEvent({
+      mission_id: mission.id,
+      agent_id: primaryAgent.id,
+      type: "ARTIFACT_CREATED",
+      title: "Artifact created",
+      summary: artifact.title
+    });
+    pushAgentEvent({
+      mission_id: mission.id,
+      agent_id: primaryAgent.id,
+      type: "NEEDS_MAJOR_REVIEW",
+      title: "Needs Major review",
+      summary: `${artifact.title} is waiting for local approval`
+    });
+    state.needsMajor = {
+      mission: artifact.title,
+      agent: primaryAgentLabel
+    };
+    pushAction({
+      label: "REVIEW",
+      title: `Review artifact: ${artifact.title}`,
+      next: "Approve, revise, or archive",
+      agent: primaryAgentLabel
+    });
+    agents.forEach((agent) => setAgentState(agent.id, {
+      status: "WAITING",
+      current_task: command,
+      last_event: "Needs Major review",
+      needs_major: true
+    }));
+    renderRuntimeState();
+  }, 1350);
+};
+
 const findArtifactByTitle = (title) => {
   const needle = title.trim().toLowerCase();
   const idMatch = state.artifacts.find((artifact) =>
@@ -1230,7 +1541,7 @@ const hasStrongSystemUnderneath = (artifact) =>
 
 const artifactPriorityRank = (artifact) => {
   if (artifact.status === "BLOCKED") return 1;
-  if (artifact.requires_major_review || artifact.status === "NEEDS REVIEW") return 2;
+  if (artifact.requires_major_review || artifact.status === "NEEDS REVIEW" || artifact.status === "NEEDS_REVIEW") return 2;
   if (artifact.status === "READY" && Number(artifact.score || 0) >= 85) return 3;
   if (artifact.status === "SCHEDULED" || artifact.publish_mode === "SCHEDULED" || artifact.delay_until) return 4;
   if (["PUBLISHED", "APPROVED"].includes(artifact.status)) return 5;
@@ -1419,6 +1730,101 @@ const assetQueueDecisionExportJson = () =>
     target_path: "content/logs/workflows/asset_queue_decisions.json",
     decisions: state.assetQueueDecisions || []
   }, null, 2);
+
+const artifactById = (artifactId) =>
+  state.artifacts.find((artifact) => artifact.id === artifactId || artifact.artifact_id === artifactId);
+
+const finalizeApprovedArtifact = (artifact, mission, agentId) => {
+  window.setTimeout(() => {
+    const currentMission = findMission(mission.id);
+    if (!currentMission) return;
+    updateMission(currentMission.id, {
+      status: "DONE",
+      next_action: "Mission complete",
+      needs_major: false,
+      last_event: "Completed",
+      output_summary: `${artifact.title} approved and completed locally`
+    });
+    appendMissionThread(currentMission.id, "Completed", artifact.owner_agent || agentId, "DONE", artifact.title);
+    pushAgentEvent({
+      mission_id: currentMission.id,
+      agent_id: agentId,
+      type: "COMPLETED",
+      title: "Completed",
+      summary: `${artifact.title} approved and mission marked done`
+    });
+    state.needsMajor = null;
+    agAgentsForLane(currentMission.lane || "GENERAL").forEach((agent) => setAgentState(agent.id, {
+      status: "READY",
+      current_task: "",
+      last_event: "Mission complete",
+      needs_major: false
+    }));
+    renderRuntimeState();
+  }, 350);
+};
+
+const updateArtifactFromButton = (artifactId, action) => {
+  const artifact = artifactById(artifactId);
+  if (!artifact) {
+    pushActivity(`Artifact action failed: ${artifactId}`, "BLOCKED");
+    return;
+  }
+
+  const mission = findMission(artifact.mission_id);
+  const agentId = artifact.owner_agent?.match(/^A\d{3}/)?.[0] || mission?.assigned_agents?.[0]?.match(/^A\d{3}/)?.[0] || "A004";
+  artifact.updated_at = new Date().toISOString();
+  state.artifactsHighlighted = true;
+
+  if (action === "approve") {
+    artifact.status = "APPROVED";
+    artifact.requires_major_review = false;
+    artifact.next_action = "Approved locally; mission can close";
+    if (mission) {
+      updateMission(mission.id, {
+        status: "APPROVED",
+        next_action: "Complete local mission",
+        needs_major: false,
+        last_event: "Approved",
+        output_summary: `${artifact.title} approved`
+      });
+      appendMissionThread(mission.id, "Approved", artifact.owner_agent || agentId, "APPROVED", artifact.title);
+      pushAgentEvent({
+        mission_id: mission.id,
+        agent_id: agentId,
+        type: "APPROVED",
+        title: "Approved",
+        summary: `${artifact.title} approved by Major`
+      });
+      finalizeApprovedArtifact(artifact, mission, agentId);
+    } else {
+      pushActivity("Artifact approved", "APPROVED");
+    }
+  } else if (action === "revise") {
+    artifact.status = "NEEDS_REVIEW";
+    artifact.requires_major_review = true;
+    artifact.next_action = "Revise local artifact";
+    if (mission) {
+      updateMission(mission.id, {
+        status: "NEEDS_REVIEW",
+        next_action: "Revise artifact",
+        needs_major: true,
+        last_event: "Revision requested"
+      });
+      appendMissionThread(mission.id, "Revision requested", artifact.owner_agent || agentId, "NEEDS_REVIEW", artifact.title);
+    }
+    state.needsMajor = { mission: artifact.title, agent: artifact.owner_agent || "A004 Ops Watcher" };
+    pushActivity("Artifact revision requested", "REVIEW");
+  } else if (action === "archive") {
+    artifact.status = "ARCHIVED";
+    artifact.requires_major_review = false;
+    artifact.next_action = "Archived locally";
+    pushActivity("Artifact archived", "ARCHIVED");
+  }
+
+  saveState();
+  renderRuntimeState();
+};
 
 const updateArtifactStatus = (title, status) => {
   const artifact = findArtifactByTitle(title);
@@ -2132,6 +2538,7 @@ const isActionableArtifact = (artifact) =>
   artifact.status === "BLOCKED" ||
   artifact.requires_major_review ||
   artifact.status === "NEEDS REVIEW" ||
+  artifact.status === "NEEDS_REVIEW" ||
   (artifact.publish_mode === "AUTO" && artifact.risk_level === "LOW" && artifact.status === "READY");
 
 const getPriorityArtifact = () =>
@@ -2146,17 +2553,17 @@ const getPriorityAssetIntake = () =>
   })[0] || null;
 
 const getReviewMission = () =>
-  state.missions.find((mission) => mission.status === "NEEDS MAJOR" || mission.needs_major);
+  state.missions.find((mission) => ["NEEDS_REVIEW", "NEEDS MAJOR"].includes(mission.status) || mission.needs_major);
 
 const buildStatusLines = () => {
   const activeMissions = state.missions.filter((mission) =>
-    ["PLANNED", "RUNNING", "NEEDS MAJOR", "REVIEW"].includes(mission.status)
+    ["PLANNED", "RUNNING", "NEEDS_REVIEW", "NEEDS MAJOR", "APPROVED", "REVIEW"].includes(mission.status)
   );
   const latestMission = activeMissions[0] || getLatestMission();
   const workingAgents = state.agents.filter((agent) =>
     ["WORKING", "WAITING", "BLOCKED"].includes(agent.status) || agent.current_task || agent.needs_major
   );
-  const reviewArtifacts = state.artifacts.filter((artifact) => artifact.status === "NEEDS REVIEW");
+  const reviewArtifacts = state.artifacts.filter((artifact) => ["NEEDS REVIEW", "NEEDS_REVIEW"].includes(artifact.status));
   const assetStatus = state.assetGenerationStatus || seedState.assetGenerationStatus;
   const assetQueueStatus = state.assetDecisionQueueStatus || seedState.assetDecisionQueueStatus;
   const lines = [];
@@ -3098,7 +3505,7 @@ const dispatchMission = (command) => {
     return;
   }
 
-  runOrchestratorMission(mission, trimmed);
+  runAgUiMission(mission, trimmed);
 };
 
 const reviewAgentRegistry = (mission, command) => {
@@ -3188,12 +3595,75 @@ const renderUnread = () => {
     `${String(state.unread).padStart(2, "0")} UNREAD`;
 };
 
+const getLiveMission = () =>
+  state.missions.find((mission) => ["RUNNING", "NEEDS_REVIEW", "APPROVED", "PLANNED"].includes(mission.status)) ||
+  state.missions[0] ||
+  null;
+
+const renderLiveMission = () => {
+  const panel = document.querySelector("#live-mission");
+  const target = document.querySelector("#live-mission-body");
+  if (!panel || !target) return;
+
+  panel.classList.toggle("review-highlight", Boolean(state.liveMissionHighlighted));
+  const mission = getLiveMission();
+  if (!mission) {
+    target.innerHTML = "<p class=\"empty-lane\">No live mission. Dispatch a command to start local runtime events.</p>";
+    return;
+  }
+
+  const events = missionEventsFor(mission.id).slice(0, 6);
+  const artifact = latestLocalArtifactForMission(mission.id);
+  target.innerHTML = `
+    <div class="live-mission-grid">
+      <div>
+        <span class="meta">MISSION</span>
+        <strong>${escapeHtml(mission.title || mission.command)}</strong>
+      </div>
+      <div>
+        <span class="meta">LANE</span>
+        <span class="signal">${escapeHtml(mission.lane || "GENERAL")}</span>
+      </div>
+      <div>
+        <span class="meta">STATUS</span>
+        <span class="${labelClass(mission.status)}">${escapeHtml(mission.status)}</span>
+      </div>
+      <div>
+        <span class="meta">AGENTS</span>
+        <code>${escapeHtml((mission.assigned_agents || []).join(" / ") || mission.assigned_agent || "A004 Ops Watcher")}</code>
+      </div>
+    </div>
+    <div class="live-timeline">
+      ${events.map((event) => `
+        <article>
+          <time>${escapeHtml(nowStampFromIso(event.timestamp))}</time>
+          <div>
+            <strong>${escapeHtml(event.type)}</strong>
+            <p>${escapeHtml(event.title)} / ${escapeHtml(event.summary)}</p>
+          </div>
+        </article>
+      `).join("") || "<p class=\"empty-lane\">No runtime events yet.</p>"}
+    </div>
+    <div class="latest-artifact">
+      <span class="meta">LATEST ARTIFACT</span>
+      ${artifact
+        ? `<strong>${escapeHtml(artifact.title)}</strong><span class="${labelClass(artifact.status)}">${escapeHtml(artifact.status)}</span>`
+        : "<strong>No artifact yet</strong>"}
+    </div>
+  `;
+};
+
 const renderNeedsMajor = () => {
   const panel = document.querySelector("#needs-major-panel");
   const text = document.querySelector("#needs-major-text");
   const signal = document.querySelector("#needs-major-signal");
+  const reviewArtifact = state.artifacts.find((artifact) => ["NEEDS_REVIEW", "NEEDS REVIEW"].includes(artifact.status));
+  const reviewMission = getReviewMission();
+  const hold = state.needsMajor ||
+    (reviewArtifact ? { mission: reviewArtifact.title, agent: reviewArtifact.owner_agent } : null) ||
+    (reviewMission ? { mission: reviewMission.title || reviewMission.command, agent: (reviewMission.assigned_agents || [reviewMission.assigned_agent]).join(" / ") } : null);
 
-  if (!state.needsMajor) {
+  if (!hold) {
     panel.classList.remove("waiting");
     text.textContent = "No review holds";
     signal.className = "signal ready";
@@ -3202,7 +3672,7 @@ const renderNeedsMajor = () => {
   }
 
   panel.classList.add("waiting");
-  text.textContent = `${state.needsMajor.agent}: ${state.needsMajor.mission}`;
+  text.textContent = `${hold.agent}: ${hold.mission}`;
   signal.className = "signal waiting";
   signal.textContent = "WAITING";
 };
@@ -3489,6 +3959,11 @@ const renderArtifacts = () => {
         <span>route ${escapeHtml(artifact.asset_next_decision || "none")}</span>
       </div>
       <p>${escapeHtml(artifact.next_action || artifact.summary)} / ${escapeHtml(artifact.publish_rule || "No governance rule")} ${artifact.asset_routing_note ? `/ asset note: ${escapeHtml(artifact.asset_routing_note)}` : ""} ${artifact.github_path ? `/ ${escapeHtml(artifact.github_path)}` : ""} ${artifact.delay_until ? `/ Delay until ${escapeHtml(nowStampFromIso(artifact.delay_until))}` : ""}</p>
+      <div class="artifact-controls" data-artifact-id="${escapeHtml(artifact.id || artifact.artifact_id)}">
+        <button type="button" data-artifact-action="approve">Approve</button>
+        <button type="button" data-artifact-action="revise">Revise</button>
+        <button type="button" data-artifact-action="archive">Archive</button>
+      </div>
     </article>
   `).join("") || "<p class=\"empty-lane\">No artifacts</p>";
 };
@@ -3851,6 +4326,20 @@ const bindArtifactFilter = () => {
   });
 };
 
+const bindArtifactCardActions = () => {
+  const target = document.querySelector("#artifact-list");
+  if (!target) return;
+
+  target.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-artifact-action]");
+    if (!button) return;
+    const controls = button.closest(".artifact-controls");
+    const artifactId = controls?.dataset.artifactId;
+    if (!artifactId) return;
+    updateArtifactFromButton(artifactId, button.dataset.artifactAction);
+  });
+};
+
 const bindArtifactRefresh = () => {
   const button = document.querySelector("#refresh-artifacts-button");
   if (button) button.addEventListener("click", () => {
@@ -3970,6 +4459,7 @@ const renderAll = () => {
   refreshSystemGuidance();
   renderUnread();
   renderNeedsMajor();
+  renderLiveMission();
   renderGuidance();
   renderMissionBoard();
   renderLeads();
@@ -3996,6 +4486,7 @@ bindResetControl();
 bindNextMove();
 bindRiskGovernance();
 bindArtifactFilter();
+bindArtifactCardActions();
 bindArtifactRefresh();
 bindAssetDecisionControls();
 bindNavigationState();

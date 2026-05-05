@@ -276,6 +276,79 @@ h3 {
   background: linear-gradient(90deg, var(--amber-dim), rgba(11, 15, 14, 0.96) 70%);
 }
 
+.live-mission-body {
+  display: grid;
+}
+
+.live-mission-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) 90px 104px minmax(180px, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.live-mission-grid > div,
+.latest-artifact {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 10px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border-right: 1px solid var(--line);
+}
+
+.live-mission-grid > div:last-child {
+  border-right: 0;
+}
+
+.live-mission-grid strong,
+.live-mission-grid code,
+.latest-artifact strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.live-timeline {
+  display: grid;
+}
+
+.live-timeline article {
+  min-height: 38px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.live-timeline time,
+.live-timeline p {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.live-timeline strong {
+  color: var(--green);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.latest-artifact {
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+
 .system-status-lines {
   padding: 8px 10px;
   display: grid;
@@ -1089,6 +1162,31 @@ time {
   color: var(--green);
 }
 
+.artifact-controls {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.artifact-controls button {
+  min-height: 24px;
+  padding: 0 9px;
+  color: var(--green);
+  background: var(--surface-hard);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.artifact-controls button:hover {
+  border-color: rgba(32, 245, 138, 0.55);
+  background: var(--green-dim);
+}
+
 .artifact-main {
   display: grid;
   gap: 4px;
@@ -1379,7 +1477,8 @@ time {
 .auto,
 .ready,
 .synced,
-.approved {
+.approved,
+.completed {
   color: var(--green);
   background: var(--green-dim);
   border-color: rgba(32, 245, 138, 0.38);
@@ -1391,7 +1490,10 @@ time {
 .action,
 .scheduled,
 .waiting,
-.working {
+.working,
+.needs_review,
+.planned,
+.running {
   color: var(--amber);
   background: var(--amber-dim);
   border-color: rgba(255, 176, 32, 0.35);
@@ -1419,7 +1521,8 @@ time {
 
 .draft,
 .rewrite,
-.archived {
+.archived,
+.rewrite_requested {
   color: var(--muted);
   background: #0b1110;
   border-color: var(--line);
@@ -1628,6 +1731,16 @@ td strong {
 
   .media-stage-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .live-mission-grid,
+  .latest-artifact {
+    grid-template-columns: 1fr;
+  }
+
+  .live-mission-grid > div,
+  .latest-artifact {
+    border-right: 0;
   }
 
   .tag-row {
