@@ -169,6 +169,13 @@ const riskRuleSeed = [
   }
 ];
 
+const riskLaneAliases = {
+  CONTOUR: "Contour",
+  CONTENT: "Doctrine",
+  OPS: "Operations",
+  GENERAL: "Operations"
+};
+
 const externalArtifactSources = {
   SUBSTACK_ENGINE: [
     "content/logs/workflows/mission_control_export.json",
@@ -848,11 +855,18 @@ const normalizeMission = (mission) => {
   };
 };
 
-const riskRuleForLane = (lane, rules = riskRuleSeed) =>
-  rules.find((rule) => rule.lane === lane) ||
-  rules.find((rule) => rule.lane.toLowerCase() === String(lane || "").toLowerCase()) ||
-  rules.find((rule) => rule.lane === "Operations") ||
-  riskRuleSeed.find((rule) => rule.lane === "Operations");
+const canonicalRiskLane = (lane) => riskLaneAliases[String(lane || "").toUpperCase()] || lane || "Operations";
+
+const sameRiskLane = (left, right) =>
+  canonicalRiskLane(left).toLowerCase() === canonicalRiskLane(right).toLowerCase();
+
+const riskRuleForLane = (lane, rules = riskRuleSeed) => {
+  const canonicalLane = canonicalRiskLane(lane);
+  return rules.find((rule) => rule.lane === canonicalLane) ||
+    rules.find((rule) => rule.lane.toLowerCase() === String(canonicalLane || "").toLowerCase()) ||
+    rules.find((rule) => rule.lane === "Operations") ||
+    riskRuleSeed.find((rule) => rule.lane === "Operations");
+};
 
 const calculateDelayUntil = (rule, baseTime = new Date()) => {
   if (!rule || rule.mode !== "SCHEDULED" || !rule.delay_hours) return "";
@@ -893,6 +907,7 @@ const normalizeArtifact = (artifact) => {
     confidence: Number.isFinite(artifact.confidence) ? artifact.confidence : null,
     risk_level: riskLevel,
     publish_mode: publishMode,
+    risk_lane: rule.lane,
     next_action: artifact.next_action || "Review artifact",
     system_underneath: artifact.system_underneath || "",
     asset_state: artifact.asset_state || "",
@@ -921,9 +936,13 @@ const normalizeRiskRule = (rule, seedRule) => ({
 
 const normalizeGovernedItem = (item) => ({
   ...item,
+  risk_lane: item.risk_lane || riskRuleForLane(item.lane || "Operations").lane,
   risk_mode: item.risk_mode || riskRuleForLane(item.lane || "Operations").mode,
+  publish_mode: item.publish_mode || item.risk_mode || riskRuleForLane(item.lane || "Operations").mode,
+  risk_level: item.risk_level || (riskRuleForLane(item.lane || "Operations").mode === "AUTO" ? "LOW" : "MED"),
   publish_rule: item.publish_rule || riskRuleForLane(item.lane || "Operations").rule,
   delay_until: item.delay_until || calculateDelayUntil(riskRuleForLane(item.lane || "Operations"), new Date()),
+  requires_major_review: item.requires_major_review ?? riskRuleForLane(item.lane || "Operations").mode === "REVIEW",
   governance_override: Boolean(item.governance_override)
 });
 
@@ -1155,7 +1174,11 @@ const activeRiskRuleForLane = (lane) => riskRuleForLane(lane, state?.riskGoverna
 const governanceMetadataForLane = (lane, baseTime = new Date()) => {
   const rule = activeRiskRuleForLane(lane);
   return {
+    risk_lane: rule.lane,
     risk_mode: rule.mode,
+    publish_mode: rule.mode,
+    risk_level: rule.mode === "AUTO" ? "LOW" : "MED",
+    requires_major_review: rule.mode === "REVIEW",
     publish_rule: rule.rule,
     delay_until: calculateDelayUntil(rule, baseTime),
     governance_override: Boolean(rule.updated_at),
@@ -1166,8 +1189,18 @@ const governanceMetadataForLane = (lane, baseTime = new Date()) => {
 const statusForRiskMode = (mode, fallback = "READY") => {
   if (mode === "REVIEW") return "NEEDS REVIEW";
   if (mode === "SCHEDULED") return "READY";
-  if (mode === "AUTO") return fallback === "NEEDS REVIEW" ? "READY" : fallback;
+  if (mode === "AUTO") return ["NEEDS REVIEW", "NEEDS_REVIEW"].includes(fallback) ? "READY" : fallback;
   return fallback;
+};
+
+const nextActionForRiskMode = (mode, delayUntil = "") => {
+  if (mode === "AUTO") return "Local auto lane; ready for internal handoff";
+  if (mode === "SCHEDULED") {
+    return delayUntil
+      ? `Delay buffer active until ${nowStampFromIso(delayUntil)}`
+      : "Delay buffer active before future handoff";
+  }
+  return "Major review required before publish handoff";
 };
 
 const artifactTitle = (type, command) => {
@@ -3137,6 +3170,10 @@ const applyRiskGovernanceToItem = (item) => {
   if (item.status !== "APPROVED" && item.status !== "ARCHIVED") {
     item.status = statusForRiskMode(governance.risk_mode, item.status || "READY");
   }
+  if (item.next_action && !/approved|archived|rewrite/i.test(item.next_action)) {
+    item.next_action = nextActionForRiskMode(governance.risk_mode, governance.delay_until);
+  }
+  item.updated_at = new Date().toISOString();
   return item;
 };
 
@@ -3155,10 +3192,10 @@ const overrideRiskRule = (lane, mode) => {
   }
 
   state.artifacts
-    .filter((artifact) => artifact.lane === lane)
+    .filter((artifact) => sameRiskLane(artifact.lane, lane))
     .forEach(applyRiskGovernanceToItem);
   state.distributionQueue
-    .filter((item) => item.lane === lane)
+    .filter((item) => sameRiskLane(item.lane, lane))
     .forEach(applyRiskGovernanceToItem);
 
   state.riskGovernanceHighlighted = true;
@@ -3835,8 +3872,11 @@ const renderRiskGovernance = () => {
 
   panel.classList.toggle("review-highlight", Boolean(state.riskGovernanceHighlighted));
   target.innerHTML = state.riskGovernance.map((rule) => {
-    const affectedArtifacts = state.artifacts.filter((artifact) => artifact.lane === rule.lane).length;
-    const affectedDistribution = state.distributionQueue.filter((item) => item.lane === rule.lane).length;
+    const affectedArtifacts = state.artifacts.filter((artifact) => sameRiskLane(artifact.lane, rule.lane)).length;
+    const affectedDistribution = state.distributionQueue.filter((item) => sameRiskLane(item.lane, rule.lane)).length;
+    const scheduled = rule.mode === "SCHEDULED" && rule.delay_hours
+      ? `${rule.delay_hours}H BUFFER`
+      : "NO BUFFER";
     return `
       <article class="risk-rule-row">
         <div>
@@ -3844,7 +3884,7 @@ const renderRiskGovernance = () => {
           <span class="meta">${escapeHtml(rule.rule)}</span>
         </div>
         <span class="${labelClass(rule.mode)}">${escapeHtml(rule.mode)}</span>
-        <span class="meta">${rule.delay_hours ? `${escapeHtml(rule.delay_hours)}H BUFFER` : "NO BUFFER"}</span>
+        <span class="risk-buffer ${rule.mode === "SCHEDULED" ? "is-scheduled" : ""}">${escapeHtml(scheduled)}</span>
         <span class="meta">${escapeHtml(affectedArtifacts)} ART / ${escapeHtml(affectedDistribution)} DIST</span>
         <div class="risk-controls" data-lane="${escapeHtml(rule.lane)}">
           <button class="${rule.mode === "AUTO" ? "active" : ""}" type="button" data-mode="AUTO">AUTO</button>
@@ -3950,10 +3990,12 @@ const renderArtifacts = () => {
       <span class="${labelClass(artifact.risk_mode || "REVIEW")}">${escapeHtml(artifact.risk_mode || "REVIEW")}</span>
       <span class="${labelClass(artifact.status)}">${escapeHtml(artifact.status)}</span>
       <div class="artifact-intel">
+        <span>rule ${escapeHtml(artifact.risk_lane || riskRuleForLane(artifact.lane).lane)}</span>
         <span>score ${artifact.score ?? "n/a"}</span>
         <span>confidence ${artifact.confidence ?? "n/a"}</span>
         <span>risk ${escapeHtml(artifact.risk_level || "MED")}</span>
         <span>publish ${escapeHtml(artifact.publish_mode || artifact.risk_mode || "REVIEW")}</span>
+        <span>review ${artifact.requires_major_review ? "yes" : "no"}</span>
         <span>status ${escapeHtml(artifact.status)}</span>
         <span>asset ${escapeHtml(artifact.asset_state || "none")}</span>
         <span>route ${escapeHtml(artifact.asset_next_decision || "none")}</span>

@@ -25,13 +25,26 @@ Current local rules:
 - `Operations`: `AUTO`
 - `Commerce`: `REVIEW`
 
+AG-UI runtime lanes map into these same rules:
+
+- `CONTOUR` -> `Contour`
+- `CONTENT` -> `Doctrine`
+- `OPS` -> `Operations`
+- `GENERAL` -> `Operations`
+
+This keeps newer local mission artifacts and older media/distribution rows under one governance layer.
+
 ## Artifact Metadata
 
 Artifacts may include:
 
 ```js
 {
+  risk_lane,
   risk_mode,
+  publish_mode,
+  risk_level,
+  requires_major_review,
   publish_rule,
   delay_until,
   governance_override,
@@ -71,6 +84,14 @@ The Risk Governance panel provides local override buttons:
 - `SCHEDULED`
 
 Overrides update the selected lane rule and reapply metadata to existing local artifacts and distribution rows in that lane.
+
+Override effects:
+
+- `AUTO` clears the delay buffer, marks local internal movement as low risk, and removes review requirement for non-approved/non-archived local items.
+- `REVIEW` clears the delay buffer and marks affected non-approved/non-archived local items as needing review.
+- `SCHEDULED` applies a local delay buffer and displays the future `delay_until` timestamp.
+
+Overrides are local state only and persist through `localStorage`.
 
 ## Boundary
 
