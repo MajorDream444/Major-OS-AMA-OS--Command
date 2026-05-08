@@ -20,10 +20,16 @@ Role:
 - produce future intake, blueprint, proposal, and build-task artifacts
 - report exported contracts into Mission Control for review
 
+Contract:
+
+- subsystem id is `CLIENT_CLARITY_INTAKE_OS`
+- status is `BUILDING`
+- owner is `Codex Intake Agent`
+- artifact type is `client_blueprint`
+- approval mode is `REVIEW`
+
 Boundary:
 
-- status is `BUILDING EXTERNALLY`
-- owner is `Codex Intake Agent`
 - Mission Control monitors status, blocker, and next action
 - Mission Control does not duplicate the intake build
 - Mission Control ingests artifacts only after the subsystem exports a contract

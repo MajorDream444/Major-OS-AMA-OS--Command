@@ -670,12 +670,15 @@ const seedState = {
     },
     {
       name: "Client Clarity Intake OS",
-      status: "BUILDING EXTERNALLY",
+      key: "CLIENT_CLARITY_INTAKE_OS",
+      status: "BUILDING",
       priority: "P1",
       repo: "MajorDream444/client-clarity-intake-os",
       next: "Wait for subsystem export contract",
       owner: "Codex Intake Agent",
       blocker: "No Mission Control artifact export contract yet",
+      artifact_type: "client_blueprint",
+      approval_mode: "REVIEW",
       output_contract: "Ingest artifacts only after subsystem exports a contract",
       mission_control_behavior: "Monitor status, blocker, and next action. Do not duplicate build."
     }
@@ -4298,6 +4301,8 @@ const renderApps = () => {
           <th>Priority</th>
           <th>Repo</th>
           <th>Owner</th>
+          <th>Artifact</th>
+          <th>Approval</th>
           <th>Blocker</th>
           <th>Next</th>
           <th>Contract</th>
@@ -4311,6 +4316,8 @@ const renderApps = () => {
             <td>${escapeHtml(app.priority)}</td>
             <td>${escapeHtml(app.repo)}</td>
             <td>${escapeHtml(app.owner || "Mission Control")}</td>
+            <td>${escapeHtml(app.artifact_type || "n/a")}</td>
+            <td><span class="${labelClass(app.approval_mode || "LOCAL")}">${escapeHtml(app.approval_mode || "LOCAL")}</span></td>
             <td>${escapeHtml(app.blocker || "None")}</td>
             <td>${escapeHtml(app.next)}</td>
             <td>${escapeHtml(app.output_contract || app.mission_control_behavior || "Local registry item")}</td>

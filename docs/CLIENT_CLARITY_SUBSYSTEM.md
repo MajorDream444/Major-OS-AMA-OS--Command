@@ -5,9 +5,12 @@
 Client Clarity Intake OS is registered as an external subsystem in progress.
 
 ```text
-Status: BUILDING EXTERNALLY
+Subsystem: CLIENT_CLARITY_INTAKE_OS
+Status: BUILDING
 Owner: Codex Intake Agent
 Repo: MajorDream444/client-clarity-intake-os
+Artifact type: client_blueprint
+Approval mode: REVIEW
 ```
 
 ## Mission Control Role
@@ -19,6 +22,8 @@ Mission Control should:
 - show subsystem status
 - show current blocker
 - show next action
+- show artifact type
+- show approval mode
 - ingest artifacts only after the subsystem exports a contract
 
 Mission Control must not:
@@ -42,3 +47,5 @@ Wait for subsystem export contract.
 ```
 
 When the external subsystem produces a contract, Mission Control can add a local-first intake path that reads the contract, displays candidate artifacts, routes review states, and records approvals locally.
+
+Future `client_blueprint` artifacts must enter Mission Control in `REVIEW` mode until Major approves them.
