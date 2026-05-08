@@ -244,6 +244,7 @@ const seedState = {
   agentRegistryHighlighted: false,
   mediaEngineHighlighted: false,
   distributionHighlighted: false,
+  appRegistryHighlighted: false,
   missionBoardHighlighted: false,
   artifactsHighlighted: false,
   liveMissionHighlighted: false,
@@ -970,6 +971,7 @@ const mergeSeedState = (savedState) => {
   merged.mediaEngineHighlighted = Boolean(savedState.mediaEngineHighlighted);
   merged.mediaWorkflow = Array.isArray(savedState.mediaWorkflow) ? savedState.mediaWorkflow : cloneState(seedState.mediaWorkflow);
   merged.distributionHighlighted = Boolean(savedState.distributionHighlighted);
+  merged.appRegistryHighlighted = Boolean(savedState.appRegistryHighlighted);
   merged.distributionQueue = (Array.isArray(savedState.distributionQueue) ? savedState.distributionQueue : cloneState(seedState.distributionQueue))
     .map(normalizeGovernedItem);
   merged.missionBoardHighlighted = Boolean(savedState.missionBoardHighlighted);
@@ -1093,6 +1095,7 @@ const routes = [
 
 const githubLogCommandPattern = /\b(show github logs|check repo logs|what changed)\b/i;
 const agentRegistryCommandPattern = /\bshow agents\b/i;
+const appRegistryCommandPattern = /\b(show apps|show app registry|show subsystems|show external systems)\b/i;
 const missionBoardCommandPattern = /\bshow missions\b/i;
 const artifactsCommandPattern = /\bshow artifacts\b/i;
 const refreshArtifactsCommandPattern = /\b(refresh artifacts|refresh substack artifacts|reload artifacts)\b/i;
@@ -2596,6 +2599,12 @@ const getPriorityAssetIntake = () =>
     return a.title.localeCompare(b.title);
   })[0] || null;
 
+const externalSubsystems = () =>
+  state.apps.filter((app) => /external/i.test(app.status) || app.output_contract || app.mission_control_behavior);
+
+const blockedExternalSubsystem = () =>
+  externalSubsystems().find((app) => app.blocker && !/none/i.test(app.blocker));
+
 const getReviewMission = () =>
   state.missions.find((mission) => ["NEEDS_REVIEW", "NEEDS MAJOR"].includes(mission.status) || mission.needs_major);
 
@@ -2610,6 +2619,7 @@ const buildStatusLines = () => {
   const reviewArtifacts = state.artifacts.filter((artifact) => ["NEEDS REVIEW", "NEEDS_REVIEW"].includes(artifact.status));
   const assetStatus = state.assetGenerationStatus || seedState.assetGenerationStatus;
   const assetQueueStatus = state.assetDecisionQueueStatus || seedState.assetDecisionQueueStatus;
+  const subsystem = blockedExternalSubsystem();
   const lines = [];
 
   if (latestMission) {
@@ -2646,6 +2656,10 @@ const buildStatusLines = () => {
 
   if (assetQueueStatus.total_assets) {
     lines.push(`Asset decision queue: ${assetQueueStatus.prepared} prepared, ${assetQueueStatus.ready_for_distribution} distribution-ready, ${assetQueueStatus.blocked_skipped} blocked or skipped.`);
+  }
+
+  if (subsystem) {
+    lines.push(`${subsystem.name} is ${subsystem.status}; blocker: ${subsystem.blocker}.`);
   }
 
   lines.push(getReviewMission() || state.needsMajor
@@ -2709,6 +2723,15 @@ const buildNextMove = () => {
       action: `Review mission: ${mission.command}`,
       why: "The mission reached the Major review gate and needs direction before the next handoff.",
       command: "show missions"
+    };
+  }
+
+  const subsystem = blockedExternalSubsystem();
+  if (subsystem) {
+    return {
+      action: `Track subsystem: ${subsystem.name}`,
+      why: `Mission Control should monitor this external build without duplicating it. Current blocker: ${subsystem.blocker}.`,
+      command: "show subsystems"
     };
   }
 
@@ -3495,6 +3518,11 @@ const dispatchMission = (command) => {
     return;
   }
 
+  if (appRegistryCommandPattern.test(trimmed)) {
+    reviewAppRegistry(mission, trimmed);
+    return;
+  }
+
   if (missionBoardCommandPattern.test(trimmed)) {
     reviewMissionBoard(mission, trimmed);
     return;
@@ -3562,6 +3590,14 @@ const reviewAgentRegistry = (mission, command) => {
   saveState();
   renderAgents();
   pushActivity("Agent registry reviewed", "SYNCED");
+};
+
+const reviewAppRegistry = (mission, command) => {
+  logSubmittedCommand(mission, command, "A004 Ops Watcher");
+  state.appRegistryHighlighted = true;
+  saveState();
+  renderApps();
+  pushActivity("Subsystem registry reviewed", "SYNCED");
 };
 
 const reviewMissionBoard = (mission, command) => {
@@ -4250,7 +4286,9 @@ const renderPipeline = (id, stages) => {
 };
 
 const renderApps = () => {
+  const panel = document.querySelector("#apps");
   const target = document.querySelector("#app-registry");
+  panel.classList.toggle("review-highlight", Boolean(state.appRegistryHighlighted));
   target.innerHTML = `
     <table>
       <thead>

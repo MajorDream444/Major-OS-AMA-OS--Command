@@ -659,7 +659,8 @@ time {
 .mission-board-panel.review-highlight,
 .artifacts-panel.review-highlight,
 .risk-governance-panel.review-highlight,
-.skill-requests-panel.review-highlight {
+.skill-requests-panel.review-highlight,
+.registry-panel.review-highlight {
   border-color: rgba(32, 245, 138, 0.5);
   box-shadow: inset 2px 0 0 var(--green);
 }

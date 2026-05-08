@@ -11,6 +11,7 @@ This layer explains what already exists in local state:
 - mission stages
 - artifacts
 - Major review holds
+- registered external subsystems
 
 ## System Narrator
 
@@ -23,6 +24,7 @@ It answers:
 - Which agents are working or waiting?
 - How many artifacts exist?
 - Is the system waiting on Major?
+- Is a registered external subsystem blocked?
 
 The narrator is generated from local `app.js` state and persists as `state.systemGuidance` in `localStorage`.
 
@@ -32,8 +34,9 @@ The `NEXT MOVE` panel always shows one action:
 
 1. If any artifact has `NEEDS REVIEW`, recommend approving that artifact.
 2. Else if any mission has `NEEDS MAJOR`, recommend reviewing missions.
-3. Else if the latest mission is content/media, recommend distribution.
-4. Otherwise, recommend the next revenue-facing command.
+3. Else if any registered external subsystem has a blocker, recommend reviewing subsystem status.
+4. Else if the latest mission is content/media, recommend distribution.
+5. Otherwise, recommend the next revenue-facing command.
 
 The panel displays:
 
@@ -42,6 +45,14 @@ The panel displays:
 - `COMMAND`: exact command the operator can type
 
 Clicking the panel fills the command input with the recommended command. It does not auto-send.
+
+Current external subsystem command:
+
+```text
+show subsystems
+```
+
+This highlights the App Registry only. It does not build, sync, or ingest external subsystem data.
 
 ## Operator Guidance Rule
 
