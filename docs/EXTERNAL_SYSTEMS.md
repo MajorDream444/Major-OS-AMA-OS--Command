@@ -6,6 +6,40 @@ Command Center is the authority layer. External systems may produce artifacts, l
 
 ## Registered External Sources
 
+### CLIENT_CLARITY_INTAKE_OS
+
+Source repo:
+
+```text
+MajorDream444/client-clarity-intake-os
+```
+
+Role:
+
+- external client intake subsystem
+- produce future intake, blueprint, proposal, and build-task artifacts
+- report exported contracts into Mission Control for review
+
+Boundary:
+
+- status is `BUILDING EXTERNALLY`
+- owner is `Codex Intake Agent`
+- Mission Control monitors status, blocker, and next action
+- Mission Control does not duplicate the intake build
+- Mission Control ingests artifacts only after the subsystem exports a contract
+
+Current blocker:
+
+```text
+No Mission Control artifact export contract yet.
+```
+
+Next action:
+
+```text
+Wait for subsystem export contract.
+```
+
 ### SUBSTACK_ENGINE
 
 Source repo:
