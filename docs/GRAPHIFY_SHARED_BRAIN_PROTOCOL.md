@@ -122,7 +122,20 @@ registration:
 
 ---
 
-# 7. Memory Update Lifecycle
+# 7. Formal Registry Layer
+
+The shared brain protocol now expects formal registry surfaces for the objects that drive delivery and revenue.
+
+Initial formal registries:
+- `CLIENT_REGISTRY.md` — client worlds, phases, archetypes, economic value, build status, playbooks, artifacts, and handoffs
+- `ARTIFACT_REGISTRY.md` — durable outputs, approval state, repo location, graph links, and reusable value
+- `CLOSE_PROTOCOL_REGISTRY.md` — offer type, payment structure, support terms, handover rules, revision rules, risk, and approvals
+
+These registries should remain documentation-first until a live database or automation path is explicitly approved.
+
+---
+
+# 8. Memory Update Lifecycle
 
 ```text
 Input appears
@@ -138,7 +151,7 @@ Input appears
 
 ---
 
-# 8. Graphify Update Rules
+# 9. Graphify Update Rules
 
 Before broad repo work:
 1. Check whether `graphify-out/GRAPH_REPORT.md` exists.
@@ -156,7 +169,7 @@ If no graph exists, say so clearly.
 
 ---
 
-# 9. Anti-Silo Rule
+# 10. Anti-Silo Rule
 
 No object should remain only in one chat, one agent output, one local folder, or one person's head.
 
@@ -171,7 +184,7 @@ If an object matters, it needs at least one durable destination:
 
 ---
 
-# 10. No Isolated Agent Drift Rule
+# 11. No Isolated Agent Drift Rule
 
 Agents must not create private side-worlds.
 
@@ -185,7 +198,7 @@ An agent output should always say:
 
 ---
 
-# 11. Economic Purpose Requirement
+# 12. Economic Purpose Requirement
 
 Memory is not hoarding. Memory exists to improve execution.
 
@@ -201,7 +214,7 @@ Every memory update should support:
 
 ---
 
-# 12. Source Priority
+# 13. Source Priority
 
 When sources conflict, prioritize:
 1. current canonical markdown
@@ -213,4 +226,3 @@ When sources conflict, prioritize:
 7. chat memory
 
 If a claim comes from a missing or unverified source, mark it as pending.
-

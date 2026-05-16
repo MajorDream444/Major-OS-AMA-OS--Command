@@ -22,6 +22,11 @@ This file defines draft registry fields for agents, workflows, artifacts, and me
 
 It exists to prevent isolated agent drift and make every agent action trace back to doctrine, execution, memory, and economic purpose.
 
+Formal companion registries extend this draft:
+- `CLIENT_REGISTRY.md` for client worlds, phases, archetypes, economic value, build status, playbooks, artifacts, and handoffs
+- `ARTIFACT_REGISTRY.md` for durable outputs, approval state, repo location, graph links, and reusable value
+- `CLOSE_PROTOCOL_REGISTRY.md` for offers, payment structures, support terms, handovers, revisions, risk, and approvals
+
 ---
 
 # 2. Agent Registry Fields
@@ -251,4 +256,3 @@ Do not include yet:
 - production automation
 - live integration actions
 - agent swarm execution before registry rules are approved
-
