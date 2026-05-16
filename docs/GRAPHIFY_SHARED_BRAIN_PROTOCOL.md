@@ -131,6 +131,12 @@ Initial formal registries:
 - `ARTIFACT_REGISTRY.md` — durable outputs, approval state, repo location, graph links, and reusable value
 - `CLOSE_PROTOCOL_REGISTRY.md` — offer type, payment structure, support terms, handover rules, revision rules, risk, and approvals
 
+Client operating system doctrine:
+- `CLIENT_OPERATING_ENVIRONMENTS.md` — reusable doctrine for client operating environments, build activation, update rhythm, and handover boundaries
+- `CLIENT_REGISTRY_DRAFT.md` — draft client registry fields for reusable client environments
+- `ARTIFACT_REGISTRY_DRAFT.md` — draft artifact registry fields aligned to source classification and placement discipline
+- `CLOSE_PROTOCOL_STANDARD.md` — close protocol standard for offers, payment structures, support, handover, revisions, risk, and build activation
+
 These registries should remain documentation-first until a live database or automation path is explicitly approved.
 
 ---
