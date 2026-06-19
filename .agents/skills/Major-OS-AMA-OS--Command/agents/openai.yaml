@@ -1,0 +1,6 @@
+interface:
+  display_name: "Major OS AMA OS Command"
+  short_description: "Repo-specific patterns and workflows for Major-OS-AMA-OS--Command"
+  default_prompt: "Use the Major-OS-AMA-OS--Command repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
