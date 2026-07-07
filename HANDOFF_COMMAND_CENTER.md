@@ -6,6 +6,24 @@ This handoff gives the Command Center builder full context on where the system s
 
 The mission is not to rebuild from zero. The mission is to integrate what already exists, make it easier to operate, and turn the internal system into a productized AI operating system that can be used by Major and sold to clients.
 
+## Current Ecosystem Boundary
+
+```txt
+AMA Command Center coordinates.
+MAIM teaches.
+HAMAL provides doctrine and orchestration standards.
+Major-AI-OS holds reusable product/system layer.
+52in52 builds weekly apps.
+Hanzo provides AI infrastructure.
+Lux provides sovereignty.
+Airtable tracks operations.
+Notion presents the human dashboard.
+```
+
+Stage: `Stage A - Foundation`.
+
+No dashboard features, live integrations, Airtable writes, Notion writes, OpenClaw execution, Hanzo source changes, Lux implementation, or secrets.
+
 ## Latest Update - 2026-05-02
 
 Mission Control now has a local-only intake for SUBSTACK-AUTOMATION-ENGINE `asset_generation_summary.json`.
@@ -57,15 +75,17 @@ The decision:
 - Do not rebuild unnecessarily.
 - Use ChatGPT as the strategy/planning layer.
 - Use Codex as the build/repo execution layer.
-- Keep OpenClaw as the agent runtime.
-- Keep Hanzo as the agent intelligence/ecosystem layer.
+- Keep OpenClaw as the future agent runtime.
+- Keep HAMAL as the doctrine and orchestration standards layer.
+- Keep Hanzo as the AI infrastructure layer.
+- Keep Lux as the sovereignty layer.
 - Keep Airtable as the operational database.
 - Keep Notion as the human dashboard.
 - Keep GitHub as the truth vault.
 
 Operating sentence:
 
-> ChatGPT plans it. Codex builds it. OpenClaw runs the agents. Hanzo gives the ecosystem intelligence. GitHub stores the truth. Airtable tracks the business. Notion gives the dashboard. Obsidian and Graphify store deep memory.
+> AMA Command Center coordinates. ChatGPT plans it. Codex builds it. OpenClaw is the future agent runtime. HAMAL provides doctrine and orchestration standards. Hanzo provides AI infrastructure. Lux provides sovereignty. GitHub stores the truth. Airtable tracks operations. Notion presents the human dashboard. Obsidian and Graphify store deep memory.
 
 ## Current Repo Roles
 
@@ -147,13 +167,13 @@ Strategy, thinking, writing, research, architecture, product framing, prompts.
 Builder, executor, repo worker, PR machine, local/cloud implementation agent.
 
 ### OpenClaw
-Agent runtime and orchestration layer. Should remain in the stack. Do not replace it with Codex; Codex should help build and maintain it.
+Future agent runtime. Should remain in the stack. Do not replace it with Codex; Codex should help build and maintain its handoff surfaces when approved.
 
 ### Hanzo
-Agent intelligence and ecosystem identity layer.
+AI infrastructure layer: models, tools, runtime capabilities, inference, and execution primitives.
 
 ### Lux
-Rails, trust, settlement, blockchain/tokenization layer.
+Sovereignty layer: identity, ownership, provenance, credentials, blockchain, and tokenization.
 
 ### GitHub
 Source of truth for code, docs, skills, tasks, workflows, handoffs, and versioned system knowledge.
@@ -609,9 +629,13 @@ Build the command center scaffold, then connect it to:
 The system is now properly split into:
 
 ```text
-Command Center = Major-OS-AMA-OS--Command
-Reusable AI OS = Major-AI-OS
+AMA Command Center coordinates = Major-OS-AMA-OS--Command
+MAIM teaches = Major-AI-OS / MAIM surfaces
+HAMAL provides doctrine = HAMAL_MOB_PLAYBOOKS
+Reusable product/system layer = Major-AI-OS
 App Factory = 52in52
+AI Infrastructure = Hanzo
+Sovereignty = Lux
 Operations DB = Airtable
 Human Dashboard = Notion
 ```
