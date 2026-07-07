@@ -14,6 +14,20 @@ Operations DB = Airtable
 Human Dashboard = Notion
 ```
 
+## Ecosystem Boundary
+
+```text
+AMA Command Center coordinates.
+MAIM teaches.
+HAMAL provides doctrine and orchestration standards.
+Major-AI-OS holds reusable product/system layer.
+52in52 builds weekly apps.
+Hanzo provides AI infrastructure.
+Lux provides sovereignty.
+Airtable tracks operations.
+Notion presents the human dashboard.
+```
+
 ## Responsibilities
 
 The Command Center owns:
@@ -33,14 +47,27 @@ The Command Center does not own:
 - Individual app implementations that belong in `52in52`
 - Operational records that belong in Airtable
 - Human-readable planning dashboards that belong in Notion
+- HAMAL doctrine, SOPs, rubrics, or playbook ownership
+- Hanzo source code
+- Lux sovereignty implementation
 
 ## Operating Sentence
 
-ChatGPT plans it. Codex builds it. OpenClaw runs the agents. GitHub stores the truth. Airtable tracks the business. Notion gives the dashboard. Obsidian and Graphify store deep memory.
+ChatGPT plans it. Codex builds it. OpenClaw is the future agent runtime. GitHub stores the truth. Airtable tracks operations. Notion presents the human dashboard. Obsidian and Graphify store deep memory.
 
 ## Build Rule
 
 Start with the boot layer. Do not add dashboard features until the entrypoint files, handoff docs, environment template, and repo commands are stable.
+
+## Stage Rule
+
+Current stage:
+
+```text
+Stage A - Foundation
+```
+
+No dashboard features, live integrations, Airtable writes, Notion writes, OpenClaw execution, Hanzo source changes, Lux implementation, or secrets.
 
 ## Security Rule
 

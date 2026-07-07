@@ -12,6 +12,20 @@ No agent should run without knowing where context, playbooks, and executable too
 Context → Playbooks → Execution
 ```
 
+## Canonical Boundary
+
+```text
+AMA Command Center coordinates.
+MAIM teaches.
+HAMAL provides doctrine and orchestration standards.
+Major-AI-OS holds reusable product/system layer.
+52in52 builds weekly apps.
+Hanzo provides AI infrastructure.
+Lux provides sovereignty.
+Airtable tracks operations.
+Notion presents the human dashboard.
+```
+
 ## 1. Command Repo
 
 Repository:
@@ -23,15 +37,15 @@ MajorDream444/Major-OS-AMA-OS--Command
 Role:
 
 ```text
-Command center / multi-chat context / orchestration doctrine
+Command center / operator console / coordination layer
 ```
 
 Use this repo for:
 
 - master handoff documents
-- command center doctrine
+- command center boundaries
 - multi-chat context
-- agent civilization architecture
+- agent coordination surfaces
 - 12 MOBS structure
 - event-driven architecture
 - shared memory rules
@@ -188,9 +202,9 @@ kpi: TBD
 
 ```text
 Major-OS-AMA-OS--Command
-  ↓ defines mission/context
+  ↓ coordinates operator visibility
 HAMAL_MOB_PLAYBOOKS
-  ↓ defines repeatable execution
+  ↓ defines doctrine, playbooks, SOPs, rubrics, and standards
 hanzo-lux-codex-repo
   ↓ runs tools and automations
 Airtable / Notion / Telegram / Firecrawl / Hanzo / Lux
