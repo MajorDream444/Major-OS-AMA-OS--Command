@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MAIM Digital Ecosystem Wireframe</title>
+<style>
+/* ─── Token Layer ─────────────────────────────────────────── */
+:root {
+  --bg:        #090C12;
+  --surface:   #10151F;
+  --surface2:  #151D2B;
+  --border:    #1B2438;
+  --border2:   #243050;
+  --text:      #C4D4EE;
+  --muted:     #465A7A;
+  --dim:       #2C3F5C;
+
+  /* node palette */
+  --gold:     #C9931A;
+  --gold-glow:#D4A830;
+  --blue:     #2F80ED;
+  --blue-glow:#4A9FFF;
+  --violet:   #8B5CF6;
+  --teal:     #10B981;
+  --slate:    #4A7A9B;
+  --amber:    #D97706;
+  --fog:      #3E5472;
+
+  --font-display: 'DM Mono', 'Fira Mono', 'SF Mono', monospace;
+  --font-body:    system-ui, -apple-system, sans-serif;
+  --font-mono:    'SF Mono', 'Fira Code', monospace;
+
+  --r: 6px;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:       #EDF1F9;
+    --surface:  #FFFFFF;
+    --surface2: #E4EAF6;
+    --border:   #C8D4E8;
+    --border2:  #A8BCDA;
+    --text:     #111827;
+    --muted:    #6B7FA8;
+    --dim:      #8FA5C4;
+  }
+}
+:root[data-theme="dark"]  { --bg:#090C12; --surface:#10151F; --surface2:#151D2B; --border:#1B2438; --border2:#243050; --text:#C4D4EE; --muted:#465A7A; --dim:#2C3F5C; }
+:root[data-theme="light"] { --bg:#EDF1F9; --surface:#FFFFFF; --surface2:#E4EAF6; --border:#C8D4E8; --border2:#A8BCDA; --text:#111827; --muted:#6B7FA8; --dim:#8FA5C4; }
+
+/* ─── Reset & Base ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ─── Layout Shell ────────────────────────────────────────── */
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+.header {
+  padding: 36px 0 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.header-left { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.title span { color: var(--gold-glow); }
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 480px;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.stage-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: transparent;
+}
+.meta-row {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.theme-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--r);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s, color 0.2s;
+}
+.theme-btn:hover { border-color: var(--border2); color: var(--text); }
+.theme-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* ─── Diagram Canvas ──────────────────────────────────────── */
+.diagram-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 40px;
+  position: relative;
+}
+#ecosystem-svg {
+  width: 100%;
+  display: block;
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────── */
+.tooltip {
+  position: absolute;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  max-width: 220px;
+  z-index: 10;
+}
+.tooltip.visible { opacity: 1; }
+.tooltip-name {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tooltip-role {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ─── Bottom Grid ─────────────────────────────────────────── */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 700px) { .bottom-grid { grid-template-columns: 1fr; } }
+
+/* ─── Panel ───────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+.panel-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── Legend ──────────────────────────────────────────────── */
+.legend-list { display: flex; flex-direction: column; gap: 9px; }
+.legend-item { display: flex; align-items: center; gap: 10px; }
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-label { font-size: 12px; color: var(--text); }
+.legend-desc { font-size: 11px; color: var(--muted); margin-left: auto; text-align: right; }
+
+/* ─── Registry Table ──────────────────────────────────────── */
+.registry { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 10px 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+td {
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+.node-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.node-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.node-name { font-family: var(--font-mono); font-size: 11px; }
+.role-cell { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.status-pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.status-active { color: var(--teal); }
+.status-future { color: var(--muted); }
+.status-core   { color: var(--gold); }
+
+/* ─── Operating Sentence ──────────────────────────────────── */
+.op-sentence {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.op-sentence strong { color: var(--text); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="eyebrow">Design Canvas · Ecosystem Architecture</div>
+      <h1 class="title"><span>MAIM</span> Digital Ecosystem Wireframe</h1>
+      <p class="subtitle">
+        Component map, relationship model, and operator registry for the Major OS / AMA OS ecosystem.
+      </p>
+    </div>
+    <div class="header-right">
+      <span class="stage-badge">Stage A — Foundation</span>
+      <span class="meta-row">Owner: Major Dream Williams</span>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">Toggle Theme</button>
+    </div>
+  </header>
+
+  <!-- Ecosystem Diagram -->
+  <div class="diagram-wrap" id="diagram-wrap">
+    <svg id="ecosystem-svg" viewBox="0 0 1100 640" aria-label="MAIM Ecosystem node diagram"></svg>
+    <div class="tooltip" id="tooltip">
+      <div class="tooltip-name" id="tt-name"></div>
+      <div class="tooltip-role" id="tt-role"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Grid -->
+  <div class="bottom-grid">
+
+    <!-- Legend -->
+    <div class="panel">
+      <div class="panel-title">Layer Legend</div>
+      <div class="legend-list">
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#C9931A"></span>
+          <span class="legend-label">Teaching</span>
+          <span class="legend-desc">MAIM</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#2F80ED"></span>
+          <span class="legend-label">Coordination</span>
+          <span class="legend-desc">AMA Command Center</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#8B5CF6"></span>
+          <span class="legend-label">Doctrine</span>
+          <span class="legend-desc">HAMAL</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#10B981"></span>
+          <span class="legend-label">Build Layer</span>
+          <span class="legend-desc">Major-AI-OS · 52in52</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#4A7A9B"></span>
+          <span class="legend-label">Infrastructure</span>
+          <span class="legend-desc">Hanzo · Lux · OpenClaw</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#D97706"></span>
+          <span class="legend-label">Operations</span>
+          <span class="legend-desc">Airtable · Notion · GitHub</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#3E5472"></span>
+          <span class="legend-label">Memory / Expression</span>
+          <span class="legend-desc">Obsidian · Graphify · Substack · n8n</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background:#557A70"></span>
+          <span class="legend-label">AI Tools</span>
+          <span class="legend-desc">ChatGPT · Codex</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registry -->
+    <div class="panel">
+      <div class="panel-title">Component Registry</div>
+      <div class="registry">
+        <table>
+          <thead>
+            <tr>
+              <th>Node</th>
+              <th>Role</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="registry-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Operating Sentence -->
+  <div class="op-sentence">
+    <strong>ChatGPT</strong> plans it. <strong>Codex</strong> builds it. <strong>OpenClaw</strong> is the future agent runtime.
+    <strong>GitHub</strong> stores the truth. <strong>Airtable</strong> tracks operations.
+    <strong>Notion</strong> presents the human dashboard. <strong>Obsidian</strong> and <strong>Graphify</strong> store deep memory.
+  </div>
+
+</div>
+
+<script>
+/* ── Node Data ─────────────────────────────────────────────── */
+const NODES = [
+  // Center
+  { id: 'ama',       label: 'AMA Command\nCenter', short: 'AMA',   color: '#2F80ED', layer: 'coord',  ring: 0, angle: 0,
+    role: 'Coordinates all ecosystem components. Operator-facing visibility, handoffs, and admin workflows.',
+    status: 'active' },
+
+  // Inner ring — 7 nodes evenly spaced
+  { id: 'maim',      label: 'MAIM',          short: 'MAIM',    color: '#C9931A', layer: 'teach',  ring: 1, angle: 0,
+    role: 'Teaches and builds community. The education and ABC layer. Command Room and Knowledge Center content.',
+    status: 'core' },
+  { id: 'hamal',     label: 'HAMAL',         short: 'HAMAL',   color: '#8B5CF6', layer: 'doc',    ring: 1, angle: 51.4,
+    role: 'Provides doctrine, orchestration standards, SOPs, rubrics, and workspace playbooks.',
+    status: 'active' },
+  { id: '52in52',    label: '52in52',         short: '52IN52',  color: '#10B981', layer: 'build',  ring: 1, angle: 102.9,
+    role: 'Weekly app factory. Owns all app builds, weekly records, demos, and shipped artifacts.',
+    status: 'active' },
+  { id: 'hanzo',     label: 'Hanzo',          short: 'HANZO',   color: '#4A7A9B', layer: 'infra',  ring: 1, angle: 154.3,
+    role: 'Provides AI infrastructure. The underlying AI compute and tooling layer.',
+    status: 'active' },
+  { id: 'lux',       label: 'Lux',            short: 'LUX',     color: '#4A7A9B', layer: 'infra',  ring: 1, angle: 205.7,
+    role: 'Provides sovereignty. Independence and ownership layer.',
+    status: 'active' },
+  { id: 'openclaw',  label: 'OpenClaw',       short: 'CLAW',    color: '#4A7A9B', layer: 'infra',  ring: 1, angle: 257.1,
+    role: 'Future agent runtime. Autonomous execution engine — not yet live.',
+    status: 'future' },
+  { id: 'maios',     label: 'Major-AI-OS',    short: 'AI-OS',   color: '#10B981', layer: 'build',  ring: 1, angle: 308.6,
+    role: 'Holds the reusable product and system layer. Shared OS logic and product templates.',
+    status: 'active' },
+
+  // Outer ring — 7 nodes
+  { id: 'airtable',  label: 'Airtable',       short: 'ART',     color: '#D97706', layer: 'ops',    ring: 2, angle: 25,
+    role: 'Operations database. Tracks all operational records, tasks, and status.',
+    status: 'active' },
+  { id: 'github',    label: 'GitHub',          short: 'GH',      color: '#D97706', layer: 'ops',    ring: 2, angle: 77,
+    role: 'Source of truth. All code, docs, handoffs, and implementation files.',
+    status: 'active' },
+  { id: 'notion',    label: 'Notion',          short: 'NOT',     color: '#D97706', layer: 'ops',    ring: 2, angle: 130,
+    role: 'Human dashboard. Presents the planning view for operators.',
+    status: 'active' },
+  { id: 'substack',  label: 'Substack',        short: 'SUB',     color: '#3E5472', layer: 'mem',    ring: 2, angle: 180,
+    role: 'Expression engine. Substack media artifacts, articles, and audience output.',
+    status: 'active' },
+  { id: 'n8n',       label: 'n8n',             short: 'N8N',     color: '#3E5472', layer: 'mem',    ring: 2, angle: 232,
+    role: 'Automation engine. Workflow automation and integration orchestration.',
+    status: 'future' },
+  { id: 'obsidian',  label: 'Obsidian /\nGraphify', short: 'MEM', color: '#3E5472', layer: 'mem', ring: 2, angle: 284,
+    role: 'Memory graph. Deep context storage via Obsidian and Graphify.',
+    status: 'active' },
+  { id: 'chatgpt',   label: 'ChatGPT /\nCodex', short: 'AI',    color: '#557A70', layer: 'ai',     ring: 2, angle: 336,
+    role: 'AI tools. ChatGPT plans. Codex builds. Primary AI execution agents.',
+    status: 'active' },
+];
+
+const EDGES = [
+  // Center to inner
+  ['ama','maim'],['ama','hamal'],['ama','52in52'],['ama','hanzo'],
+  ['ama','lux'],['ama','openclaw'],['ama','maios'],
+  // Inner to outer (functional links)
+  ['maim','substack'],['maim','notion'],
+  ['hamal','airtable'],['hamal','github'],
+  ['52in52','airtable'],['52in52','github'],['52in52','maios'],
+  ['hanzo','openclaw'],['hanzo','n8n'],
+  ['lux','airtable'],
+  ['maios','github'],
+  // Outer cross-links
+  ['airtable','notion'],
+  ['github','obsidian'],
+  ['obsidian','n8n'],
+  ['chatgpt','ama'],
+];
+
+/* ── Layout Math ───────────────────────────────────────────── */
+const CX = 550, CY = 320;
+const RADII = [0, 160, 285];
+
+function nodePos(n) {
+  if (n.ring === 0) return { x: CX, y: CY };
+  const r = RADII[n.ring];
+  const a = (n.angle - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+}
+
+NODES.forEach(n => { const p = nodePos(n); n.x = p.x; n.y = p.y; });
+
+const byId = {};
+NODES.forEach(n => { byId[n.id] = n; });
+
+/* ── SVG Render ────────────────────────────────────────────── */
+const svg = document.getElementById('ecosystem-svg');
+const NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs = {}) {
+  const el = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+function renderDiagram() {
+  svg.innerHTML = '';
+
+  const isDark = document.documentElement.dataset.theme === 'dark'
+    || (document.documentElement.dataset.theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  const bgColor      = isDark ? '#10151F' : '#FFFFFF';
+  const ringColor    = isDark ? '#1B2438' : '#CBD5E8';
+  const edgeColor    = isDark ? '#1E2E46' : '#CDDAEE';
+  const edgeHiColor  = isDark ? '#2E4470' : '#AABFE0';
+  const labelColor   = isDark ? '#C4D4EE' : '#111827';
+  const subColor     = isDark ? '#4A5E7A' : '#6B7FA8';
+
+  // Background
+  svg.appendChild(svgEl('rect', { width: 1100, height: 640, fill: bgColor }));
+
+  // Ring guides
+  [RADII[1], RADII[2]].forEach(r => {
+    svg.appendChild(svgEl('circle', {
+      cx: CX, cy: CY, r,
+      fill: 'none',
+      stroke: ringColor,
+      'stroke-width': 1,
+      'stroke-dasharray': '3 5',
+      opacity: 0.6
+    }));
+  });
+
+  // Edges
+  const edgeGroup = svgEl('g', { opacity: 0.55 });
+  EDGES.forEach(([a, b]) => {
+    const na = byId[a], nb = byId[b];
+    if (!na || !nb) return;
+    const line = svgEl('line', {
+      x1: na.x, y1: na.y, x2: nb.x, y2: nb.y,
+      stroke: edgeColor, 'stroke-width': 1.2
+    });
+    edgeGroup.appendChild(line);
+  });
+  svg.appendChild(edgeGroup);
+
+  // Nodes
+  NODES.forEach(n => {
+    const g = svgEl('g', {
+      'data-id': n.id,
+      style: 'cursor:pointer',
+      role: 'button',
+      tabindex: 0,
+      'aria-label': `${n.label.replace('\n',' ')} — ${n.role}`
+    });
+
+    const r = n.ring === 0 ? 34 : n.ring === 1 ? 24 : 19;
+
+    // Glow ring (only on center and ring 0/1)
+    if (n.ring <= 1) {
+      g.appendChild(svgEl('circle', {
+        cx: n.x, cy: n.y, r: r + 7,
+        fill: n.color + (isDark ? '18' : '12'),
+        stroke: n.color + (isDark ? '40' : '30'),
+        'stroke-width': 1
+      }));
+    }
+
+    // Main circle
+    g.appendChild(svgEl('circle', {
+      cx: n.x, cy: n.y, r,
+      fill: n.color + (isDark ? '28' : '18'),
+      stroke: n.color,
+      'stroke-width': n.ring === 0 ? 2 : 1.5,
+    }));
+
+    // Short label inside
+    const shortEl = svgEl('text', {
+      x: n.x, y: n.y + 1,
+      'text-anchor': 'middle',
+      'dominant-baseline': 'middle',
+      fill: n.color,
+      'font-family': "'DM Mono','Fira Mono','SF Mono',monospace",
+      'font-size': n.ring === 0 ? 9 : 8,
+      'font-weight': '600',
+      'letter-spacing': '0.06em',
+    });
+    shortEl.textContent = n.short;
+    g.appendChild(shortEl);
+
+    // External label
+    const lines = n.label.split('\n');
+    const labelOffset = r + 12;
+    const angle = n.angle;
+    const rad = (angle - 90) * Math.PI / 180;
+    let lx = n.x, ly = n.y;
+
+    if (n.ring > 0) {
+      lx = n.x + Math.cos(rad) * labelOffset;
+      ly = n.y + Math.sin(rad) * labelOffset;
+    } else {
+      ly = n.y + r + 18;
+    }
+
+    const textAnchor = lx < CX - 20 ? 'end' : lx > CX + 20 ? 'start' : 'middle';
+
+    const lgEl = svgEl('g');
+    lines.forEach((ln, i) => {
+      const t = svgEl('text', {
+        x: lx,
+        y: ly + i * 12 - ((lines.length - 1) * 6),
+        'text-anchor': textAnchor,
+        'dominant-baseline': 'middle',
+        fill: labelColor,
+        'font-family': 'system-ui,-apple-system,sans-serif',
+        'font-size': n.ring === 0 ? 11 : 10,
+        'font-weight': n.ring === 0 ? '600' : '400',
+      });
+      t.textContent = ln;
+      lgEl.appendChild(t);
+    });
+    g.appendChild(lgEl);
+
+    // Interaction
+    const tooltip = document.getElementById('tooltip');
+    const ttName  = document.getElementById('tt-name');
+    const ttRole  = document.getElementById('tt-role');
+    const wrap    = document.getElementById('diagram-wrap');
+
+    function showTip(e) {
+      ttName.textContent = n.label.replace('\n', ' / ');
+      ttName.style.color = n.color;
+      ttRole.textContent = n.role;
+      tooltip.classList.add('visible');
+      moveTip(e);
+    }
+    function moveTip(e) {
+      const rect = wrap.getBoundingClientRect();
+      let tx = e.clientX - rect.left + 12;
+      let ty = e.clientY - rect.top + 12;
+      if (tx + 230 > wrap.offsetWidth) tx -= 250;
+      tooltip.style.left = tx + 'px';
+      tooltip.style.top  = ty + 'px';
+    }
+    function hideTip() { tooltip.classList.remove('visible'); }
+
+    g.addEventListener('mouseenter', showTip);
+    g.addEventListener('mousemove', moveTip);
+    g.addEventListener('mouseleave', hideTip);
+    g.addEventListener('focus', showTip);
+    g.addEventListener('blur', hideTip);
+    g.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
+
+    svg.appendChild(g);
+  });
+
+  // Center label below hub
+  const centerLabel = svgEl('text', {
+    x: CX, y: CY + 52,
+    'text-anchor': 'middle',
+    fill: subColor,
+    'font-family': "'DM Mono','Fira Mono','SF Mono',monospace",
+    'font-size': 9,
+    'letter-spacing': '0.1em',
+  });
+  centerLabel.textContent = 'COORDINATES';
+  svg.appendChild(centerLabel);
+}
+
+/* ── Registry Table ────────────────────────────────────────── */
+function renderRegistry() {
+  const tbody = document.getElementById('registry-tbody');
+  tbody.innerHTML = '';
+  NODES.forEach(n => {
+    const tr = document.createElement('tr');
+    const statusClass = n.status === 'active' ? 'status-active'
+                      : n.status === 'future'  ? 'status-future'
+                      : 'status-core';
+    const statusLabel = n.status === 'active' ? 'active'
+                      : n.status === 'future'  ? 'future'
+                      : 'core';
+    const shortRole = n.role.length > 70 ? n.role.slice(0, 68) + '…' : n.role;
+    tr.innerHTML = `
+      <td>
+        <div class="node-name-cell">
+          <span class="node-dot" style="background:${n.color}"></span>
+          <span class="node-name">${n.label.replace('\n', ' / ')}</span>
+        </div>
+      </td>
+      <td class="role-cell">${shortRole}</td>
+      <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── Theme Toggle ──────────────────────────────────────────── */
+function toggleTheme() {
+  const root = document.documentElement;
+  const current = root.dataset.theme;
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (!current) {
+    root.dataset.theme = systemDark ? 'light' : 'dark';
+  } else if (current === 'dark') {
+    root.dataset.theme = 'light';
+  } else {
+    root.dataset.theme = 'dark';
+  }
+  renderDiagram();
+}
+
+/* ── Init ──────────────────────────────────────────────────── */
+renderDiagram();
+renderRegistry();
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if (!document.documentElement.dataset.theme) renderDiagram();
+});
+</script>
+</body>
+</html>
