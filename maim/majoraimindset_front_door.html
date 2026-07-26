@@ -1429,6 +1429,7 @@ footer {
     <div class="hero-ctas">
       <a class="btn-primary" href="#register">Reserve your free seat →</a>
       <a class="btn-ghost" href="#film">Watch the welcome film</a>
+      <a class="btn-ghost" href="./MAIM_Funnel_Landing_Page.html">Get the 10 Pillars →</a>
     </div>
 
     <div class="hero-stat-row">
@@ -1458,16 +1459,13 @@ footer {
 <!-- WELCOME FILM -->
 <section class="film-sec" id="film">
   <div class="film-inner">
-    <a class="film-stage bracket bracket-b" href="https://youtu.be/OZ10QdrUxl8" target="_blank" rel="noopener noreferrer" aria-label="Watch the MAIM welcome film on YouTube — 4 minutes 34 seconds">
-      <div class="film-stage-glow"></div>
-      <div class="film-label-tl">MAIM Welcome Film · 2025</div>
-      <div class="film-play-ring" aria-hidden="true">
-        <svg width="20" height="22" viewBox="0 0 20 22" fill="none">
-          <path d="M2 1L18 11L2 21V1Z" fill="#C9931A"/>
-        </svg>
-      </div>
-      <div class="film-timestamp">4:34</div>
-    </a>
+    <div class="film-stage bracket bracket-b">
+      <iframe src="https://www.youtube-nocookie.com/embed/OZ10QdrUxl8?rel=0"
+              title="MAIM Welcome Film — Major Dream Williams"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen loading="lazy"
+              style="position:absolute;inset:0;width:100%;height:100%;border:0;z-index:3"></iframe>
+    </div>
     <div class="film-copy">
       <div class="film-copy-eyebrow">Founder welcome</div>
       <h2 style="font-size:clamp(28px,4vw,48px);">Why this room exists.</h2>
@@ -1743,20 +1741,21 @@ footer {
           <div class="register-feature">Free resources and prompt cards</div>
           <div class="register-feature">Pressure Test result — your personal map</div>
         </div>
+        <p style="margin-top:28px;font-size:15px;line-height:1.7;color:var(--muted)">Ready to go deeper than the free room? <a href="./MAIM_Funnel_Landing_Page.html" style="color:var(--gold)">The 10 Pillars →</a> — the architecture underneath the A·B·C, from $27.</p>
       </div>
       <div>
-        <div class="register-form" role="form" aria-label="Seat reservation">
+        <form class="register-form" action="https://maim-the-10-pillars.kit.com/products/5-ai-moves" method="POST" aria-label="Seat reservation">
           <div class="form-group">
             <label class="form-label" for="r-name">Full name</label>
-            <input class="form-input" id="r-name" type="text" placeholder="Your name" autocomplete="name">
+            <input class="form-input" id="r-name" name="first_name" type="text" placeholder="Your name" autocomplete="given-name" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="r-email">Email</label>
-            <input class="form-input" id="r-email" type="email" placeholder="you@example.com" autocomplete="email">
+            <input class="form-input" id="r-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
           </div>
           <div class="form-group">
             <label class="form-label" for="r-lane">Your lane</label>
-            <select class="form-select" id="r-lane">
+            <select class="form-select" id="r-lane" name="lane">
               <option>Athlete</option>
               <option>Creator</option>
               <option>Entrepreneur</option>
@@ -1767,9 +1766,9 @@ footer {
               <option>I just know there's more</option>
             </select>
           </div>
-          <button class="form-submit" type="button">Register free →</button>
+          <button class="form-submit" type="submit">Register free →</button>
           <p class="form-note">No credit card. No spam. Just a seat.</p>
-        </div>
+        </form>
       </div>
     </div>
   </div>
