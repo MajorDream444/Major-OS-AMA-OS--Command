@@ -1,376 +1,800 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>5 AI Moves Every Caribbean Builder Must Make Now — Free Guide</title>
-<meta name="description" content="Get the free M.A.I.M. guide: 5 high-leverage AI moves for Caribbean builders. No tech background needed. Results in 48 hours."/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<title>MAIM — The 10 Pillars · Free Guide</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#08111f;--gold:#f0a500;--gold-lt:#fdc84b;
-  --em-lt:#27ae60;--white:#fafaf8;
-  --muted:rgba(250,250,248,0.55);--light:#c8d8ea;
-  --border:rgba(240,165,0,0.2);--border-soft:rgba(250,250,248,0.08);
+/* ══ MAIM Design System — shared with majoraimindset.com front door ══ */
+:root {
+  --ink:    #111111;
+  --ink2:   #181818;
+  --ink3:   #202020;
+  --gold:   #C9931A;
+  --gold2:  #E0A820;
+  --green:  #1F8A4C;
+  --blue:   #2A78D6;
+  --orange: #E07A2F;
+  --red:    #C94040;
+  --text:   #F0EDE5;
+  --muted:  rgba(240,237,229,0.52);
+  --dim:    rgba(240,237,229,0.14);
+  --border: rgba(240,237,229,0.07);
 }
-html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);line-height:1.7}
-h1,h2,h3,h4{font-family:'Syne',sans-serif}
-
-/* ── HERO ── */
-.hero{
-  min-height:100vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:3rem 1.5rem;text-align:center;position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;top:-100px;right:-100px;
-  width:600px;height:600px;
-  background:radial-gradient(circle,rgba(240,165,0,0.06) 0%,transparent 65%);
-  pointer-events:none;
-}
-.hero::after{
-  content:'';position:absolute;bottom:-80px;left:-80px;
-  width:500px;height:500px;
-  background:radial-gradient(circle,rgba(39,174,96,0.05) 0%,transparent 65%);
-  pointer-events:none;
-}
-.badge{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.4rem;
-}
-.badge::before,.badge::after{content:'';width:18px;height:1px;background:var(--gold);opacity:0.6}
-.hero h1{
-  font-size:clamp(2.2rem,6vw,4rem);font-weight:800;
-  line-height:1.05;letter-spacing:-0.025em;
-  max-width:720px;margin:0 auto 1rem;
-}
-.hero h1 em{font-style:normal;color:var(--gold)}
-.hero-sub{
-  font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);
-  max-width:520px;margin:0 auto 2.5rem;font-weight:300;line-height:1.8;
-}
-.form-card{
-  background:rgba(13,30,53,0.8);border:0.5px solid var(--border);
-  border-radius:14px;padding:2rem;max-width:440px;width:100%;
-  margin:0 auto;backdrop-filter:blur(20px);
-}
-.form-card h3{
-  font-size:1rem;font-weight:700;margin-bottom:0.3rem;
-  color:var(--em-lt);
-}
-.form-card p{font-size:0.82rem;color:var(--muted);font-weight:300;margin-bottom:1.2rem}
-.field{margin-bottom:0.75rem}
-.field input{
-  width:100%;padding:0.8rem 1rem;
-  background:rgba(255,255,255,0.04);
-  border:0.5px solid var(--border-soft);border-radius:8px;
-  color:var(--white);font-size:0.9rem;outline:none;
-  font-family:'DM Sans',sans-serif;transition:border-color 0.2s;
-}
-.field input:focus{border-color:rgba(240,165,0,0.5)}
-.field input::placeholder{color:rgba(250,250,248,0.25)}
-.submit-btn{
-  width:100%;padding:0.9rem;
-  background:var(--gold);border:none;border-radius:8px;
-  font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:800;
-  letter-spacing:0.08em;text-transform:uppercase;color:var(--navy);
-  cursor:pointer;transition:background 0.2s;
-}
-.submit-btn:hover{background:var(--gold-lt)}
-.form-note{font-size:10px;color:rgba(250,250,248,0.25);margin-top:0.75rem;text-align:center}
-.hero-proof{
-  display:flex;align-items:center;justify-content:center;
-  gap:1.5rem;flex-wrap:wrap;margin-top:2rem;
-}
-.proof-item{font-size:0.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
-.proof-dot{width:6px;height:6px;border-radius:50%;background:var(--em-lt)}
-
-/* ── WHAT YOU GET ── */
-.section{padding:5rem 1.5rem;max-width:820px;margin:0 auto}
-.s-label{
-  font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.4rem;display:flex;align-items:center;gap:10px;
-}
-.s-label::before{content:'';width:18px;height:1px;background:var(--gold);opacity:0.7}
-.section h2{
-  font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;
-  line-height:1.1;letter-spacing:-0.02em;margin-bottom:0.8rem;
-}
-.section p{color:var(--muted);font-weight:300;font-size:0.95rem;line-height:1.8;margin-bottom:2rem;max-width:580px}
-
-.moves-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.75rem}
-.move-card{
-  padding:1.3rem;background:rgba(13,30,53,0.7);
-  border:0.5px solid var(--border-soft);border-radius:10px;
-  transition:border-color 0.2s;
-}
-.move-card:hover{border-color:var(--border)}
-.move-num{
-  font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:700;
-  color:var(--gold);opacity:0.7;margin-bottom:0.5rem;letter-spacing:0.1em;
-}
-.move-card h4{font-size:0.85rem;font-weight:700;margin-bottom:0.3rem}
-.move-card p{font-size:0.78rem;color:var(--muted);font-weight:300;line-height:1.5;margin:0}
-.move-meta{
-  font-size:10px;color:rgba(39,174,96,0.7);margin-top:0.5rem;
-  letter-spacing:0.05em;
+:root[data-theme="dark"] {
+  --ink: #111111; --ink2: #181818; --ink3: #202020;
+  --text: #F0EDE5;
+  --muted: rgba(240,237,229,0.52);
+  --dim: rgba(240,237,229,0.14);
+  --border: rgba(240,237,229,0.07);
 }
 
-/* ── DIVIDER ── */
-.divider{height:0.5px;background:var(--border-soft);margin:0 1.5rem}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
 
-/* ── QUIZ SECTION ── */
-.quiz-section{
-  padding:5rem 1.5rem;
-  background:rgba(14,122,78,0.04);
-  border-top:0.5px solid rgba(39,174,96,0.1);
-  border-bottom:0.5px solid rgba(39,174,96,0.1);
+h1, h2, h3, h4 {
+  font-family: 'Arial Narrow', 'Arial Condensed', Arial, sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-wrap: balance;
+  letter-spacing: -0.015em;
 }
-.quiz-inner{max-width:680px;margin:0 auto;text-align:center}
-.quiz-inner h2{font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;margin-bottom:0.6rem}
-.quiz-inner h2 em{font-style:normal;color:var(--em-lt)}
-.quiz-inner p{color:var(--muted);font-weight:300;font-size:0.95rem;line-height:1.8;margin-bottom:1.5rem}
-.archetypes{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;
-  margin:1.5rem 0;text-align:left;
-}
-@media(max-width:480px){.archetypes{grid-template-columns:1fr}}
-.arch-card{
-  padding:1rem;background:rgba(14,122,78,0.06);
-  border:0.5px solid rgba(39,174,96,0.15);border-radius:8px;
-}
-.arch-card strong{font-family:'Syne',sans-serif;font-size:0.8rem;color:var(--white);display:block;margin-bottom:2px}
-.arch-card span{font-size:0.75rem;color:var(--muted);font-weight:300}
-.quiz-btn{
-  display:inline-block;padding:0.9rem 2.5rem;
-  background:var(--em-lt);border:none;border-radius:8px;
-  font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:800;
-  letter-spacing:0.08em;text-transform:uppercase;color:var(--white);
-  text-decoration:none;transition:background 0.2s;cursor:pointer;
-}
-.quiz-btn:hover{background:#2ecc71}
 
-/* ── QUOTE ── */
-.quote-section{padding:4rem 1.5rem;max-width:680px;margin:0 auto;text-align:center}
-.quote-section blockquote{
-  font-family:'DM Sans',sans-serif;font-size:clamp(1.1rem,2.5vw,1.4rem);
-  font-style:italic;font-weight:300;color:rgba(250,250,248,0.85);
-  line-height:1.7;border-left:2px solid var(--gold);
-  padding:1rem 1.5rem;margin-bottom:0.75rem;text-align:left;
-  background:rgba(240,165,0,0.04);border-radius:0 8px 8px 0;
+/* ── Viewfinder brackets ── */
+.bracket { position: relative; }
+.bracket::before, .bracket::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--gold); border-style: solid;
+  opacity: 0.45; pointer-events: none; z-index: 1;
 }
-.quote-section cite{font-size:0.78rem;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase}
+.bracket::before { top: 14px; left: 14px; border-width: 1.5px 0 0 1.5px; }
+.bracket::after  { top: 14px; right: 14px; border-width: 1.5px 1.5px 0 0; }
+.bracket-b { position: relative; }
+.bracket-b::before, .bracket-b::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--gold); border-style: solid;
+  opacity: 0.45; pointer-events: none;
+}
+.bracket-b::before { bottom: 14px; left: 14px; border-width: 0 0 1.5px 1.5px; }
+.bracket-b::after  { bottom: 14px; right: 14px; border-width: 0 1.5px 1.5px 0; }
 
-/* ── TIER PREVIEW ── */
-.tiers-section{padding:5rem 1.5rem;max-width:820px;margin:0 auto}
-.tiers-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem}
-@media(max-width:640px){.tiers-row{grid-template-columns:1fr}}
-.tier-preview{
-  padding:1.4rem;background:rgba(13,30,53,0.7);
-  border:0.5px solid var(--border-soft);border-radius:12px;
-}
-.tier-preview.featured{border-color:var(--em-lt);background:rgba(14,122,78,0.06)}
-.tier-preview.vault{border-color:var(--gold);background:rgba(240,165,0,0.04)}
-.tp-label{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:0.4rem}
-.tp-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:0.2rem}
-.tp-price{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--white);margin-bottom:0.6rem}
-.tp-features{list-style:none;font-size:0.78rem;color:var(--muted)}
-.tp-features li{padding:2px 0;display:flex;gap:7px;align-items:flex-start}
-.tp-features li::before{content:'—';color:var(--gold);font-size:9px;margin-top:4px;flex-shrink:0}
-.tp-cta{
-  display:block;width:100%;margin-top:1.2rem;padding:0.7rem;
-  border-radius:7px;font-family:'Syne',sans-serif;font-size:0.78rem;
-  font-weight:700;letter-spacing:0.07em;text-transform:uppercase;
-  text-align:center;text-decoration:none;transition:all 0.15s;
-  border:0.5px solid var(--border-soft);background:transparent;color:var(--white);
-}
-.tp-cta:hover{background:rgba(255,255,255,0.05)}
-.tier-preview.featured .tp-cta{background:var(--em-lt);color:#fff;border-color:transparent}
-.tier-preview.vault .tp-cta{background:var(--gold);color:var(--navy);border-color:transparent}
+/* ── ABC stripe ── */
+.abc-stripe { display: flex; height: 3px; }
+.abc-stripe span { flex: 1; }
+.s-gold { background: var(--gold); }
+.s-green { background: var(--green); }
+.s-blue { background: var(--blue); }
 
-/* ── FOOTER CTA ── */
-.footer-cta{
-  text-align:center;padding:5rem 1.5rem 4rem;
-  border-top:0.5px solid var(--border-soft);
+/* ── Nav ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(17,17,17,0.93);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px; height: 62px;
+  display: flex; align-items: center; gap: 16px;
 }
-.footer-cta .eyebrow{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
-.footer-cta h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;line-height:1.1;margin-bottom:1rem}
-.footer-cta h2 em{font-style:normal;color:var(--gold)}
-.footer-cta p{color:var(--muted);font-weight:300;font-size:0.9rem;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8}
-.cta-big{
-  display:inline-block;padding:1rem 2.5rem;
-  background:var(--gold);color:var(--navy);
-  font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:800;
-  letter-spacing:0.1em;text-transform:uppercase;border-radius:8px;
-  text-decoration:none;transition:background 0.2s;
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+.nav-medallion { width: 36px; height: 36px; flex-shrink: 0; }
+.nav-wordmark { display: flex; flex-direction: column; gap: 2px; }
+.nav-brand {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text); line-height: 1;
 }
-.cta-big:hover{background:var(--gold-lt)}
+.nav-tag {
+  font-family: 'Courier New', monospace; font-size: 8px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gold); line-height: 1;
+}
+.nav-spacer { flex: 1; }
+.nav-links { display: flex; gap: 26px; list-style: none; }
+.nav-links a {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none; transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--text); }
+@media (max-width: 700px) { .nav-links { display: none; } }
 
-/* ── RESPONSIVE ── */
-@media(max-width:600px){
-  .moves-grid{grid-template-columns:1fr}
-  .hero-proof{flex-direction:column;gap:0.75rem}
+/* ── Buttons ── */
+.btn-gold {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--gold); color: #111;
+  font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  padding: 14px 28px; border: none; cursor: pointer; transition: background 0.15s;
+}
+.btn-gold:hover { background: var(--gold2); }
+.btn-gold:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn-sm { padding: 9px 18px; font-size: 10px; }
+
+/* ── Hero ── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 25% 35%, rgba(201,147,26,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 40% at 80% 70%, rgba(31,138,76,0.05) 0%, transparent 60%);
+}
+.hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 90px 0 80px;
+  display: grid; grid-template-columns: 1fr 400px;
+  gap: 70px; align-items: center;
+}
+@media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; gap: 48px; } }
+.hero-eyebrow {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--gold); opacity: 0.5; }
+.hero h1 {
+  font-size: clamp(44px, 7.5vw, 92px);
+  line-height: 0.9; letter-spacing: -0.025em;
+  margin-bottom: 28px;
+}
+.hero h1 .hl-gold { color: var(--gold); }
+.hero-sub {
+  font-size: 17px; line-height: 1.65; color: var(--muted);
+  max-width: 460px; margin-bottom: 32px;
+}
+.hero-proof { display: flex; flex-wrap: wrap; gap: 10px 24px; }
+.proof-item {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 7px;
+}
+.proof-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+/* ── Opt-in form card ── */
+.form-card {
+  background: var(--ink2); border: 1px solid var(--border);
+  padding: 34px 30px; position: relative;
+}
+.form-card-label {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.form-card h3 { font-size: 26px; line-height: 1; margin-bottom: 10px; }
+.form-card > p {
+  font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 22px;
+}
+.field { margin-bottom: 10px; }
+.field label {
+  display: block;
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.field input {
+  width: 100%; padding: 13px 16px;
+  background: var(--ink); border: 1px solid var(--border);
+  color: var(--text); font-family: Georgia, serif; font-size: 15px;
+  outline: none; transition: border-color 0.15s;
+}
+.field input::placeholder { color: var(--dim); }
+.field input:focus { border-color: rgba(201,147,26,0.45); }
+.form-card button { width: 100%; margin-top: 8px; padding: 16px; }
+.form-note {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.06em; color: var(--muted);
+  text-align: center; margin-top: 14px; opacity: 0.65;
+}
+
+/* ── Section shell ── */
+.section { padding: 100px 32px; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.s-label {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 22px;
+  display: flex; align-items: center; gap: 12px;
+}
+.s-label::before { content: ''; width: 24px; height: 1px; background: currentColor; opacity: 0.6; }
+.section h2 { font-size: clamp(32px, 5vw, 60px); line-height: 0.95; margin-bottom: 18px; }
+.section h2 em { font-style: normal; color: var(--gold); }
+.section-lede {
+  font-size: 16px; line-height: 1.7; color: var(--muted);
+  max-width: 560px; margin-bottom: 48px;
+}
+.alt { background: var(--ink2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+/* ── The 5 Moves ── */
+.moves { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2px; }
+.move {
+  background: var(--ink); padding: 32px 30px;
+  position: relative; overflow: hidden; transition: background 0.2s;
+}
+.move:hover { background: var(--ink3); }
+.move::after {
+  content: attr(data-n); position: absolute;
+  right: -6px; bottom: -34px;
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 130px; line-height: 1; opacity: 0.045;
+  color: var(--mc); pointer-events: none;
+}
+.move-n {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--mc); margin-bottom: 16px;
+}
+.move h4 { font-size: 19px; line-height: 1.1; margin-bottom: 12px; }
+.move p { font-size: 14px; line-height: 1.6; color: var(--muted); margin-bottom: 20px; }
+.move-meta {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px;
+  border-top: 1px solid var(--border); padding-top: 14px;
+}
+.move-meta .pill-ref { color: var(--mc); }
+
+/* ── The 10 Pillars ── */
+.pillar-groups { display: flex; flex-direction: column; gap: 44px; }
+.pillar-group-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; margin-bottom: 18px;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px;
+}
+.pillar-group-name {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 20px; text-transform: uppercase; letter-spacing: 0.01em;
+}
+.pillar-group-note {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+@media (max-width: 860px) { .pillar-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .pillar-grid { grid-template-columns: 1fr; } }
+.pillar {
+  background: var(--ink); padding: 26px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background 0.2s;
+}
+.pillar:hover { background: var(--ink3); }
+.pillar-n {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 34px; line-height: 1; letter-spacing: -0.03em;
+  color: var(--pc); font-variant-numeric: tabular-nums;
+}
+.pillar-name {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 16px; text-transform: uppercase; line-height: 1.1;
+  color: var(--text);
+}
+.pillar-desc { font-size: 13.5px; line-height: 1.55; color: var(--muted); }
+.pillar.locked { opacity: 0.6; }
+.pillar-access {
+  font-family: 'Courier New', monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pc); margin-top: auto; padding-top: 8px;
+}
+.pillar.locked .pillar-access { color: var(--muted); }
+
+/* ── Quiz ── */
+.quiz { text-align: center; }
+.quiz .s-label { justify-content: center; }
+.quiz .s-label::before { display: none; }
+.quiz h2 { font-size: clamp(32px, 5vw, 56px); }
+.quiz h2 em { font-style: normal; color: var(--green); }
+.quiz-lede {
+  font-size: 16px; line-height: 1.7; color: var(--muted);
+  max-width: 520px; margin: 0 auto 40px;
+}
+.archetypes {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px;
+  text-align: left; margin-bottom: 40px;
+}
+@media (max-width: 560px) { .archetypes { grid-template-columns: 1fr; } }
+.arch {
+  background: var(--ink); padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.arch-name {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 17px; text-transform: uppercase; color: var(--text);
+}
+.arch-pillar {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ac);
+}
+.btn-green {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green); color: #F0EDE5;
+  font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  padding: 14px 30px; border: none; cursor: pointer; transition: background 0.15s;
+}
+.btn-green:hover { background: #25A15A; }
+
+/* ── Quote ── */
+.quote-sec {
+  padding: 110px 32px; text-align: center;
+  border-top: 1px solid var(--border);
+}
+.quote-inner { max-width: 820px; margin: 0 auto; }
+.quote-eyebrow {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 44px;
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+}
+.quote-eyebrow::before, .quote-eyebrow::after {
+  content: ''; width: 40px; height: 1px; background: var(--border);
+}
+.quote-text {
+  font-family: Georgia, 'Times New Roman', serif; font-style: italic;
+  font-size: clamp(21px, 3.4vw, 38px); line-height: 1.42;
+  color: var(--text); margin-bottom: 30px;
+}
+.quote-text em { font-style: normal; color: var(--gold); }
+.quote-byline {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+
+/* ── Tiers ── */
+.tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+@media (max-width: 860px) { .tiers { grid-template-columns: 1fr; } }
+.tier {
+  background: var(--ink); padding: 34px 30px;
+  display: flex; flex-direction: column;
+  border-top: 3px solid var(--tc);
+}
+.tier-label {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--tc); margin-bottom: 12px;
+}
+.tier-name { font-size: 24px; line-height: 1; margin-bottom: 8px; }
+.tier-price {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: 48px; line-height: 1; letter-spacing: -0.03em;
+  color: var(--tc); margin-bottom: 8px; font-variant-numeric: tabular-nums;
+}
+.tier-tagline {
+  font-family: Georgia, serif; font-style: italic;
+  font-size: 14px; color: var(--muted); line-height: 1.5;
+  margin-bottom: 24px; padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.tier-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.tier-features li {
+  font-size: 14px; color: var(--muted); line-height: 1.5;
+  display: flex; gap: 10px; align-items: baseline;
+}
+.tier-features li::before { content: '◉'; font-size: 7px; color: var(--tc); flex-shrink: 0; }
+.tier-cta {
+  margin-top: auto;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; text-decoration: none;
+  font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid var(--tc); color: var(--tc);
+  background: transparent; transition: background 0.15s, color 0.15s;
+}
+.tier-cta:hover { background: var(--tc); color: #111; }
+.tier.featured .tier-cta { background: var(--tc); color: #F0EDE5; }
+.tier.featured .tier-cta:hover { background: transparent; color: var(--tc); }
+
+/* ── Closing CTA ── */
+.closing {
+  padding: 110px 32px; text-align: center;
+  border-top: 1px solid var(--border);
+}
+.closing-inner { max-width: 640px; margin: 0 auto; }
+.closing-eyebrow {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+}
+.closing h2 { font-size: clamp(36px, 6vw, 68px); line-height: 0.92; margin-bottom: 20px; }
+.closing h2 em { font-style: normal; color: var(--gold); }
+.closing > .closing-inner > p {
+  font-size: 16px; line-height: 1.7; color: var(--muted);
+  max-width: 460px; margin: 0 auto 36px;
+}
+.closing-taglines {
+  display: flex; flex-direction: column; gap: 5px; margin-top: 56px;
+}
+.closing-line {
+  font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
+  font-size: clamp(16px, 2.4vw, 24px); letter-spacing: 0.02em;
+  text-transform: uppercase; color: var(--muted);
+}
+.closing-line.gold { color: var(--gold); }
+.closing-mark {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-top: 20px;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border); padding: 28px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.footer-handle {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.1em; color: var(--muted);
+}
+.footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+.footer-links a {
+  font-family: 'Courier New', monospace; font-size: 9px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none; transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--gold); }
+.footer-domain {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);
 }
 </style>
-</head>
-<body>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="badge">Free Guide — M.A.I.M.</div>
-  <h1>5 AI Moves Every<br><em>Caribbean Builder</em><br>Must Make Now</h1>
-  <p class="hero-sub">No tech background needed. No budget required. Results in 48 hours. Built for the diaspora — and every builder who moves with purpose.</p>
+<!-- ══ NAV ══ -->
+<nav>
+  <a class="nav-logo" href="#top" aria-label="Major AI Mindset">
+    <svg class="nav-medallion" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="rim" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#F2D272"/><stop offset="0.35" stop-color="#C9931A"/>
+          <stop offset="0.65" stop-color="#8A6210"/><stop offset="1" stop-color="#E0B84E"/>
+        </linearGradient>
+      </defs>
+      <circle cx="24" cy="24" r="23" fill="url(#rim)"/>
+      <circle cx="24" cy="24" r="20.5" fill="#0E0E0E"/>
+      <text x="24" y="27" font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive" font-size="24" font-style="italic" fill="#C9931A" text-anchor="middle">MD</text>
+      <g opacity="0.9">
+        <ellipse cx="24" cy="36.5" rx="10" ry="3.2" fill="none" stroke="#A87814" stroke-width="1.6"/>
+        <ellipse cx="24" cy="35" rx="7.5" ry="2.4" fill="none" stroke="#C9931A" stroke-width="1.3"/>
+        <path d="M15 36.5 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0" stroke="#8A6210" stroke-width="0.8" fill="none"/>
+      </g>
+    </svg>
+    <div class="nav-wordmark">
+      <div class="nav-brand">Major AI Mindset</div>
+      <div class="nav-tag">The 10 Pillars</div>
+    </div>
+  </a>
+  <div class="nav-spacer"></div>
+  <ul class="nav-links">
+    <li><a href="#moves">5 Moves</a></li>
+    <li><a href="#pillars">10 Pillars</a></li>
+    <li><a href="#quiz">Find Your Pillar</a></li>
+    <li><a href="#tiers">Tiers</a></li>
+  </ul>
+  <a class="btn-gold btn-sm" href="#top">Get the Guide →</a>
+</nav>
 
-  <div class="form-card">
-    <h3>Get the Free Guide Instantly</h3>
-    <p>Enter your details and it lands in your inbox in 60 seconds.</p>
-    <form action="https://maim-the-10-pillars.kit.com/products/5-ai-moves" method="POST">
-      <div class="field">
-        <input type="text" name="first_name" placeholder="First name" required/>
+<!-- ══ HERO ══ -->
+<section class="hero bracket bracket-b" id="top">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Free Guide · Major AI Mindset</div>
+      <h1>5 AI moves<br>every builder<br><span class="hl-gold">must make now.</span></h1>
+      <p class="hero-sub">Five high-leverage moves you can run this week. No tech background. No budget. Each one takes under two hours — and each one compounds.</p>
+      <div class="hero-proof">
+        <div class="proof-item"><span class="proof-dot" aria-hidden="true"></span>Instant delivery</div>
+        <div class="proof-item"><span class="proof-dot" aria-hidden="true"></span>100% free</div>
+        <div class="proof-item"><span class="proof-dot" aria-hidden="true"></span>Culturally grounded</div>
+        <div class="proof-item"><span class="proof-dot" aria-hidden="true"></span>No fluff — only moves</div>
       </div>
-      <div class="field">
-        <input type="email" name="email" placeholder="Email address" required/>
-      </div>
-      <button type="submit" class="submit-btn">Send Me the Free Guide →</button>
-    </form>
-    <p class="form-note">No spam. Unsubscribe anytime. Your information is never sold.</p>
+    </div>
+
+    <div class="form-card bracket">
+      <div class="form-card-label">Free · Instant · Actionable</div>
+      <h3>Get the guide</h3>
+      <p>Enter your details and it lands in your inbox in 60 seconds.</p>
+      <form action="https://maim-the-10-pillars.kit.com/products/5-ai-moves" method="POST">
+        <div class="field">
+          <label for="f-name">First name</label>
+          <input id="f-name" type="text" name="first_name" placeholder="Your name" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <button type="submit" class="btn-gold">Send me the guide →</button>
+      </form>
+      <p class="form-note">No spam. Unsubscribe anytime. Never sold.</p>
+    </div>
   </div>
+</section>
+<div class="abc-stripe" aria-hidden="true">
+  <span class="s-gold"></span><span class="s-green"></span><span class="s-blue"></span>
+</div>
 
-  <div class="hero-proof">
-    <div class="proof-item"><div class="proof-dot"></div>Instant delivery</div>
-    <div class="proof-item"><div class="proof-dot"></div>100% free</div>
-    <div class="proof-item"><div class="proof-dot"></div>Caribbean-built framework</div>
-    <div class="proof-item"><div class="proof-dot"></div>No fluff — only moves</div>
+<!-- ══ THE 5 MOVES ══ -->
+<section class="section alt" id="moves">
+  <div class="section-inner">
+    <div class="s-label">What's inside</div>
+    <h2>Five moves.<br>Each one under <em>two hours.</em></h2>
+    <p class="section-lede">These are not tips from a Silicon Valley playbook. Every move is built for builders who carry culture, operate with real constraints, and are building something that matters beyond a personal exit.</p>
+
+    <div class="moves">
+      <article class="move" data-n="01" style="--mc: var(--blue)">
+        <div class="move-n">Move 01</div>
+        <h4>Build your AI content engine</h4>
+        <p>Take one piece of content you already made this week and turn it into five — a LinkedIn series, a caption, a thread, a newsletter opener, a video script.</p>
+        <div class="move-meta"><span>90 min</span><span>Free</span><span class="pill-ref">Pillar 03</span></div>
+      </article>
+      <article class="move" data-n="02" style="--mc: var(--gold)">
+        <div class="move-n">Move 02</div>
+        <h4>Map your network with AI</h4>
+        <p>Turn a vague sense of "I know people" into a strategic map: who to reconnect with, what skills are missing, who could make the most powerful introduction.</p>
+        <div class="move-meta"><span>45 min</span><span>Free</span><span class="pill-ref">Pillar 01</span></div>
+      </article>
+      <article class="move" data-n="03" style="--mc: var(--blue)">
+        <div class="move-n">Move 03</div>
+        <h4>Design your 30-day sprint</h4>
+        <p>A complete day-by-day learning plan with milestone checks — and a real shipped output on Day 30 that becomes proof of your capability.</p>
+        <div class="move-meta"><span>60 min</span><span>Free</span><span class="pill-ref">Pillar 03</span></div>
+      </article>
+      <article class="move" data-n="04" style="--mc: var(--green)">
+        <div class="move-n">Move 04</div>
+        <h4>Write your sovereign value proposition</h4>
+        <p>One paragraph that says who you are, what you uniquely offer, and why your perspective is a feature — not a background detail.</p>
+        <div class="move-meta"><span>30 min</span><span>Free</span><span class="pill-ref">Pillar 02</span></div>
+      </article>
+      <article class="move" data-n="05" style="--mc: var(--red)">
+        <div class="move-n">Move 05</div>
+        <h4>Write page one of your legacy document</h4>
+        <p>Your Legacy Statement, your core values, and the first thing you want your great-grandchildren to know about you. Forty-five minutes.</p>
+        <div class="move-meta"><span>45 min</span><span>Free</span><span class="pill-ref">Pillar 10</span></div>
+      </article>
+    </div>
   </div>
 </section>
 
-<!-- WHAT YOU GET -->
-<section class="section">
-  <div class="s-label">What's Inside</div>
-  <h2>5 moves. Each one takes<br>under 2 hours.</h2>
-  <p>These are not generic AI tips. Every move is built for builders who carry culture, operate with real constraints, and are building something that matters beyond a personal exit.</p>
+<!-- ══ THE 10 PILLARS ══ -->
+<section class="section" id="pillars">
+  <div class="section-inner">
+    <div class="s-label">The architecture</div>
+    <h2>The A–Z gets you moving.<br>The <em>10 Pillars</em> hold it up.</h2>
+    <p class="section-lede">Every Pillar is a living principle — a way of thinking and building that, combined with the others, creates an unbreakable foundation for technological sovereignty and generational legacy.</p>
 
-  <div class="moves-grid">
-    <div class="move-card">
-      <div class="move-num">MOVE 01</div>
-      <h4>Build Your AI Content Engine</h4>
-      <p>Turn one piece of content into five — in 90 minutes.</p>
-      <div class="move-meta">90 min · Free · Pillar 3</div>
-    </div>
-    <div class="move-card">
-      <div class="move-num">MOVE 02</div>
-      <h4>Map Your Diaspora Network With AI</h4>
-      <p>Transform your vague network into a strategic asset map.</p>
-      <div class="move-meta">45 min · Free · Pillar 1</div>
-    </div>
-    <div class="move-card">
-      <div class="move-num">MOVE 03</div>
-      <h4>Design Your 30-Day Learning Sprint</h4>
-      <p>A complete day-by-day AI-generated skill plan with a real output on Day 30.</p>
-      <div class="move-meta">60 min · Free · Pillar 3</div>
-    </div>
-    <div class="move-card">
-      <div class="move-num">MOVE 04</div>
-      <h4>Write Your Sovereign Value Proposition</h4>
-      <p>One paragraph that makes your Caribbean perspective a competitive advantage.</p>
-      <div class="move-meta">30 min · Free · Pillar 2</div>
-    </div>
-    <div class="move-card">
-      <div class="move-num">MOVE 05</div>
-      <h4>Write the First Page of Your Legacy Document</h4>
-      <p>Your Legacy Statement, core values, and message to your great-grandchildren.</p>
-      <div class="move-meta">45 min · Free · Pillar 10</div>
+    <div class="pillar-groups">
+      <div>
+        <div class="pillar-group-head">
+          <div class="pillar-group-name">The Foundation · 01–03</div>
+          <div class="pillar-group-note">Full deep dive in The Pillar Scroll · $27</div>
+        </div>
+        <div class="pillar-grid">
+          <article class="pillar" style="--pc: var(--gold)">
+            <div class="pillar-n">01</div>
+            <div class="pillar-name">Diaspora Empowerment</div>
+            <p class="pillar-desc">Build sovereign communities of creators, not consumers. Brain drain becomes brain circulation — the diaspora was never a wound, it's a distributed network.</p>
+            <div class="pillar-access">Deep dive included</div>
+          </article>
+          <article class="pillar" style="--pc: var(--green)">
+            <div class="pillar-n">02</div>
+            <div class="pillar-name">Mindset Shift &amp; Resilience</div>
+            <p class="pillar-desc">Turn adversity into strategic greatness. Recognize survival programming when it activates — and consciously override it with sovereign thinking.</p>
+            <div class="pillar-access">Deep dive included</div>
+          </article>
+          <article class="pillar" style="--pc: var(--blue)">
+            <div class="pillar-n">03</div>
+            <div class="pillar-name">Gamified Education</div>
+            <p class="pillar-desc">Make learning irresistible. Challenge-based, immediate feedback, visible progress, community competition. Learning should feel like leveling up.</p>
+            <div class="pillar-access">Deep dive included</div>
+          </article>
+        </div>
+      </div>
+
+      <div>
+        <div class="pillar-group-head">
+          <div class="pillar-group-name">The Full Architecture · 04–10</div>
+          <div class="pillar-group-note">Unlocks with Emerald Awakening · $97</div>
+        </div>
+        <div class="pillar-grid">
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">04</div>
+            <div class="pillar-name">Blockchain &amp; Decentralization</div>
+            <p class="pillar-desc">Restore ownership, remove middlemen. Every time you accept someone else's platform as permanent, you give away equity.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">05</div>
+            <div class="pillar-name">Community &amp; Collaboration</div>
+            <p class="pillar-desc">Move as crews, tribes, DAOs — not individuals. The lone genius is a myth. Every empire was built by a network.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">06</div>
+            <div class="pillar-name">Localized AI &amp; Personalization</div>
+            <p class="pillar-desc">Tech that speaks the people's language and rhythms. AI without cultural context is callaloo without seasoning. Your culture is your innovation advantage.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">07</div>
+            <div class="pillar-name">Holistic Wellness &amp; Balance</div>
+            <p class="pillar-desc">Protect mind, body, and spirit while scaling. Your health, your rest, your grounding — these aren't luxuries. They're infrastructure.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">08</div>
+            <div class="pillar-name">Security &amp; Compliance</div>
+            <p class="pillar-desc">Guard sovereignty digitally and legally. Own your data, protect your assets, understand the legal terrain of every territory you operate in.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">09</div>
+            <div class="pillar-name">Data-Driven Performance</div>
+            <p class="pillar-desc">Track what matters, grow what matters. Build measurement systems that reflect your values — not just your vanity metrics.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+          <article class="pillar locked" style="--pc: var(--muted)">
+            <div class="pillar-n">10</div>
+            <div class="pillar-name">Legacy &amp; Long-Term Impact</div>
+            <p class="pillar-desc">Build 100-year dynasties, not 1-year hype. Every decision you make today is a message to the descendants who will inherit what you build.</p>
+            <div class="pillar-access">Tier 2</div>
+          </article>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
-
-<!-- QUIZ SECTION -->
-<section class="quiz-section">
-  <div class="quiz-inner">
-    <div class="s-label" style="justify-content:center">Free Quiz</div>
-    <h2>Which Pillar <em>Are You?</em></h2>
-    <p>Take the 2-minute quiz to discover your dominant Major AI Mindset archetype — your unique entry point into the full framework.</p>
+<!-- ══ QUIZ ══ -->
+<section class="section alt quiz" id="quiz">
+  <div class="section-inner">
+    <div class="s-label">Free quiz · 2 minutes</div>
+    <h2>Which pillar <em>are you?</em></h2>
+    <p class="quiz-lede">Every person enters the framework through a different door. Some are natural community builders. Others are data architects. Some lead with mindset, others with legacy vision. Find yours.</p>
     <div class="archetypes">
-      <div class="arch-card"><strong>The Community Architect</strong><span>Pillar 5 — Community & Collaboration</span></div>
-      <div class="arch-card"><strong>The Sovereign Builder</strong><span>Pillar 4 — Blockchain & Decentralization</span></div>
-      <div class="arch-card"><strong>The Knowledge Warrior</strong><span>Pillar 3 — Gamified Education</span></div>
-      <div class="arch-card"><strong>The Legacy Visionary</strong><span>Pillar 10 — Long-Term Impact</span></div>
+      <div class="arch" style="--ac: var(--green)">
+        <div class="arch-name">The Community Architect</div>
+        <div class="arch-pillar">Pillar 05 · Community &amp; Collaboration</div>
+      </div>
+      <div class="arch" style="--ac: var(--blue)">
+        <div class="arch-name">The Sovereign Builder</div>
+        <div class="arch-pillar">Pillar 04 · Blockchain &amp; Decentralization</div>
+      </div>
+      <div class="arch" style="--ac: var(--gold)">
+        <div class="arch-name">The Knowledge Warrior</div>
+        <div class="arch-pillar">Pillar 03 · Gamified Education</div>
+      </div>
+      <div class="arch" style="--ac: var(--red)">
+        <div class="arch-name">The Legacy Visionary</div>
+        <div class="arch-pillar">Pillar 10 · Long-Term Impact</div>
+      </div>
     </div>
-    <a href="YOUR_TYPEFORM_QUIZ_URL" target="_blank" class="quiz-btn">Find My Pillar →</a>
+    <a class="btn-green" href="https://majordream.gumroad.com/quiz" target="_blank" rel="noopener noreferrer">Find my pillar →</a>
   </div>
 </section>
 
-<!-- QUOTE -->
-<div class="quote-section">
-  <blockquote>"Freedom was never supposed to be a favor. It was supposed to be our starting point. The 10 Pillars are your toolkit. The diaspora is your marketplace. The ancestors are your council. The descendants are your responsibility."</blockquote>
-  <cite>— Major Dream Williams</cite>
-</div>
+<!-- ══ QUOTE ══ -->
+<section class="quote-sec">
+  <div class="quote-inner">
+    <div class="quote-eyebrow">From The Pillar Scroll</div>
+    <p class="quote-text">"Freedom was never supposed to be a favor. It was supposed to be our <em>starting point.</em> The 10 Pillars are your toolkit. The diaspora is your marketplace. The ancestors are your council. The descendants are your responsibility."</p>
+    <p class="quote-byline">— Major Dream Williams</p>
+  </div>
+</section>
 
-<!-- TIER PREVIEW -->
-<section class="tiers-section">
-  <div class="s-label">Go Deeper</div>
-  <h2>When you're ready<br>for the full system.</h2>
-  <p>The free guide gives you the moves. The M.A.I.M. tiers give you the complete operating system — all 10 Pillars, AI implementation guides, and a community of builders.</p>
+<!-- ══ TIERS ══ -->
+<section class="section alt" id="tiers">
+  <div class="section-inner">
+    <div class="s-label">Go deeper</div>
+    <h2>When you're ready for<br>the <em>full system.</em></h2>
+    <p class="section-lede">The free guide gives you the moves. The tiers give you the complete operating system — all 10 Pillars, AI implementation guidance, and a community of builders moving at the same time.</p>
 
-  <div class="tiers-row">
-    <div class="tier-preview">
-      <div class="tp-label">Tier 1</div>
-      <div class="tp-name">The Pillar Scroll</div>
-      <div class="tp-price">$27</div>
-      <ul class="tp-features">
-        <li>Complete 10 Pillars book</li>
-        <li>"Which Pillar Are You?" quiz</li>
-        <li>Visual concept map</li>
-        <li>Oath wallpaper pack</li>
-        <li>AI Guide (Pillars 1–3)</li>
-      </ul>
-      <a href="https://majordream.gumroad.com" class="tp-cta">Get the Scroll →</a>
-    </div>
-    <div class="tier-preview featured">
-      <div class="tp-label">Tier 2 — Most Popular</div>
-      <div class="tp-name">Emerald Awakening</div>
-      <div class="tp-price">$97</div>
-      <ul class="tp-features">
-        <li>Everything in Tier 1</li>
-        <li>All 10 Pillars deep dive</li>
-        <li>10-day journal prompts</li>
-        <li>Emerald Tablet art</li>
-        <li>AI Strategist (unlimited)</li>
-        <li>5 course curricula</li>
-      </ul>
-      <a href="https://majordream.gumroad.com" class="tp-cta">Awaken the Pillars →</a>
-    </div>
-    <div class="tier-preview vault">
-      <div class="tp-label">Tier 3 — Dynasty</div>
-      <div class="tp-name">The Pillar Code Vault</div>
-      <div class="tp-price">$297</div>
-      <ul class="tp-features">
-        <li>Everything in Tiers 1 + 2</li>
-        <li>AI Mind Architect (premium)</li>
-        <li>30-60-90 day roadmap</li>
-        <li>DAO architecture guide</li>
-        <li>Legacy planning document</li>
-        <li>Lifetime access</li>
-      </ul>
-      <a href="https://majordream.gumroad.com" class="tp-cta">Unlock the Vault →</a>
+    <div class="tiers">
+      <article class="tier" style="--tc: var(--gold)">
+        <div class="tier-label">Tier 1 · Entry</div>
+        <h3 class="tier-name">The Pillar Scroll</h3>
+        <div class="tier-price">$27</div>
+        <p class="tier-tagline">You are here. Master the foundation.</p>
+        <ul class="tier-features">
+          <li>The complete 10 Pillars book</li>
+          <li>Deep dive on Pillars 01–03</li>
+          <li>"Which Pillar Are You?" quiz</li>
+          <li>Visual concept map</li>
+          <li>M.A.I.M. Oath wallpaper pack</li>
+          <li>AI Guide — 10 queries/day</li>
+        </ul>
+        <a class="tier-cta" href="https://majordream.gumroad.com" target="_blank" rel="noopener noreferrer">Get the Scroll →</a>
+      </article>
+
+      <article class="tier featured" style="--tc: var(--green)">
+        <div class="tier-label">Tier 2 · Most popular</div>
+        <h3 class="tier-name">Emerald Awakening</h3>
+        <div class="tier-price">$97</div>
+        <p class="tier-tagline">All ten Pillars unlocked. The full architecture.</p>
+        <ul class="tier-features">
+          <li>Everything in Tier 1</li>
+          <li>All 10 Pillars — full deep dives</li>
+          <li>10-day journal prompt series</li>
+          <li>Emerald Tablet art + 2757 Vision Poster</li>
+          <li>AI Move Strategist — unlimited</li>
+          <li>5 course curricula</li>
+        </ul>
+        <a class="tier-cta" href="https://majordream.gumroad.com" target="_blank" rel="noopener noreferrer">Awaken the Pillars →</a>
+      </article>
+
+      <article class="tier" style="--tc: var(--red)">
+        <div class="tier-label">Tier 3 · Dynasty</div>
+        <h3 class="tier-name">The Pillar Code Vault</h3>
+        <div class="tier-price">$297</div>
+        <p class="tier-tagline">Lifetime access. Legacy builders only.</p>
+        <ul class="tier-features">
+          <li>Everything in Tiers 1 + 2</li>
+          <li>AI Mind Architect — premium</li>
+          <li>30-60-90 day roadmap</li>
+          <li>DAO architecture guide</li>
+          <li>Legacy planning document</li>
+          <li>Dynasty community + lifetime access</li>
+        </ul>
+        <a class="tier-cta" href="https://majordream.gumroad.com" target="_blank" rel="noopener noreferrer">Unlock the Vault →</a>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- FOOTER CTA -->
-<div class="footer-cta">
-  <div class="eyebrow">The world is not ready. But we are.</div>
-  <h2>Start with the<br><em>Free Guide</em></h2>
-  <p>5 moves. This week. No cost. Just your next step into the Major AI Mindset movement.</p>
-  <a href="#" onclick="document.querySelector('.form-card input').focus();return false;" class="cta-big">Get the Free Guide Now</a>
-  <p style="margin-top:1.5rem;font-size:0.78rem;color:rgba(250,250,248,0.25)">majordream.gumroad.com · M.A.I.M. Movement</p>
+<!-- ══ CLOSING ══ -->
+<section class="closing">
+  <div class="closing-inner">
+    <div class="closing-eyebrow">The world is not ready. But we are.</div>
+    <h2>Start with the<br><em>free guide.</em></h2>
+    <p>Five moves. This week. No cost. Just your next step into the Major AI Mindset.</p>
+    <a class="btn-gold" href="#top">Get the free guide →</a>
+    <div class="closing-taglines">
+      <div class="closing-line">Understand your mind.</div>
+      <div class="closing-line gold">Activate your intelligence.</div>
+      <div class="closing-line">Build your legacy.</div>
+    </div>
+    <div class="closing-mark">One letter. One lesson. One action at a time.</div>
+  </div>
+</section>
+<div class="abc-stripe" aria-hidden="true">
+  <span class="s-gold"></span><span class="s-green"></span><span class="s-blue"></span>
 </div>
 
-</body>
-</html>
+<!-- ══ FOOTER ══ -->
+<footer>
+  <span class="footer-handle">@major_ai_mindset</span>
+  <svg width="30" height="30" viewBox="0 0 48 48" fill="none" role="img" aria-label="MD Medallion">
+    <defs>
+      <linearGradient id="rimF" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#F2D272"/><stop offset="0.35" stop-color="#C9931A"/>
+        <stop offset="0.65" stop-color="#8A6210"/><stop offset="1" stop-color="#E0B84E"/>
+      </linearGradient>
+    </defs>
+    <circle cx="24" cy="24" r="23" fill="url(#rimF)"/>
+    <circle cx="24" cy="24" r="20.5" fill="#0E0E0E"/>
+    <text x="24" y="27" font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive" font-size="24" font-style="italic" fill="#C9931A" text-anchor="middle">MD</text>
+    <g opacity="0.9">
+      <ellipse cx="24" cy="36.5" rx="10" ry="3.2" fill="none" stroke="#A87814" stroke-width="1.6"/>
+      <ellipse cx="24" cy="35" rx="7.5" ry="2.4" fill="none" stroke="#C9931A" stroke-width="1.3"/>
+    </g>
+  </svg>
+  <div class="footer-links">
+    <a href="https://majoraimindset.com">majoraimindset.com</a>
+    <a href="https://majordream.gumroad.com" target="_blank" rel="noopener noreferrer">Gumroad</a>
+    <a href="https://youtu.be/OZ10QdrUxl8" target="_blank" rel="noopener noreferrer">Welcome Film</a>
+  </div>
+  <span class="footer-domain">M.A.I.M. Movement</span>
+</footer>
