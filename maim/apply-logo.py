@@ -27,6 +27,7 @@ LOGO = ROOT / "assets" / "md-medallion.png"
 PAGES = [
     ROOT / "majoraimindset_front_door.html",
     ROOT / "MAIM_Funnel_Landing_Page.html",
+    ROOT / "return.html",
 ]
 
 # <!--MD-LOGO 36--> anything <!--/MD-LOGO-->   →  36px square <img>
