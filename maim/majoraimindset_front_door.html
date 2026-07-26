@@ -1,0 +1,1859 @@
+<title>MAJOR AI MINDSET — majoraimindset.com</title>
+<style>
+/* ── Tokens ── */
+:root {
+  --ink:    #111111;
+  --ink2:   #181818;
+  --ink3:   #202020;
+  --gold:   #C9931A;
+  --gold2:  #E0A820;
+  --green:  #1F8A4C;
+  --blue:   #2A78D6;
+  --orange: #E07A2F;
+  --red:    #C94040;
+  --text:   #F0EDE5;
+  --muted:  rgba(240,237,229,0.52);
+  --dim:    rgba(240,237,229,0.14);
+  --border: rgba(240,237,229,0.07);
+  --r: 3px;
+}
+
+/* Light theme tokens */
+@media (prefers-color-scheme: light) {
+  :root {
+    --ink:    #F5F2EC;
+    --ink2:   #EBE7E0;
+    --ink3:   #E0DCD5;
+    --text:   #1A1814;
+    --muted:  rgba(26,24,20,0.52);
+    --dim:    rgba(26,24,20,0.18);
+    --border: rgba(26,24,20,0.09);
+  }
+}
+:root[data-theme="dark"] {
+  --ink:    #111111;
+  --ink2:   #181818;
+  --ink3:   #202020;
+  --text:   #F0EDE5;
+  --muted:  rgba(240,237,229,0.52);
+  --dim:    rgba(240,237,229,0.14);
+  --border: rgba(240,237,229,0.07);
+}
+:root[data-theme="light"] {
+  --ink:    #F5F2EC;
+  --ink2:   #EBE7E0;
+  --ink3:   #E0DCD5;
+  --text:   #1A1814;
+  --muted:  rgba(26,24,20,0.52);
+  --dim:    rgba(26,24,20,0.18);
+  --border: rgba(26,24,20,0.09);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ── Type system ── */
+/* Display: compressed black for impact */
+.display, h1, h2, h3 {
+  font-family: 'Arial Narrow', 'Arial Condensed', Arial, sans-serif;
+  font-weight: 900;
+  font-stretch: condensed;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+/* Mono: data/labels/eyebrows */
+.mono, .eyebrow, label, .label {
+  font-family: 'Courier New', 'Lucida Console', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+/* Body stays Georgia — weight and presence in the serif */
+
+/* ── Viewfinder bracket ── */
+.bracket { position: relative; }
+.bracket::before, .bracket::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 1;
+}
+.bracket::before { top: 14px; left: 14px; border-width: 1.5px 0 0 1.5px; }
+.bracket::after  { top: 14px; right: 14px; border-width: 1.5px 1.5px 0 0; }
+.bracket-b { position: relative; }
+.bracket-b::before, .bracket-b::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.bracket-b::before { bottom: 14px; left: 14px; border-width: 0 0 1.5px 1.5px; }
+.bracket-b::after  { bottom: 14px; right: 14px; border-width: 0 1.5px 1.5px 0; }
+
+/* ── ABC stripe ── */
+.abc-stripe { display: flex; height: 3px; }
+.abc-stripe span { flex: 1; display: block; }
+.s-gold  { background: var(--gold);  }
+.s-green { background: var(--green); }
+.s-blue  { background: var(--blue);  }
+
+/* ── Nav ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.nav-medallion { width: 36px; height: 36px; flex-shrink: 0; }
+.nav-wordmark { display: flex; flex-direction: column; gap: 2px; }
+.nav-brand {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1;
+}
+.nav-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  line-height: 1;
+}
+.nav-spacer { flex: 1; }
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--text); }
+@media (max-width: 640px) { .nav-links { display: none; } }
+.btn-seat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold);
+  color: #111;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 9px 18px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-seat:hover { background: var(--gold2); }
+.btn-seat:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: #111;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 14px 28px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--gold2); }
+.btn-primary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 27px;
+  border: 1px solid var(--dim);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.btn-ghost:hover { border-color: rgba(240,237,229,0.3); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 95vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 0 32px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 0 60px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 72% 38%, rgba(201,147,26,0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 40% at 20% 70%, rgba(31,138,76,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+/* Subtle scanline over hero only */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+/* The thesis — Major's actual opening question */
+.hero-question {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: clamp(22px, 3.5vw, 38px);
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 780px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+.hero-question em {
+  font-style: normal;
+  color: var(--gold);
+}
+.hero-rule {
+  width: 60px;
+  height: 2px;
+  background: var(--gold);
+  margin-bottom: 32px;
+  opacity: 0.7;
+}
+.hero-answer {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(60px, 11vw, 130px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin-bottom: 48px;
+}
+.hero-answer .hl-gold  { color: var(--gold);  }
+.hero-answer .hl-green { color: var(--green); }
+.hero-answer .hl-blue  { color: var(--blue);  }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 64px; }
+.hero-stat-row { display: flex; gap: 40px; flex-wrap: wrap; }
+.hero-stat { display: flex; flex-direction: column; gap: 4px; }
+.hero-stat-n {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 32px;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.hero-stat-l {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Film section ── */
+.film-sec {
+  position: relative;
+  background: #0B0B0B;
+  border-top: 1px solid rgba(201,147,26,0.15);
+  border-bottom: 1px solid rgba(201,147,26,0.15);
+  overflow: hidden;
+}
+.film-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 32px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 64px;
+  align-items: center;
+}
+@media (max-width: 860px) { .film-inner { grid-template-columns: 1fr; } }
+.film-stage {
+  aspect-ratio: 16/9;
+  background: #0D0D0D;
+  border: 1px solid rgba(201,147,26,0.18);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* scanline over film stage */
+.film-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.012) 2px,
+    rgba(255,255,255,0.012) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+.film-stage-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,147,26,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.film-play-ring {
+  position: relative;
+  z-index: 2;
+  width: 80px;
+  height: 80px;
+  border: 1.5px solid rgba(201,147,26,0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.film-stage:hover .film-play-ring {
+  border-color: var(--gold);
+  background: rgba(201,147,26,0.1);
+}
+.film-play-ring svg { margin-left: 5px; }
+.film-timestamp {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(201,147,26,0.6);
+  z-index: 2;
+}
+.film-label-tl {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(201,147,26,0.5);
+  z-index: 2;
+}
+.film-copy {}
+.film-copy-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+.film-copy h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #F0EDE5;
+  margin-bottom: 24px;
+}
+.film-copy p {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  color: rgba(240,237,229,0.6);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+.film-copy-quote {
+  border-left: 2px solid rgba(201,147,26,0.4);
+  padding: 14px 18px;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: rgba(240,237,229,0.8);
+  line-height: 1.4;
+  margin-bottom: 28px;
+}
+.film-copy-quote em {
+  font-style: normal;
+  color: var(--gold);
+}
+.film-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201,147,26,0.3);
+  padding-bottom: 3px;
+  transition: border-color 0.15s;
+}
+.film-watch:hover { border-color: var(--gold); }
+
+/* ── Origin section ── */
+.origin-sec {
+  padding: 100px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.origin-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.origin-eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: currentColor;
+}
+.origin-headline {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 5.5vw, 68px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  text-wrap: balance;
+}
+.origin-headline em {
+  font-style: normal;
+  color: var(--gold);
+}
+.origin-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 60px;
+  margin-bottom: 56px;
+}
+@media (max-width: 640px) { .origin-body { grid-template-columns: 1fr; } }
+.origin-body p {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.origin-body p strong {
+  color: var(--text);
+  font-weight: 600;
+}
+/* Geography path */
+.origin-path {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  padding: 20px 28px;
+  overflow-x: auto;
+}
+.origin-node {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.origin-node-name {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.origin-node-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.origin-arrow {
+  color: var(--gold);
+  font-size: 12px;
+  padding: 0 14px;
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin-top: -8px;
+}
+/* Superpower pull */
+.origin-superpower {
+  margin-top: 48px;
+  padding: 40px;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  position: relative;
+}
+.origin-superpower-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.origin-superpower-text {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: clamp(18px, 2.5vw, 26px);
+  line-height: 1.45;
+  color: var(--text);
+  max-width: 600px;
+}
+
+/* ── Why MAIM ── */
+.why-sec {
+  padding: 100px 32px;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.why-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+@media (max-width: 768px) { .why-inner { grid-template-columns: 1fr; } }
+.why-headline {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(36px, 5.5vw, 72px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin-bottom: 20px;
+}
+.why-headline em { font-style: normal; color: var(--gold); }
+.why-sub {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.why-body { display: flex; flex-direction: column; gap: 20px; }
+.why-body p { font-size: 16px; line-height: 1.75; color: var(--muted); }
+.why-body p strong { color: var(--text); }
+.why-quote {
+  border-left: 2px solid var(--gold);
+  padding: 18px 24px;
+  background: rgba(201,147,26,0.04);
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ── ABC Section ── */
+.abc-sec {
+  padding: 100px 32px;
+  border-top: 1px solid var(--border);
+}
+.abc-header {
+  max-width: 1100px;
+  margin: 0 auto 56px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.abc-header h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 5vw, 60px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.abc-coming {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.abc-coming::before { content: '···'; color: var(--gold); }
+.abc-cards {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+@media (max-width: 768px) { .abc-cards { grid-template-columns: 1fr; } }
+.abc-card {
+  background: var(--ink2);
+  padding: 44px 38px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+.abc-card:hover { background: var(--ink3); }
+/* Ghost letter in background */
+.abc-card::after {
+  content: attr(data-letter);
+  position: absolute;
+  right: -8px;
+  bottom: -28px;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 150px;
+  line-height: 1;
+  text-transform: uppercase;
+  opacity: 0.04;
+  pointer-events: none;
+  color: var(--lc);
+}
+.abc-card[data-letter="A"] { --lc: var(--gold); }
+.abc-card[data-letter="B"] { --lc: var(--green); }
+.abc-card[data-letter="C"] { --lc: var(--blue); }
+.abc-letter {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 68px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--lc);
+  margin-bottom: 18px;
+}
+.abc-word {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.abc-def {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+/* Major's exact words, styled differently */
+.abc-major {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--lc);
+  opacity: 0.8;
+  line-height: 1.55;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-bottom: 20px;
+}
+.abc-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lc);
+  opacity: 0.6;
+}
+.abc-locked-row {
+  max-width: 1100px;
+  margin: 2px auto 0;
+  background: var(--ink2);
+  padding: 20px 38px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+}
+.abc-locked-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.abc-chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.abc-chip {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  color: var(--dim);
+  opacity: 0.45;
+}
+.abc-chip.unlocked { border-color: rgba(240,237,229,0.18); color: var(--muted); opacity: 1; }
+
+/* ── The Statement ── */
+.statement-sec {
+  padding: 120px 32px;
+  background: var(--ink);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.statement-inner { max-width: 860px; margin: 0 auto; }
+.statement-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.statement-eyebrow::before, .statement-eyebrow::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+}
+.statement-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: clamp(22px, 3.8vw, 42px);
+  line-height: 1.4;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+.statement-text em {
+  font-style: normal;
+  color: var(--gold);
+}
+.statement-byline {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Live Room ── */
+.room-sec {
+  padding: 100px 32px;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.room-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+@media (max-width: 768px) { .room-inner { grid-template-columns: 1fr; } }
+.room-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 2.2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.room-inner h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(30px, 4.5vw, 52px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.session-card {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.session-tz {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.session-zone {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.session-time {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.session-divider { height: 1px; background: var(--border); }
+.session-platform {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.room-agenda { display: flex; flex-direction: column; gap: 0; }
+.room-agenda-head {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.agenda-item {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  font-size: 15px;
+  color: var(--muted);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.agenda-item:last-child { border-bottom: none; }
+.agenda-n {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  flex-shrink: 0;
+  width: 20px;
+}
+
+/* ── Lane selector ── */
+.lane-sec {
+  padding: 80px 32px;
+  border-top: 1px solid var(--border);
+}
+.lane-inner { max-width: 1100px; margin: 0 auto; }
+.lane-inner h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(26px, 4vw, 48px);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.lane-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+.lane-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.lane-chip {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 11px 22px;
+  border: 1px solid rgba(240,237,229,0.15);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  background: transparent;
+}
+.lane-chip:hover, .lane-chip.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,147,26,0.05);
+}
+
+/* ── Pressure Test ── */
+.pressure-sec {
+  padding: 100px 32px;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+}
+.pressure-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+@media (max-width: 768px) { .pressure-inner { grid-template-columns: 1fr; } }
+.pressure-copy h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(30px, 4.5vw, 56px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-wrap: balance;
+}
+.pressure-copy h2 em { font-style: normal; color: var(--gold); }
+.pressure-copy p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 32px;
+  max-width: 380px;
+}
+.pressure-meta {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+  display: flex;
+  gap: 20px;
+}
+.pressure-card {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  padding: 32px;
+  position: relative;
+}
+.pressure-card-tag {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.pressure-q {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+.pressure-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.pressure-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.pressure-opt:hover { border-color: rgba(240,237,229,0.22); background: rgba(240,237,229,0.02); }
+.pressure-opt-dot {
+  width: 14px; height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pressure-progress { display: flex; align-items: center; gap: 12px; }
+.pressure-bar-wrap { flex: 1; height: 2px; background: var(--border); }
+.pressure-bar { height: 100%; width: 10%; background: var(--gold); transition: width 0.4s ease; }
+.pressure-count {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Meet Major ── */
+.meet-sec {
+  padding: 100px 32px;
+  border-top: 1px solid var(--border);
+}
+.meet-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 80px;
+  align-items: center;
+}
+@media (max-width: 900px) { .meet-inner { grid-template-columns: 1fr; } }
+.meet-photo {
+  aspect-ratio: 3/4;
+  background: var(--ink2);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.meet-photo-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(17,17,17,0.85) 0%, transparent 55%);
+}
+.meet-photo-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.meet-copy { max-width: 520px; }
+.meet-title {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.meet-copy h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 5vw, 60px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.meet-bio {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.meet-bio strong { color: var(--text); }
+.meet-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  padding: 16px 20px;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+}
+.path-node {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.path-arrow { color: var(--gold); font-size: 12px; opacity: 0.6; }
+.meet-mark {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.meet-mark::before { content: '◉'; color: var(--gold); }
+
+/* ── Register ── */
+.register-sec {
+  padding: 100px 32px;
+  background: var(--ink2);
+  border-top: 1px solid var(--border);
+}
+.register-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 80px;
+  align-items: start;
+}
+@media (max-width: 900px) { .register-inner { grid-template-columns: 1fr; } }
+.register-copy h2 {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 5vw, 62px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  text-wrap: balance;
+}
+.register-copy h2 em { font-style: normal; color: var(--gold); }
+.register-copy p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.register-features { display: flex; flex-direction: column; gap: 12px; }
+.register-feature {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--muted);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.register-feature:last-child { border-bottom: none; }
+.register-feature::before { content: '◉'; font-size: 9px; color: var(--green); flex-shrink: 0; }
+/* Form */
+.register-form { display: flex; flex-direction: column; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.form-input {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: Georgia, serif;
+  font-size: 15px;
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.form-input::placeholder { color: var(--dim); }
+.form-input:focus { border-color: rgba(201,147,26,0.45); }
+.form-select {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  cursor: pointer;
+}
+.form-select:focus { border-color: rgba(201,147,26,0.45); }
+.form-submit {
+  background: var(--gold);
+  color: #111;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 17px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+.form-submit:hover { background: var(--gold2); }
+.form-note {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: center;
+  opacity: 0.65;
+}
+
+/* ── Closing ── */
+.closing-sec {
+  padding: 100px 32px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.closing-inner { max-width: 680px; margin: 0 auto; }
+.closing-taglines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 40px;
+}
+.closing-line {
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 900;
+  font-size: clamp(18px, 2.8vw, 28px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.closing-line.gold { color: var(--gold); }
+.closing-mark {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer-handle {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.footer-links { display: flex; gap: 24px; }
+.footer-links a {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--gold); }
+.footer-domain {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+</style>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#top" aria-label="MAJOR AI MINDSET">
+    <svg class="nav-medallion" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="mdRim" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#F2D272"/>
+          <stop offset="0.35" stop-color="#C9931A"/>
+          <stop offset="0.65" stop-color="#8A6210"/>
+          <stop offset="1" stop-color="#E0B84E"/>
+        </linearGradient>
+        <linearGradient id="mdScript" x1="12" y1="8" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#F2D272"/>
+          <stop offset="0.5" stop-color="#C9931A"/>
+          <stop offset="1" stop-color="#A87814"/>
+        </linearGradient>
+      </defs>
+      <circle cx="24" cy="24" r="23" fill="url(#mdRim)"/>
+      <circle cx="24" cy="24" r="20.5" fill="#0E0E0E"/>
+      <circle cx="24" cy="24" r="20.5" stroke="#F2D272" stroke-width="0.5" opacity="0.5"/>
+      <!-- Script MD monogram -->
+      <text x="24" y="27" font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive" font-size="24" font-style="italic" fill="url(#mdScript)" text-anchor="middle">MD</text>
+      <!-- Woven palm crown -->
+      <g opacity="0.9">
+        <ellipse cx="24" cy="36.5" rx="10" ry="3.2" fill="none" stroke="#A87814" stroke-width="1.6"/>
+        <ellipse cx="24" cy="35" rx="7.5" ry="2.4" fill="none" stroke="#C9931A" stroke-width="1.3"/>
+        <path d="M15 36.5 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0" stroke="#8A6210" stroke-width="0.8" fill="none"/>
+      </g>
+    </svg>
+    <div class="nav-wordmark">
+      <div class="nav-brand">Major AI Mindset</div>
+      <div class="nav-tag">● Live Knowledge Room</div>
+    </div>
+  </a>
+  <div class="nav-spacer"></div>
+  <ul class="nav-links">
+    <li><a href="#film">Welcome Film</a></li>
+    <li><a href="#abc">A·B·C</a></li>
+    <li><a href="#room">Live Room</a></li>
+    <li><a href="#meet">Major</a></li>
+  </ul>
+  <a class="btn-seat" href="#register">Reserve Seat →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero bracket bracket-b" id="top">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Major AI Mindset · majoraimindset.com</div>
+
+    <!-- Major's actual opening question — this IS the thesis -->
+    <p class="hero-question">
+      What becomes possible when you finally understand your own mind — and you learn how to use artificial intelligence <em>without surrendering</em> your own intelligence?
+    </p>
+    <div class="hero-rule" aria-hidden="true"></div>
+
+    <h1 class="hero-answer">
+      <span class="hl-gold">This</span><br>
+      <span class="hl-green">is</span> where<br>
+      you <span class="hl-blue">find out.</span>
+    </h1>
+
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#register">Reserve your free seat →</a>
+      <a class="btn-ghost" href="#film">Watch the welcome film</a>
+    </div>
+
+    <div class="hero-stat-row">
+      <div class="hero-stat">
+        <span class="hero-stat-n">26</span>
+        <span class="hero-stat-l">Letters</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">26</span>
+        <span class="hero-stat-l">Lessons</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">26</span>
+        <span class="hero-stat-l">Actions</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n" style="color:var(--green)">Free</span>
+        <span class="hero-stat-l">Live room</span>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="abc-stripe" aria-hidden="true">
+  <span class="s-gold"></span><span class="s-green"></span><span class="s-blue"></span>
+</div>
+
+<!-- WELCOME FILM -->
+<section class="film-sec" id="film">
+  <div class="film-inner">
+    <a class="film-stage bracket bracket-b" href="https://youtu.be/OZ10QdrUxl8" target="_blank" rel="noopener noreferrer" aria-label="Watch the MAIM welcome film on YouTube — 4 minutes 34 seconds">
+      <div class="film-stage-glow"></div>
+      <div class="film-label-tl">MAIM Welcome Film · 2025</div>
+      <div class="film-play-ring" aria-hidden="true">
+        <svg width="20" height="22" viewBox="0 0 20 22" fill="none">
+          <path d="M2 1L18 11L2 21V1Z" fill="#C9931A"/>
+        </svg>
+      </div>
+      <div class="film-timestamp">4:34</div>
+    </a>
+    <div class="film-copy">
+      <div class="film-copy-eyebrow">Founder welcome</div>
+      <h2 style="font-size:clamp(28px,4vw,48px);">Why this room exists.</h2>
+      <p>Major didn't start from a software product or a course. He started from a question — one he'd been circling for years before he had the language to explain it.</p>
+      <div class="film-copy-quote">
+        "AI should not replace your judgment, your culture, or your experience — or your <em>humanity.</em> It should help you think more clearly."
+      </div>
+      <a class="film-watch" href="https://youtu.be/OZ10QdrUxl8" target="_blank" rel="noopener noreferrer">
+        Watch on YouTube
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGIN STORY -->
+<section id="origin">
+  <div class="origin-sec">
+    <p class="origin-eyebrow">Where MAIM began</p>
+    <h2 class="origin-headline">Not built in<br>one room.<br><em>One industry.</em><br>One country.</h2>
+    <div class="origin-body">
+      <p>MAIM didn't begin with software or the arrival of ChatGPT. It began <strong>years before</strong> Major had the language to explain what he was building — thinking about community, culture, intellectual property, access, and how ordinary people could build from what they already know.</p>
+      <p>His perspective was shaped across worlds. That's not a biography point. It's the whole method. When you can see the same problem from radically different angles — and connect those angles — that's the actual superpower MAIM teaches.</p>
+    </div>
+    <div class="origin-path" role="list" aria-label="Major's path">
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">The South Bronx</div>
+        <div class="origin-node-tag">Origin</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Mt. Vernon</div>
+        <div class="origin-node-tag">Culture</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Basketball</div>
+        <div class="origin-node-tag">Discipline</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Finance</div>
+        <div class="origin-node-tag">Systems</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Wellness</div>
+        <div class="origin-node-tag">Depth</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Blockchain</div>
+        <div class="origin-node-tag">Access</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">Travel</div>
+        <div class="origin-node-tag">Perspective</div>
+      </div>
+      <div class="origin-arrow" aria-hidden="true">→</div>
+      <div class="origin-node" role="listitem">
+        <div class="origin-node-name">AI</div>
+        <div class="origin-node-tag" style="color:var(--gold)">Now</div>
+      </div>
+    </div>
+    <div class="origin-superpower">
+      <div class="origin-superpower-label">The superpower</div>
+      <p class="origin-superpower-text">"I learned that intelligence doesn't live inside one person. A lot of people have these experiences — and I can make that connection because some may not even see the relationship. That's my superpower."</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY MAIM -->
+<section class="why-sec" id="why">
+  <div class="why-inner">
+    <div>
+      <h2 class="why-headline">The problem<br>isn't <em>always</em><br>intelligence.</h2>
+      <p class="why-sub">Today, people have more access to information and technology than ever before.</p>
+    </div>
+    <div class="why-body">
+      <p>Many still feel overwhelmed, unclear, unsure where to begin. <strong>The problem is not always a lack of intelligence.</strong> Sometimes we simply need a process that helps us recognize what we already carry — understand the opportunity in front of us — and move with direction.</p>
+      <p>That's why MAIM exists. Not as another AI course that hands you a list of tools. As a room where you find your process. Where you bring what you already know, and learn to activate it.</p>
+      <div class="why-quote">
+        "You only need enough willingness to become aware, strengthen your belief, gain the right context, and take the next action."
+      </div>
+    </div>
+  </div>
+</section>
+<div class="abc-stripe" aria-hidden="true">
+  <span class="s-gold"></span><span class="s-green"></span><span class="s-blue"></span>
+</div>
+
+<!-- ABC FRAMEWORK -->
+<section class="abc-sec" id="abc">
+  <div class="abc-header">
+    <h2>Three foundations.<br>A · B · C.</h2>
+    <div class="abc-coming">D · E and beyond shipping next</div>
+  </div>
+  <div class="abc-cards">
+    <div class="abc-card bracket" data-letter="A">
+      <div class="abc-letter">A</div>
+      <div class="abc-word">Awareness</div>
+      <div class="abc-def">Most people scroll past a hundred AI use cases a day and none register as relevant. Awareness changes your lens — you start to see what was always there.</div>
+      <div class="abc-major">"Awareness helps you recognize what's happening."<br>— Major</div>
+      <div class="abc-tag">Lesson 1 of 26</div>
+    </div>
+    <div class="abc-card bracket" data-letter="B">
+      <div class="abc-letter">B</div>
+      <div class="abc-word">Belief</div>
+      <div class="abc-def">The biggest barrier isn't access or technical skill. It's the story you tell yourself about who AI is "really for." This lesson dismantles that story and puts you back in the frame.</div>
+      <div class="abc-major">"Belief allows you to see what is possible."<br>— Major</div>
+      <div class="abc-tag">Lesson 2 of 26</div>
+    </div>
+    <div class="abc-card bracket" data-letter="C">
+      <div class="abc-letter">C</div>
+      <div class="abc-word">Context</div>
+      <div class="abc-def">AI responds to what you give it. The quality of your output is determined by the quality of your input. Context is the skill that changes everything downstream.</div>
+      <div class="abc-major">"Context helps you ask better questions, understand your environment, and make better decisions."<br>— Major</div>
+      <div class="abc-tag">Lesson 3 of 26</div>
+    </div>
+  </div>
+  <div class="abc-locked-row">
+    <span class="abc-locked-label">Coming next</span>
+    <div class="abc-chips">
+      <span class="abc-chip unlocked">D · Direction</span>
+      <span class="abc-chip unlocked">E · Execution</span>
+      <span class="abc-chip">F 🔒</span>
+      <span class="abc-chip">G 🔒</span>
+      <span class="abc-chip">H 🔒</span>
+      <span class="abc-chip">··· Z 🔒</span>
+    </div>
+  </div>
+</section>
+
+<!-- THE STATEMENT -->
+<section class="statement-sec">
+  <div class="statement-inner">
+    <div class="statement-eyebrow">From the welcome film</div>
+    <p class="statement-text">
+      "The future does not belong to only the people with the most technology. It belongs to the people who understand <em>what to do with it.</em>"
+    </p>
+    <p class="statement-byline">— Major Dream Williams</p>
+  </div>
+</section>
+
+<!-- LIVE ROOM -->
+<section class="room-sec" id="room">
+  <div class="room-inner">
+    <div>
+      <div class="room-eyebrow"><span class="live-dot" aria-hidden="true"></span>Live Knowledge Room</div>
+      <h2>Next session.<br>Reserve your spot.</h2>
+      <div class="session-card">
+        <div class="session-tz">
+          <div>
+            <div class="session-zone">Bali / WITA</div>
+            <div class="session-time">Sun 7:00 AM</div>
+          </div>
+          <div style="text-align:right">
+            <div class="session-zone">New York / ET</div>
+            <div class="session-time">Sat 7:00 PM</div>
+          </div>
+        </div>
+        <div class="session-divider"></div>
+        <div class="session-platform">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="4"/></svg>
+          Live on Google Meet · Open to all
+        </div>
+      </div>
+      <a class="btn-primary" href="#register" style="display:inline-flex">Reserve free seat →</a>
+    </div>
+    <div>
+      <div class="room-agenda-head">In the room</div>
+      <div class="room-agenda">
+        <div class="agenda-item"><span class="agenda-n">01</span><span>A live idea — something real, not theoretical</span></div>
+        <div class="agenda-item"><span class="agenda-n">02</span><span>A working example — built in the room, in real time</span></div>
+        <div class="agenda-item"><span class="agenda-n">03</span><span>A simple action — one thing you can do before the week is over</span></div>
+        <div class="agenda-item"><span class="agenda-n">04</span><span>Replay + follow-up — in the Studio within 24 hours</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LANE SELECTOR -->
+<section class="lane-sec">
+  <div class="lane-inner">
+    <h2>Who's in the room?</h2>
+    <p class="lane-sub">Whether you're an athlete, creator, entrepreneur, educator, healer — or just someone who knows there's more inside of you. Select your lane.</p>
+    <div class="lane-chips">
+      <button class="lane-chip active" onclick="setLane(this)">Athlete</button>
+      <button class="lane-chip" onclick="setLane(this)">Creator</button>
+      <button class="lane-chip" onclick="setLane(this)">Entrepreneur</button>
+      <button class="lane-chip" onclick="setLane(this)">Educator</button>
+      <button class="lane-chip" onclick="setLane(this)">Healer</button>
+      <button class="lane-chip" onclick="setLane(this)">Professional</button>
+      <button class="lane-chip" onclick="setLane(this)">Parent</button>
+      <button class="lane-chip" onclick="setLane(this)">I just know there's more</button>
+    </div>
+  </div>
+</section>
+
+<!-- PRESSURE TEST -->
+<section class="pressure-sec">
+  <div class="pressure-inner">
+    <div class="pressure-copy">
+      <h2>Where does the <em>pressure</em> hit you?</h2>
+      <div class="pressure-meta">
+        <span>10 questions</span>
+        <span>7 minutes</span>
+        <span>Personalized result</span>
+      </div>
+      <p>This isn't a quiz. It's a map. Answer honestly and you'll walk away knowing exactly where to start — and what's actually been holding you back.</p>
+      <a class="btn-primary" href="#register">Find your biggest bottleneck →</a>
+    </div>
+    <div class="pressure-card bracket">
+      <div class="pressure-card-tag">Pressure Test · Q1 of 10</div>
+      <div class="pressure-q">When you think about using AI, the first thing you feel is…</div>
+      <div class="pressure-options">
+        <div class="pressure-opt" tabindex="0" role="radio" aria-checked="false"><span class="pressure-opt-dot" aria-hidden="true"></span>Excitement — I just don't know where to begin</div>
+        <div class="pressure-opt" tabindex="0" role="radio" aria-checked="false"><span class="pressure-opt-dot" aria-hidden="true"></span>Anxiety — it feels like I'm already behind</div>
+        <div class="pressure-opt" tabindex="0" role="radio" aria-checked="false"><span class="pressure-opt-dot" aria-hidden="true"></span>Curiosity — but no one explains it clearly</div>
+        <div class="pressure-opt" tabindex="0" role="radio" aria-checked="false"><span class="pressure-opt-dot" aria-hidden="true"></span>Pressure — like it's changing everything I do</div>
+      </div>
+      <div class="pressure-progress">
+        <div class="pressure-bar-wrap"><div class="pressure-bar" id="pbar"></div></div>
+        <span class="pressure-count" id="pcnt">1 / 10</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEET MAJOR -->
+<section class="meet-sec" id="meet">
+  <div class="meet-inner">
+    <div class="meet-photo bracket bracket-b" role="img" aria-label="Portrait of Major Dream Williams">
+      <div class="meet-photo-inner">
+        <span class="meet-photo-label">Major Dream Williams</span>
+      </div>
+    </div>
+    <div class="meet-copy">
+      <div class="meet-title">Founder · Translator · Educator</div>
+      <h2>Major Dream<br>Williams</h2>
+      <div class="meet-path" role="list" aria-label="Major's path">
+        <span class="path-node" role="listitem">The Bronx</span>
+        <span class="path-arrow" aria-hidden="true">→</span>
+        <span class="path-node" role="listitem">Finance</span>
+        <span class="path-arrow" aria-hidden="true">→</span>
+        <span class="path-node" role="listitem">Wellness</span>
+        <span class="path-arrow" aria-hidden="true">→</span>
+        <span class="path-node" role="listitem">Blockchain</span>
+        <span class="path-arrow" aria-hidden="true">→</span>
+        <span class="path-node" role="listitem" style="color:var(--gold)">AI</span>
+      </div>
+      <p class="meet-bio">Major built this room because most AI education skips what matters most: <strong>the human on the other side of the screen.</strong> He doesn't teach AI. He helps people translate it — into their real life, their business, their legacy.</p>
+      <p class="meet-bio">His perspective was never built in one room, one industry, or one country. The South Bronx. Basketball. Finance. Wellness. Technology. Travel. Conversations with people from different parts of the world. What that gave him was the ability to see the same problem from different angles — and make connections others miss.</p>
+      <div class="meet-mark">Woven palm crown · likkle by likkle</div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section id="register" style="border-top:1px solid var(--border)">
+  <div class="register-sec">
+    <div class="register-inner">
+      <div class="register-copy">
+        <h2>Reserve your <em>free</em> seat.</h2>
+        <p>The live room is free. Always. You don't need to understand all the tools. You don't need to have everything figured out. You only need enough willingness to begin.</p>
+        <div class="register-features">
+          <div class="register-feature">Access to the next live session</div>
+          <div class="register-feature">Replay library in the Studio within 24 hours</div>
+          <div class="register-feature">Your personalized A·B·C starting path</div>
+          <div class="register-feature">Free resources and prompt cards</div>
+          <div class="register-feature">Pressure Test result — your personal map</div>
+        </div>
+      </div>
+      <div>
+        <div class="register-form" role="form" aria-label="Seat reservation">
+          <div class="form-group">
+            <label class="form-label" for="r-name">Full name</label>
+            <input class="form-input" id="r-name" type="text" placeholder="Your name" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-email">Email</label>
+            <input class="form-input" id="r-email" type="email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="r-lane">Your lane</label>
+            <select class="form-select" id="r-lane">
+              <option>Athlete</option>
+              <option>Creator</option>
+              <option>Entrepreneur</option>
+              <option>Educator</option>
+              <option>Healer</option>
+              <option>Professional</option>
+              <option>Parent</option>
+              <option>I just know there's more</option>
+            </select>
+          </div>
+          <button class="form-submit" type="button">Register free →</button>
+          <p class="form-note">No credit card. No spam. Just a seat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing-sec">
+  <div class="closing-inner">
+    <div class="closing-taglines">
+      <div class="closing-line">Understand your mind.</div>
+      <div class="closing-line gold">Activate your intelligence.</div>
+      <div class="closing-line">Build your legacy.</div>
+    </div>
+    <div class="closing-mark">One letter. One lesson. One action at a time.</div>
+  </div>
+</section>
+<div class="abc-stripe" aria-hidden="true">
+  <span class="s-gold"></span><span class="s-green"></span><span class="s-blue"></span>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-handle">@major_ai_mindset</span>
+  <svg width="34" height="34" viewBox="0 0 48 48" fill="none" aria-label="MD Medallion" role="img">
+    <defs>
+      <linearGradient id="mdRimF" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#F2D272"/>
+        <stop offset="0.35" stop-color="#C9931A"/>
+        <stop offset="0.65" stop-color="#8A6210"/>
+        <stop offset="1" stop-color="#E0B84E"/>
+      </linearGradient>
+    </defs>
+    <circle cx="24" cy="24" r="23" fill="url(#mdRimF)"/>
+    <circle cx="24" cy="24" r="20.5" fill="#0E0E0E"/>
+    <text x="24" y="27" font-family="'Brush Script MT','Segoe Script','Snell Roundhand',cursive" font-size="24" font-style="italic" fill="#C9931A" text-anchor="middle">MD</text>
+    <g opacity="0.9">
+      <ellipse cx="24" cy="36.5" rx="10" ry="3.2" fill="none" stroke="#A87814" stroke-width="1.6"/>
+      <ellipse cx="24" cy="35" rx="7.5" ry="2.4" fill="none" stroke="#C9931A" stroke-width="1.3"/>
+      <path d="M15 36.5 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0 q2.2 1.6 4.5 0 q2.3 1.6 4.5 0" stroke="#8A6210" stroke-width="0.8" fill="none"/>
+    </g>
+  </svg>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#" style="color:var(--gold)">Studio →</a>
+  </div>
+  <span class="footer-domain">majoraimindset.com</span>
+</footer>
+
+<script>
+// Lane selector
+function setLane(el) {
+  document.querySelectorAll('.lane-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const sel = document.getElementById('r-lane');
+  if (sel) sel.value = el.textContent;
+}
+
+// Pressure test
+const opts = document.querySelectorAll('.pressure-opt');
+const bar = document.getElementById('pbar');
+const cnt = document.getElementById('pcnt');
+let answered = 0;
+opts.forEach(opt => {
+  opt.addEventListener('click', () => {
+    opts.forEach(o => {
+      o.style.borderColor = '';
+      o.style.background = '';
+      o.setAttribute('aria-checked', 'false');
+      const dot = o.querySelector('.pressure-opt-dot');
+      dot.style.background = '';
+      dot.style.borderColor = '';
+    });
+    opt.style.borderColor = 'rgba(201,147,26,0.55)';
+    opt.style.background = 'rgba(201,147,26,0.05)';
+    opt.setAttribute('aria-checked', 'true');
+    const dot = opt.querySelector('.pressure-opt-dot');
+    dot.style.background = '#C9931A';
+    dot.style.borderColor = '#C9931A';
+    answered = Math.min(answered + 1, 9);
+    if (bar) bar.style.width = ((answered + 1) / 10 * 100) + '%';
+    if (cnt) cnt.textContent = (answered + 1) + ' / 10';
+  });
+  opt.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); opt.click(); }
+  });
+});
+</script>
