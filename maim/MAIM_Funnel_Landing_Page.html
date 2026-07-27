@@ -303,22 +303,24 @@ nav {
   font-size: 16px; line-height: 1.7; color: var(--muted);
   max-width: 520px; margin: 0 auto 40px;
 }
-.archetypes {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px;
+.result-preview {
+  display: flex; flex-direction: column; gap: 2px;
   text-align: left; margin-bottom: 40px;
+  max-width: 620px; margin-left: auto; margin-right: auto;
 }
-@media (max-width: 560px) { .archetypes { grid-template-columns: 1fr; } }
-.arch {
-  background: var(--ink); padding: 22px 24px;
-  display: flex; flex-direction: column; gap: 6px;
+.result-row {
+  background: var(--ink); padding: 20px 24px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+  border-left: 3px solid var(--gold);
 }
-.arch-name {
+.result-label {
   font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 900;
   font-size: 17px; text-transform: uppercase; color: var(--text);
 }
-.arch-pillar {
-  font-family: 'Courier New', monospace; font-size: 9px;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ac);
+.result-value {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
 }
 .btn-green {
   display: inline-flex; align-items: center; gap: 8px;
@@ -663,23 +665,21 @@ footer {
   <div class="section-inner">
     <div class="s-label">Free quiz · 2 minutes</div>
     <h2>Which pillar <em>are you?</em></h2>
-    <p class="quiz-lede">Every person enters the framework through a different door. Some are natural community builders. Others are data architects. Some lead with mindset, others with legacy vision. Find yours.</p>
-    <div class="archetypes">
-      <div class="arch" style="--ac: var(--green)">
-        <div class="arch-name">The Community Architect</div>
-        <div class="arch-pillar">Pillar 05 · Community &amp; Collaboration</div>
+    <p class="quiz-lede">Every person enters the framework through a different door. Two minutes of honest answers tells you which of the ten Pillars is carrying the most weight for you right now — and what to do about it this week.</p>
+    <div class="result-preview">
+      <div class="result-row">
+        <div class="result-label">Your strongest Pillar</div>
+        <div class="result-value">— revealed at the end</div>
       </div>
-      <div class="arch" style="--ac: var(--blue)">
-        <div class="arch-name">The Sovereign Builder</div>
-        <div class="arch-pillar">Pillar 04 · Blockchain &amp; Decentralization</div>
+      <div class="result-row">
+        <div class="result-label">Your next lesson</div>
+        <div class="result-value">— one letter, one action</div>
       </div>
-      <div class="arch" style="--ac: var(--gold)">
-        <div class="arch-name">The Knowledge Warrior</div>
-        <div class="arch-pillar">Pillar 03 · Gamified Education</div>
+      <div class="result-row">
+        <div class="result-label">Recommended action</div>
+        <div class="result-value">— what to do this week</div>
       </div>
-      <div class="arch" style="--ac: var(--red)">
-        <div class="arch-name">The Legacy Visionary</div>
-        <div class="arch-pillar">Pillar 10 · Long-Term Impact</div>
+    </div>
       </div>
     </div>
     <a class="btn-green" href="https://majordream.gumroad.com/quiz" target="_blank" rel="noopener noreferrer">Find my pillar →</a>
