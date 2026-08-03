@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="MD medallion">
+  <title>MD Medallion — Major Dream Williams</title>
+  <defs>
+    <!-- Polished gold rim: bright at upper-left and lower-right, deep through the middle -->
+    <linearGradient id="md-rim" x1="14" y1="6" x2="86" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0"    stop-color="#FBE9A8"/>
+      <stop offset="0.14" stop-color="#EFCB6B"/>
+      <stop offset="0.34" stop-color="#C9931A"/>
+      <stop offset="0.52" stop-color="#8A6210"/>
+      <stop offset="0.70" stop-color="#B8871A"/>
+      <stop offset="0.88" stop-color="#EFCB6B"/>
+      <stop offset="1"    stop-color="#F7DE95"/>
+    </linearGradient>
+
+    <!-- Inner bevel: the step down from rim to field -->
+    <linearGradient id="md-bevel" x1="22" y1="18" x2="78" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0"   stop-color="#6E4C0C"/>
+      <stop offset="0.5" stop-color="#D8A82E"/>
+      <stop offset="1"   stop-color="#7C570E"/>
+    </linearGradient>
+
+    <!-- Matte black field with a soft top-left sheen -->
+    <radialGradient id="md-field" cx="0.36" cy="0.28" r="0.85">
+      <stop offset="0"   stop-color="#2B2926"/>
+      <stop offset="0.55" stop-color="#151413"/>
+      <stop offset="1"   stop-color="#0A0A09"/>
+    </radialGradient>
+
+    <!-- Raised gold on the monogram and crown -->
+    <linearGradient id="md-script" x1="30" y1="18" x2="72" y2="82" gradientUnits="userSpaceOnUse">
+      <stop offset="0"    stop-color="#FBE9A8"/>
+      <stop offset="0.30" stop-color="#E4B843"/>
+      <stop offset="0.62" stop-color="#C9931A"/>
+      <stop offset="1"    stop-color="#9A6E12"/>
+    </linearGradient>
+
+    <linearGradient id="md-weave" x1="26" y1="76" x2="74" y2="94" gradientUnits="userSpaceOnUse">
+      <stop offset="0"    stop-color="#E8C263"/>
+      <stop offset="0.45" stop-color="#C08A22"/>
+      <stop offset="1"    stop-color="#8A6210"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rim -->
+  <circle cx="50" cy="50" r="49" fill="url(#md-rim)"/>
+  <circle cx="50" cy="50" r="44.5" fill="none" stroke="url(#md-bevel)" stroke-width="2.4"/>
+  <!-- Field -->
+  <circle cx="50" cy="50" r="43" fill="url(#md-field)"/>
+  <!-- Thin inner keyline -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#F3D584" stroke-width="0.4" opacity="0.35"/>
+
+  <!-- ── Script MD monogram ──
+       Calligraphic M flowing into a D bowl, with the long descender
+       dropping toward the crown. -->
+  <g fill="none" stroke="url(#md-script)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- M: opening loop + two humps -->
+    <path d="M27 70
+             C 22 52, 24 28, 33 22
+             C 40 17.5, 43 25, 40 36
+             C 37 47, 34 57, 34 70"
+          stroke-width="3.2"/>
+    <path d="M34 66
+             C 35 52, 40 38, 46 33
+             C 51 29, 53 35, 51 45
+             C 49 55, 48 62, 48 72"
+          stroke-width="3.2"/>
+    <!-- D: stem rising into a full bowl -->
+    <path d="M52 74
+             C 50 54, 52 32, 57 24
+             C 62 16.5, 66 20, 65 28"
+          stroke-width="3.2"/>
+    <path d="M56 27
+             C 68 24, 78 36, 76 51
+             C 74 66, 62 75, 50 74.5"
+          stroke-width="3.4"/>
+    <!-- Long descender through the centre, meeting the crown -->
+    <path d="M49 44 C 49.5 58, 49.5 68, 49.5 78" stroke-width="2.6"/>
+  </g>
+
+  <!-- ── Woven palm crown ── -->
+  <g>
+    <!-- Dome -->
+    <path d="M41 79.5 C 41.5 73.5, 58.5 73.5, 59 79.5 Z" fill="url(#md-weave)"/>
+    <path d="M41 79.5 C 41.5 73.5, 58.5 73.5, 59 79.5"
+          fill="none" stroke="#7A5510" stroke-width="0.5" opacity="0.8"/>
+    <!-- Brim -->
+    <ellipse cx="50" cy="83.5" rx="22" ry="7.2" fill="url(#md-weave)"/>
+    <ellipse cx="50" cy="83.5" rx="22" ry="7.2" fill="none" stroke="#7A5510" stroke-width="0.55"/>
+    <!-- Weave: concentric plait rings -->
+    <g fill="none" stroke="#7A5510" stroke-width="0.5" opacity="0.75">
+      <ellipse cx="50" cy="83.5" rx="17.5" ry="5.6"/>
+      <ellipse cx="50" cy="83.5" rx="13" ry="4.1"/>
+      <ellipse cx="50" cy="83.5" rx="8.5" ry="2.6"/>
+    </g>
+    <!-- Weave: radial strands, giving the plaited texture -->
+    <g stroke="#8A6210" stroke-width="0.45" opacity="0.6">
+      <path d="M28.5 82 L 71.5 82"/>
+      <path d="M30 86.5 C 40 89.5, 60 89.5, 70 86.5"/>
+      <path d="M36 77.5 L 33 89.4"/>
+      <path d="M43 76.6 L 41.5 90.4"/>
+      <path d="M50 76.3 L 50 90.7"/>
+      <path d="M57 76.6 L 58.5 90.4"/>
+      <path d="M64 77.5 L 67 89.4"/>
+    </g>
+    <!-- Brim highlight -->
+    <path d="M31 80.5 C 40 77.4, 60 77.4, 69 80.5"
+          fill="none" stroke="#F2D687" stroke-width="0.7" opacity="0.55"/>
+  </g>
+</svg>
