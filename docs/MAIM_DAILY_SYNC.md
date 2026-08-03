@@ -37,9 +37,15 @@ watch the welcome film, join the community, and buy something.
 ## State
 
 - Repo: `MajorDream444/Major-OS-AMA-OS--Command`
-- Branch: `claude/maim-ecosystem-wireframe-xk8swp`
+- Branch: `claude/maim-ecosystem-wireframe-xk8swp` — HEAD `83e3f9a`, pushed, 9 ahead of main
 - Open PRs: none
-- Deployed: **nothing** — no host, no domain wired
+- Deployed: **nothing** — host not linked, domain not pointed
+- Build: **verified from a clean clone** — see `CODEX_HANDOFF_DEPLOY.md`
+
+**The deployment files are NOT in `Major-AI-OS`.** They live only in the Command
+repo on the branch above. `Major-AI-OS` remains canonical long-term (D-09), but
+consolidation is post-launch. Codex should deploy the candidate named in the
+handoff doc.
 
 ## Launch-critical board
 
