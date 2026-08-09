@@ -2,8 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "python3 maim/build.py",
   "outputDirectory": "maim/dist",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/pillars", "destination": "/pillars.html" },
+    { "source": "/return", "destination": "/return.html" }
+  ],
   "redirects": [
     { "source": "/10-pillars", "destination": "/pillars", "permanent": true },
     { "source": "/thank-you", "destination": "/return", "permanent": false }
