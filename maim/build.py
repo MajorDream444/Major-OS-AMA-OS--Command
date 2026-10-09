@@ -67,6 +67,23 @@ FALLBACK_FAVICON = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48
 """
 
 
+DATA_URI_IMG = re.compile(
+    r'<img src="data:image/(?:png|svg\+xml);base64,[^"]+"',
+)
+
+
+def externalize_logo(body, href):
+    """Swap inlined logo data URIs for a reference to the shared asset.
+
+    The sources inline the medallion because Claude Artifacts run under a CSP
+    that blocks external images. A real host has no such limit, and inlining a
+    417 KB PNG twice per page costs ~1.1 MB of HTML that cannot be cached.
+    Pointing at one file instead lets the browser fetch it once for the whole
+    site.
+    """
+    return DATA_URI_IMG.subn(f'<img src="{href}" loading="lazy" decoding="async"', body)
+
+
 def document(title, description, route, body, favicon_href):
     canonical = ORIGIN + route
     social = f"{ORIGIN}/social-preview.png"
@@ -109,12 +126,15 @@ def main() -> int:
     if logo.exists():
         shutil.copy(logo, DIST / "favicon.png")
         favicon_href = "/favicon.png"
+        logo_href = "/md-medallion.png"
+        shutil.copy(logo, DIST / "md-medallion.png")
         # double as the social preview until a dedicated card exists
         shutil.copy(logo, DIST / "social-preview.png")
         print("favicon + social preview: md-medallion.png")
     else:
         (DIST / "favicon.svg").write_text(FALLBACK_FAVICON)
         favicon_href = "/favicon.svg"
+        logo_href = "/favicon.svg"
         print("favicon: drawn fallback (no md-medallion.png yet)")
 
     routes = []
@@ -136,11 +156,16 @@ def main() -> int:
         for old, new in LINK_MAP.items():
             body = body.replace(old, new)
 
+        before = len(body)
+        body, swapped = externalize_logo(body, logo_href)
+        saved = (before - len(body)) // 1024
+
         (DIST / out_name).write_text(
             document(title, description, route, body, favicon_href)
         )
         routes.append(route)
-        print(f"  {src_name} -> dist/{out_name}  ({route})")
+        note = f"  -{saved} KB, {swapped} logo refs externalized" if swapped else ""
+        print(f"  {src_name} -> dist/{out_name}  ({route}){note}")
 
     (DIST / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\n\nSitemap: {ORIGIN}/sitemap.xml\n"

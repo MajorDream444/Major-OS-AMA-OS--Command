@@ -23,7 +23,7 @@
       ]
     },
     {
-      "source": "/(favicon|social-preview).(png|svg)",
+      "source": "/(favicon|social-preview|md-medallion).(png|svg)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800, immutable" }
       ]
