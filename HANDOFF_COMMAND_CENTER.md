@@ -1,5 +1,7 @@
 # AMA / Major OS Command Center Handoff
 
+> Current directive (15 October 2026): Shopify, Gumroad and Kit are retired for owned operations. Read `docs/RETIRED_PLATFORMS_2026-10-15.md`. Requests naming them route to retirement/migration review, not provider activation.
+
 ## Purpose
 
 This handoff gives the Command Center builder full context on where the system stands, why recent architecture decisions were made, and how GitHub, Notion, Airtable, Codex, OpenClaw, Hanzo, Lux, media tools, commerce tools, and automation should connect.
@@ -197,8 +199,9 @@ Research vault and source synthesis layer.
 - HeyGen = avatar/video generation
 - Remotion = programmatic video rendering
 - Generative Media Skills = image/video/lip sync/media generation
-- Gumroad = digital product sales
-- Shopify CLI = ecommerce store operations
+- Owned Vercel storefront + Stripe = selected commerce stack
+- Resend = selected email delivery; Airtable = operational records
+- Shopify, Gumroad and Kit = RETIRED / DO NOT USE; see docs/RETIRED_PLATFORMS_2026-10-15.md
 - Marketing skills = content/funnel/distribution layer
 
 ## Current Airtable Source
@@ -422,33 +425,8 @@ Purpose:
 - Social video formatting
 - Batch content generation
 
-### Shopify CLI Skill
-Current user version: 3.50.0
-Update available: 3.51.0
-Update command:
-
-```bash
-npm install -g @shopify/cli@latest
-```
-
-Purpose:
-
-- Manage Shopify products
-- Theme work
-- Store operations
-- Drop launches
-- CLI-driven automation
-
-### Gumroad Skill
-Source reference: MCPMarket Gumroad Automation
-
-Purpose:
-
-- Digital product listings
-- Pricing
-- Funnels
-- Launch copy
-- Sales tracking
+### Retired commerce skills
+Shopify CLI and Gumroad activation instructions are retired. Do not install, update, enable or delegate work to those providers for owned operations. Preserve reusable copy/assets and historical records; use Vercel, Stripe, Resend and Airtable. See docs/RETIRED_PLATFORMS_2026-10-15.md.
 
 ### Marketing Skills
 Source repos:
