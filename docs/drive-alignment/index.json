@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "repository": "MajorDream444/Major-OS-AMA-OS--Command",
+  "snapshot_date": "2026-10-15",
+  "scope": "Three public-safe operating documents only. No full-archive synchronization.",
+  "accounts": [
+    "ArtMobAGI",
+    "MajorNFTs",
+    "Hanzo"
+  ],
+  "entries": [
+    {
+      "mirror_id": "hamal-runtime-readme",
+      "repo_path": "runtime/yawdie/README.md",
+      "drive_filename": "YAWDIE_RUNTIME_README.md",
+      "sha256": "b505d382b8bf55f4a7363b8c4bd3dd6dcdb1777ada1ef31ba87449e36c266e44",
+      "tags": [
+        "ecosystem:hamal",
+        "workspace:command-center",
+        "entity:ama-solutions",
+        "asset-type:documentation",
+        "topic:agent-operations",
+        "audience:operators",
+        "workflow:context-sync",
+        "lifecycle:current",
+        "sensitivity:public",
+        "rights:owner-authored",
+        "channel:github-drive",
+        "language:en",
+        "coordinator:yawdie",
+        "sync-role:canonical-source"
+      ],
+      "content_authority": "github",
+      "drive_role": "versioned mirror"
+    },
+    {
+      "mirror_id": "hamal-runtime-handoff",
+      "repo_path": "docs/YAWDIE_RUNTIME_HANDOFF_2026-10-15.md",
+      "drive_filename": "YAWDIE_RUNTIME_HANDOFF_2026-10-15.md",
+      "sha256": "1e5546d823f313e35753c249666ae4005bd7672db65d9e5e3db58bb91f17d85b",
+      "tags": [
+        "ecosystem:hamal",
+        "workspace:command-center",
+        "entity:ama-solutions",
+        "asset-type:documentation",
+        "topic:agent-operations",
+        "audience:operators",
+        "workflow:context-sync",
+        "lifecycle:current",
+        "sensitivity:public",
+        "rights:owner-authored",
+        "channel:github-drive",
+        "language:en",
+        "coordinator:yawdie",
+        "sync-role:canonical-source"
+      ],
+      "content_authority": "github",
+      "drive_role": "versioned mirror"
+    },
+    {
+      "mirror_id": "hamal-operating-charter",
+      "repo_path": "docs/YAWDIE_OPERATING_CHARTER_2026-10-15.md",
+      "drive_filename": "YAWDIE_OPERATING_CHARTER_2026-10-15.md",
+      "sha256": "7ec2299fec4b752d8728e6ce6cecc6084201e8ecdc34a168011585ab5d8a0e4a",
+      "tags": [
+        "ecosystem:hamal",
+        "workspace:command-center",
+        "entity:ama-solutions",
+        "asset-type:documentation",
+        "topic:agent-operations",
+        "audience:operators",
+        "workflow:context-sync",
+        "lifecycle:current",
+        "sensitivity:public",
+        "rights:owner-authored",
+        "channel:github-drive",
+        "language:en",
+        "coordinator:yawdie",
+        "sync-role:canonical-source"
+      ],
+      "content_authority": "github",
+      "drive_role": "versioned mirror"
+    }
+  ],
+  "privacy": "Private source IDs, contacts and client data belong in private manifests, not this public repository."
+}
