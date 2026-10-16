@@ -1,7 +1,8 @@
 # Commerce Gate Evidence — 2026-10-16
 
 Produced for the three-hour launch sprint (Issue #35 / #37 scope). All findings
-read directly from the Stripe API. **No transaction was created.**
+read directly from the Stripe API. **One test-mode checkout session was created;
+no live write was ever made.**
 
 ## Controlled test transaction — RUN
 
@@ -133,9 +134,10 @@ are separate milestones, and commerce is at *documented*, not *built*.
 
 ## To unblock, in order
 
-1. Add a **test-mode key** to whatever environment runs the verification.
-2. Create the webhook endpoint pointing at the deployed app's handler, subscribed
-   to `checkout.session.completed` at minimum.
+1. ~~Add a test-mode key~~ — done, granted 2026-10-16.
+2. **Fix the test webhook and create a live one.** Replace `YOUR_BYPASS_SECRET`
+   with the real token, and repoint both at a stable custom domain rather than a
+   per-deployment preview URL. Live mode currently has no endpoint at all.
 3. Decide Gumroad vs Stripe for the Pillar Scroll — currently both are referenced
    and neither is wired. Running two checkouts for one product will produce two
    customer records for the same person.
