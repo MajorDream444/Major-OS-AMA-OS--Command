@@ -34,18 +34,37 @@ question — *does this help us launch?* If not, it goes to the post-launch back
 **Definition of done:** someone can discover MAIM, understand it in 30 seconds,
 watch the welcome film, join the community, and buy something.
 
-## State
+## State — corrected 2026-10-16 from the Vercel API
 
-- Repo: `MajorDream444/Major-OS-AMA-OS--Command`
-- Branch: `claude/maim-ecosystem-wireframe-xk8swp` — HEAD `83e3f9a`, pushed, 9 ahead of main
-- Open PRs: none
-- Deployed: **nothing** — host not linked, domain not pointed
-- Build: **verified from a clean clone** — see `CODEX_HANDOFF_DEPLOY.md`
+**Production exists and is READY.** Earlier entries in this file said "Deployed:
+nothing." That was wrong and is retracted.
 
-**The deployment files are NOT in `Major-AI-OS`.** They live only in the Command
-repo on the branch above. `Major-AI-OS` remains canonical long-term (D-09), but
-consolidation is post-launch. Codex should deploy the candidate named in the
-handoff doc.
+| | |
+|---|---|
+| Vercel project | `major-ai-os` · `prj_s4qpinxNU7ntgN3LrxoY0xSo0Ane` |
+| Team | HAMAL AGI · `team_quPx9Q3lvBqjx5AGbQAttJk2` |
+| Production deployment | `dpl_8785vDBaRddb9fLkfdGUgVVkiV5y` · READY |
+| Commit | `a9f0ce5d` on `main` of **MajorDream444/Major-AI-OS** |
+| | "Merge pull request #33 — MAIM philosophy canon and lifelong campus orientation" |
+| Domains | `majoraimindset.com` (308 → www) and `www.majoraimindset.com`, both `verified: true` |
+| Access control | SSO on for every target **except custom domains** — the public domain is open; `*.vercel.app` URLs require login |
+
+### The reconciliation that matters
+
+**Production serves `Major-AI-OS`, not this repo.** The MAIM web build in
+`maim/` here — front door, Pillars funnel, return page, `build.py`,
+`vercel.json` — is on branch `claude/maim-ecosystem-wireframe-xk8swp` and has
+**never been deployed anywhere**. There are two parallel MAIM site
+implementations. Which one is canonical is an open decision for Major, not an
+assumption either side should keep making.
+
+### What this session cannot verify
+
+This container's DNS and HTTP egress are allowlisted to a handful of hosts.
+`google.com`, `cloudflare.com` and `*.vercel.app` all return NXDOMAIN here, so
+**no DNS or live-route result produced in this environment is evidence about the
+public internet.** Customer-side reachability, checkout, and email delivery must
+be tested from an unrestricted network.
 
 ## Launch-critical board
 
