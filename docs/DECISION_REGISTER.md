@@ -126,3 +126,31 @@ values on sight; reconciliation is post-launch and non-blocking.
 | Where does the canonical member record physically live? Airtable is the stated Operations DB. | Major |
 | Full tagline — *"Likkle by likkle, we build the future"* appears on `/return` only; other pages carry the short form. | Major |
 | Refund / chargeback handling against `purchase_status` | post-launch |
+
+---
+
+### D-15 — NOTED, NOT YET DECIDED
+**Hero right-hand space is reserved for a motion graphic explaining MAIM.**
+
+Major's intent, 2026-10-17: a visitor who lands on the home page and never
+scrolls should still understand what Major AI Mindset is. The hero currently
+reads left-to-right — eyebrow, question, answer, CTAs, stat row — and stops.
+Everything sits inside `.hero-inner`, a single flex column capped at
+`max-width: 1100px` (the question itself caps at 780px), so on any viewport
+wider than roughly 1100px there is genuine unused space to the right of the
+type. That space is the slot.
+
+Format preference: **motion graphic over live-action video.** Major is still
+deciding what it should feel like. Vertical orientation was raised as the
+likely shape, which suits the column of empty space beside a left-aligned
+hero.
+
+Not yet decided: runtime, whether it autoplays muted on loop or waits for a
+click, whether it is the same asset as the welcome film (`OZ10QdrUxl8`, 4:34)
+cut down or an entirely separate piece, and the mobile fallback — at
+`max-width: 640px` the hero collapses to one column and the slot disappears,
+so the asset either stacks under the CTAs or is suppressed.
+
+Engineering note: taking this slot means changing `.hero-inner` from a flex
+column to a two-column grid above a breakpoint. No work has been done; nothing
+is reserved in the markup yet.
