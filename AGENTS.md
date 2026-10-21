@@ -1,5 +1,9 @@
 # Agents
 
+## Current Yawds execution queue — 21 October 2026
+
+Before organizing release work, read `docs/operations/YAWDS_RELEASE_QUEUE_2026-10-21.md` and its JSON register, then MAIM's current October 21 handover and issue #57. The register assigns accountability across the existing twelve seats; it does not activate their executors. Verify current evidence and acknowledge tasks before recording them as running. Keep the protected Studio test, private asset import, UI release and production promotion as separate gates. Hosted MAIM database operations use only MAIM ECOSYSTEM / njpdlomvyalxrkluaige; do not reapply completed catalogue migrations or use a hosted CLI/direct-Postgres fallback.
+
 ## Runtime
 
 OpenClaw is the intended agent runtime.
