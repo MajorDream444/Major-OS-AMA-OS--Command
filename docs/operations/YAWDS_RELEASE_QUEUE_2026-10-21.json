@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-10-21",
+  "timezone": "Asia/Makassar",
+  "coordinator": "H01",
+  "kind": "reviewable_execution_register",
+  "execution_status": "not_a_running_dispatcher",
+  "scope_issue": "https://github.com/MajorDream444/Major-AI-OS/issues/57",
+  "coverage": "Current GitHub handovers, selected Vercel projects, read-only MAIM database counts and limited host checks; not a complete audit of all chats, files or repositories",
+  "wip_limit": 1,
+  "canonical_sources": [
+    "https://github.com/MajorDream444/Major-AI-OS/blob/main/docs/handoffs/MAIM_CREATIVE_STUDIO_ASSETS_AND_PREVIEWS_HANDOVER_2026-10-21.md",
+    "https://github.com/MajorDream444/Major-AI-OS/blob/main/docs/decisions/MAIM_DATABASE_CONSOLIDATION_2026-10-20.md"
+  ],
+  "accounts": {
+    "maim": {
+      "plugin": "MAIM ECOSYSTEM",
+      "project": "njpdlomvyalxrkluaige",
+      "hosted_db_policy": "plugin_only"
+    },
+    "ama": "verify dedicated account binding before operations",
+    "major_dream": "verify dedicated account binding before operations"
+  },
+  "agents": [
+    {
+      "id": "H01",
+      "name": "Yawdie",
+      "role": "chief_of_staff",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H02",
+      "name": "Memory & Knowledge Steward",
+      "role": "memory",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H03",
+      "name": "Product & Offer Lead",
+      "role": "product",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H04",
+      "name": "Engineering & Release Lead",
+      "role": "engineering",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H05",
+      "name": "Commerce & Fulfillment Lead",
+      "role": "commerce",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H06",
+      "name": "Creative & Publishing Lead",
+      "role": "creative",
+      "status": "local_handler_exists_service_not_activated"
+    },
+    {
+      "id": "H07",
+      "name": "Research & Market Intelligence Lead",
+      "role": "research",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H08",
+      "name": "Growth & Distribution Lead",
+      "role": "growth",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H09",
+      "name": "Sales & Relationship Lead",
+      "role": "sales",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H10",
+      "name": "Client Delivery & Success Lead",
+      "role": "delivery",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H11",
+      "name": "Finance & Business Operations Lead",
+      "role": "finance",
+      "status": "role_defined_dispatch_not_verified"
+    },
+    {
+      "id": "H12",
+      "name": "Quality, Security & Reliability Lead",
+      "role": "quality",
+      "status": "role_defined_dispatch_not_verified"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "R01",
+      "priority": 0,
+      "title": "Protected Studio authorization test",
+      "owner": "H04",
+      "reviewer": "H12",
+      "status": "scope_prepared_awaiting_owner_gate",
+      "evidence": "https://github.com/MajorDream444/Major-AI-OS/issues/57",
+      "acceptance": [
+        "exact reviewed commit/origin and current deployment verified",
+        "canonical binding verified privately",
+        "baseline before users",
+        "two-user isolation and repeat-import assertions",
+        "membership revocation and real token expiry",
+        "six cleanup counts restored and synthetic Auth identities removed"
+      ],
+      "not_authorized": [
+        "secret/configuration writes",
+        "synthetic hosted execution"
+      ]
+    },
+    {
+      "id": "R02",
+      "priority": 0,
+      "title": "Studio UI build and same-origin integration",
+      "owner": "H04",
+      "reviewer": "H12",
+      "status": "not_released",
+      "dependency": "R01",
+      "acceptance": [
+        "deliberate UI build/deployment ownership defined",
+        "real session bootstrap and same-origin API verified",
+        "selected-workspace, sign-out and stale-response behavior tested",
+        "Academy doorway and rollback tested"
+      ]
+    },
+    {
+      "id": "R03",
+      "priority": 0,
+      "title": "Academy private pilot configuration and hosted validation",
+      "owner": "H04",
+      "reviewer": "H12",
+      "status": "blocked_configuration",
+      "evidence": "Production c441448; compared previews have zero commits ahead; project env inventory returned no entries",
+      "acceptance": [
+        "verify canonical MAIM binding and required configuration",
+        "test member API, identity, isolation, email and entitlements in isolated pilot",
+        "release only against actual hosted evidence"
+      ]
+    },
+    {
+      "id": "R04",
+      "priority": 0,
+      "title": "Lead-agent runtime alignment and activation proof",
+      "owner": "H01",
+      "reviewer": "H12",
+      "status": "blocked_runtime_access_and_model_routing",
+      "evidence": "OpenClaw service loaded/running from no-probe status; one configured main agent uses ollama/kimi-k2.6:cloud; local loopback access and supervisor writes denied",
+      "acceptance": [
+        "retain current service/config backup",
+        "select verified installed local model without paid fallback",
+        "configure Yawdie identity/context and bounded worker dispatch",
+        "prove one task acknowledgement, output and completion receipt",
+        "prove restart recovery and morning/evening briefs"
+      ],
+      "not_authorized": [
+        "invoke current cloud model",
+        "claim all twelve seats deployed"
+      ]
+    },
+    {
+      "id": "R05",
+      "priority": 1,
+      "title": "Preserved archive import into catalogue",
+      "owner": "H02",
+      "reviewer": "H12",
+      "status": "separate_import_gate",
+      "dependency": "R01",
+      "acceptance": [
+        "verified private manifest dry-run",
+        "correct workspace/rights/approval mapping",
+        "authorized import and count/hash receipts",
+        "no raw private registry in public Git"
+      ]
+    },
+    {
+      "id": "R06",
+      "priority": 1,
+      "title": "Pressure Test commerce readiness delta",
+      "owner": "H05",
+      "reviewer": "H12",
+      "status": "promotion_hold",
+      "evidence": "Provider inventory: production 699a3e5, staging 6cacfd1",
+      "acceptance": [
+        "full delta and account bindings reviewed",
+        "product/order/webhook/delivery tests pass",
+        "no client product/link leakage"
+      ]
+    },
+    {
+      "id": "R07",
+      "priority": 1,
+      "title": "Correct downstream creative-context PRs",
+      "owner": "H02",
+      "reviewer": "H04",
+      "status": "review_only",
+      "evidence": "MAIM-PRODUCTION-OS PR1 and MAIM-Legacy-Media-Studio PR1 open drafts; HAMAL creative skills README exists on main",
+      "acceptance": [
+        "replace obsolete pending-HAMAL statements",
+        "verify current upstream references",
+        "review documentation-only PRs; no unrelated merge"
+      ]
+    },
+    {
+      "id": "R08",
+      "priority": 1,
+      "title": "Product and book readiness register",
+      "owner": "H03",
+      "reviewer": "H06",
+      "status": "needs_current_inventory",
+      "acceptance": [
+        "identify actual available manuscripts/assets/SKUs and missing deliverables",
+        "preserve approved Integrity cover families and founder marks",
+        "separate catalogue definition from purchasable delivery"
+      ]
+    },
+    {
+      "id": "R09",
+      "priority": 1,
+      "title": "Creative production and research handoff",
+      "owner": "H06",
+      "reviewer": "H07",
+      "status": "not_dispatched",
+      "acceptance": [
+        "load approved skills and resolved original sources",
+        "produce one reviewable asset pack with provenance",
+        "record generation/render costs and real outputs"
+      ]
+    },
+    {
+      "id": "R10",
+      "priority": 1,
+      "title": "Distribution and targeted sales preparation",
+      "owner": "H08",
+      "reviewer": "H09",
+      "status": "blocked_verified_offer_and_adapters",
+      "acceptance": [
+        "ready owned CTA and source-derived channel adaptations",
+        "separate prospecting from subscriber consent",
+        "publication/outreach only under authorized scope with provider receipts"
+      ]
+    },
+    {
+      "id": "R11",
+      "priority": 2,
+      "title": "Administrative sources and client handoff tracking",
+      "owner": "H10",
+      "reviewer": "H02",
+      "status": "separate_client_scope",
+      "acceptance": [
+        "keep Sheetal/client files in controlled client vault",
+        "daily Downloads content review/tagging and routing tracked honestly",
+        "no original deletion before verified preservation and permitted access"
+      ]
+    },
+    {
+      "id": "R12",
+      "priority": 2,
+      "title": "Capacity and cost controls",
+      "owner": "H11",
+      "reviewer": "H01",
+      "status": "needs_current_capacity_check",
+      "acceptance": [
+        "verify scheduler capacity before promising briefs",
+        "record subscription versus API billing path",
+        "no paid fallback, upgrades or fabricated runtime activity"
+      ]
+    }
+  ]
+}
