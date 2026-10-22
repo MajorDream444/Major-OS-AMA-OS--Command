@@ -118,6 +118,37 @@ values on sight; reconciliation is post-launch and non-blocking.
 
 ---
 
+---
+
+### D-16 — APPLIED
+**Command keeps orchestration; Major-AI-OS keeps the site.**
+
+Reconciled 22 October 2026. This branch had carried a full copy of the MAIM site
+(`maim/`, `vercel.json`, `support.js`, the wireframe canvas) since the earliest
+commits. `Major-AI-OS/docs/00-canonical-sources.md` now states plainly that the
+Command repository is the active Yawdie orchestration source and that its MAIM
+site copy is historical, with site changes belonging to Major-AI-OS.
+
+Merging that copy to Command main would have recreated the exact two-repository
+duplication that rule exists to prevent, so it was dropped from the merge. Every
+file was confirmed present in `Major-AI-OS/apps/maim-site/` first. It remains
+reachable in this branch's history.
+
+**One asset was deliberately not carried over.** `maim/assets/md-medallion.svg`
+is a hand-drawn approximation of the MD medallion, not the real mark. The
+Integrity publishing design lock forbids generating, redrawing or replacing the
+MD-over-woven-hat mark with a substitute, so propagating this file would have put
+a drawn stand-in where the authentic asset is required. The real PNG lives at
+`Major-AI-OS/apps/maim-site/maim/assets/md-medallion.png`. **If a vector master is
+needed for print — and the Integrity covers will need one — it must come from the
+owner's source files, not from this SVG.**
+
+`docs/MAIM_DAILY_SYNC.md` was dropped as a duplicate; Major-AI-OS holds the
+canonical copy. Three further documents are retained with SUPERSEDED banners
+rather than deleted, so the dated record survives without inviting action:
+`COMMERCE_GATE_EVIDENCE_2026-10-16.md`, `LAUNCH_CHECKLIST.md` and
+`CODEX_HANDOFF_DEPLOY.md`.
+
 ## Open — not yet decided
 
 | Question | Needs |

@@ -1,5 +1,8 @@
 # Commerce Gate Evidence — 2026-10-16
 
+> **SUPERSEDED — 22 October 2026.** The preview bypass credential and TEST webhook described here were rotated and retired. Current commerce position: `docs/audits/ECOSYSTEM_AUDIT_2026-10-22.md` in Major-AI-OS.
+> Retained as a dated record of what was true when it was written. Do not action it.
+
 Produced for the three-hour launch sprint (Issue #35 / #37 scope). All findings
 read directly from the Stripe API. **One test-mode checkout session was created;
 no live write was ever made.**

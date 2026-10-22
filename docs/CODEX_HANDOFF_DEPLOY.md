@@ -1,5 +1,8 @@
 # Codex Handoff — Deploy MAIM
 
+> **SUPERSEDED — 22 October 2026.** Replaced by the Yawds release queue copy/paste handoffs and the Major-AI-OS October 21 handover.
+> Retained as a dated record of what was true when it was written. Do not action it.
+
 **Mission:** connect the verified implementation candidate to Vercel and point
 `majoraimindset.com` at it.
 

@@ -1,5 +1,7 @@
 # Orchestrator Layer
 
+> Provider policy update — 15 October 2026: Shopify, Gumroad and Kit are retired for owned operations. Read `docs/RETIRED_PLATFORMS_2026-10-15.md`. Selected commerce/email stack is owned Vercel surfaces, Stripe, Resend and Airtable; historical provider keywords must not enable old integrations.
+
 ## Purpose
 
 The Orchestrator turns an operator command into a local mission plan, assigns mock agents, runs the plan in simulation, and updates Mission Control.
@@ -34,7 +36,8 @@ mission = {
 - `audit`, `diagnose`, `review business` -> `audit`
 - `content`, `substack`, `article`, `video`, `remotion`, `heygen` -> `content_media`
 - `email`, `outreach`, `follow up`, `dm` -> `outreach`
-- `shopify`, `gumroad`, `product`, `store` -> `commerce`
+- `stripe`, `product`, `store` -> `commerce`
+- `shopify`, `gumroad`, `kit`, `convertkit` -> retirement/migration review; do not activate retired providers
 - `daily brief`, `report`, `status` -> `operations`
 - fallback -> `operations`
 

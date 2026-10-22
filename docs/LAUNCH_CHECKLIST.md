@@ -1,5 +1,8 @@
 # MAIM Launch Checklist
 
+> **SUPERSEDED — 22 October 2026.** Replaced by the Yawds release queue at `docs/operations/YAWDS_RELEASE_QUEUE_2026-10-21.md`, which carries the active gates.
+> Retained as a dated record of what was true when it was written. Do not action it.
+
 Target: `majoraimindset.com` public, someone can discover → understand → watch →
 join → buy.
 
