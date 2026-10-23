@@ -1,0 +1,31 @@
+{
+  "derived": "2026-10-23",
+  "why": "Flat backgrounds prevented the marks being placed on anything but black.",
+  "method": {
+    "MD-Circle-Transparent.png": "Circular alpha mask on the seal's own outer ring, supersampled 4x. Only pixels OUTSIDE the ring become transparent; the seal's black interior field is preserved, so the mark itself is unaltered.",
+    "MD-Hat-Transparent.png": "Luminance key of the flat ground with a soft ramp, then un-premultiplied: partially transparent edge pixels have their colour restored to the mark's own gold, so no dark halo survives on light grounds."
+  },
+  "guarantee": "No pixel of either mark was redrawn, traced, reinterpreted or regenerated. The originals are unmodified and remain the approved assets; these are derivations for placement on non-black grounds.",
+  "files": [
+    {
+      "file": "MD-Circle-Original.png",
+      "sha256": "4fde85ebb37e9fa94efbc182de479cdb243b16f882d987f3992665cd4cc94469",
+      "bytes": 897920
+    },
+    {
+      "file": "MD-Hat-Original.png",
+      "sha256": "97d66750d1a6edf966e18adec094d750ee0aeacc6a9244c1a8e2be4f39d05233",
+      "bytes": 131673
+    },
+    {
+      "file": "MD-Circle-Transparent.png",
+      "sha256": "dea3d8665318b38626171e9d3397e884f61441d58bc33e04815fb9cdc7aa5b28",
+      "bytes": 497978
+    },
+    {
+      "file": "MD-Hat-Transparent.png",
+      "sha256": "0a5f9467578ebbd57c9afe9d2827dce866af8eb1d9dbd47196229684dca96327",
+      "bytes": 121467
+    }
+  ]
+}
