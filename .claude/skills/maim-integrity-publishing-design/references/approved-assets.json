@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "baseline": "Branded front/back cover directions v0.4, approved by Major on 2026-10-20",
+  "approval_scope": "visual directions and supplied identity; not manuscript, final back copy, print specification or sale approval",
+  "library_package_id": "libfile_bdde278fb8248191862e14a4023c2df5",
+  "library_package_name": "MAIM_Integrity_Branded_Fronts_and_Backs_v0.4.zip",
+  "pairs": {
+    "ADULT": {
+      "A": "architectural doorway",
+      "B": "neighborhood at dusk"
+    },
+    "TEEN": {
+      "A": "choice paths",
+      "B": "basketball court conversation"
+    },
+    "CHILD": {
+      "A": "compass map",
+      "B": "cardboard-bus repair"
+    }
+  },
+  "primary_mark": "assets/MD-Circle-Original.png",
+  "alternate_mark": "assets/MD-Hat-Original.png",
+  "portrait": "assets/Major-Author-Photo.JPG",
+  "assets": [
+    {
+      "path": "assets/MD-Circle-Original.png",
+      "sha256": "4fde85ebb37e9fa94efbc182de479cdb243b16f882d987f3992665cd4cc94469",
+      "bytes": 897920,
+      "archive_path": "branded-covers/assets/MD-Circle-Original.png"
+    },
+    {
+      "path": "assets/MD-Hat-Original.png",
+      "sha256": "97d66750d1a6edf966e18adec094d750ee0aeacc6a9244c1a8e2be4f39d05233",
+      "bytes": 131673,
+      "archive_path": "branded-covers/assets/MD-Hat-Original.png"
+    },
+    {
+      "path": "assets/Major-Author-Photo.JPG",
+      "sha256": "77c31c9273af3a3d5c82e0e5990c698b238319e07eea21788ab6dcf27e5ca6e3",
+      "bytes": 274633,
+      "archive_path": "branded-covers/assets/Major-Author-Photo.JPG"
+    }
+  ],
+  "archived_cover_art": [
+    {
+      "path": "assets/ADULT-A-Art.png",
+      "sha256": "def5c8c25eb35cbe6d8f097b1e1bc7cf383e9c1a30aa9fc322ed12361240e9cc",
+      "bytes": 1790106,
+      "archive_path": "branded-covers/assets/ADULT-A-Art.png"
+    },
+    {
+      "path": "assets/ADULT-B-Art.png",
+      "sha256": "4f6910eaf0f7f703ba00453b4ad573d59c4583afd7a2fca8988515a72704df1e",
+      "bytes": 2392737,
+      "archive_path": "branded-covers/assets/ADULT-B-Art.png"
+    },
+    {
+      "path": "assets/CHILD-A-Art.png",
+      "sha256": "6d77a13a4adce15059878647aef7acd1837bb13ba67a001d90c8c4f09de81357",
+      "bytes": 3285470,
+      "archive_path": "branded-covers/assets/CHILD-A-Art.png"
+    },
+    {
+      "path": "assets/CHILD-B-Art.png",
+      "sha256": "c20dd8914b82a5512c3cee95f4c28d10d6439c0cd352b2bcd627527c6d5f0fce",
+      "bytes": 2331721,
+      "archive_path": "branded-covers/assets/CHILD-B-Art.png"
+    },
+    {
+      "path": "assets/TEEN-A-Art.png",
+      "sha256": "d23f7b52b9065b7b2c4564a62d829b702c8b770df1ee311bddc572885325a949",
+      "bytes": 1837014,
+      "archive_path": "branded-covers/assets/TEEN-A-Art.png"
+    },
+    {
+      "path": "assets/TEEN-B-Art.png",
+      "sha256": "702a7be523b236b42dac25fc7763a4a0dabc3312a554898aa0c70a18a5add33b",
+      "bytes": 2366830,
+      "archive_path": "branded-covers/assets/TEEN-B-Art.png"
+    }
+  ],
+  "archive_recovery": "Resolve library_package_id with current Library skill; materialize ZIP; extract branded-covers/assets to task asset directory; verify all nine hashes; pass --asset-dir to scripts. Reuse verified existing source copies when available.",
+  "storage": "All exact binary assets live in the saved v0.4 package; restore the asset directory and verify all hashes. This skill intentionally stores instructions, references and scripts only."
+}

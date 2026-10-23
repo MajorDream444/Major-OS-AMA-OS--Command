@@ -1,0 +1,4 @@
+interface:
+  display_name: "MAIM Integrity Publishing Design"
+  short_description: "Preserve approved MAIM book covers and author branding"
+  default_prompt: "Use $maim-integrity-publishing-design to produce an Integrity cover pair with the approved Major Dream logos and both locked visual options."
