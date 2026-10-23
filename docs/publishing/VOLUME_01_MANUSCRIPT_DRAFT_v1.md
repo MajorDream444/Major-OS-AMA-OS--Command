@@ -552,10 +552,39 @@ and look where they point, even though you don't want to.
 
 ## Where to go next
 
-**Build your first AI employee.** One task, off your Dependency Score, running by Friday.
+So. If you're ready to make some major moves, let's get down.
 
-[CTA into the MAIM ecosystem · Academy cohort · the newsletter]
-[Approved logo lockup · author portrait · bio]
+**Start with one.** Go back to your Dependency Score, take the lowest number on
+that list, and have it running without you by Friday. Not the hardest one. The
+easiest one. You are practising the handoff, not performing surgery.
+
+That's it. That's the whole assignment. One task off your plate, permanently,
+this week.
+
+### If you want the next part
+
+I write a letter. It goes out to people doing exactly what you just did —
+taking one thing at a time out of their own hands and putting it into a system.
+No theory. What worked, what broke, what I'd do differently.
+
+There's also a free guide, **Five AI Moves You Can Make This Week**, which is
+the shortest version of everything in this book.
+
+> **majoraimindset.com**
+
+### And when the doors open
+
+I run a founding cohort — a small group, capped at twenty, working through one
+real problem each until they finish with something that actually runs. Four
+sessions, one private hour with me.
+
+**It is not open yet, and it is not included with this book.** When it opens,
+the people on the letter hear first. That's the only advantage I'm offering, and
+it's a real one.
+
+---
+
+*One revenue action. One content action. One logged improvement. Every day.*
 
 ---
 
