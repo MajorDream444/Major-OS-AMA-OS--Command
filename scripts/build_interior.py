@@ -28,6 +28,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch as INCH
 from reportlab.platypus import (
     BaseDocTemplate,
+    Image,
     Frame,
     KeepTogether,
     PageBreak,
@@ -56,6 +57,10 @@ BODY_BOLD = "Times-Bold"
 BODY_ITAL = "Times-Italic"
 DISPLAY = "Helvetica-Bold"
 MONO = "Courier"
+
+ASSETS = Path(__file__).resolve().parent.parent / "assets" / "brand"
+MARK = ASSETS / "MD-Circle-supplied.png"
+PORTRAIT = ASSETS / "Major-Author-Photo-supplied.jpg"
 
 TITLE = "You Are the System"
 SERIES = "MAJOR MOVES · VOLUME ONE"
@@ -316,8 +321,15 @@ def build_story(md: str, S: dict) -> list:
 # ---------------------------------------------------------------- front matter
 
 def front_matter(S: dict) -> list:
-    out = [
-        Spacer(1, 1.7 * INCH),
+    out: list = [Spacer(1, 1.15 * INCH)]
+    if MARK.is_file():
+        # Scaled proportionately. Never redrawn, never regenerated.
+        out.append(Image(str(MARK), width=1.05 * INCH, height=1.05 * INCH,
+                         hAlign="CENTER"))
+        out.append(Spacer(1, 0.4 * INCH))
+    else:
+        out.append(Spacer(1, 1.45 * INCH))
+    out += [
         Paragraph(SERIES, S["series"]),
         Paragraph(TITLE, S["ttl"]),
         Paragraph(AUTHOR, S["byline"]),
@@ -330,6 +342,38 @@ def front_matter(S: dict) -> list:
     return out
 
 
+def about_author(S: dict) -> list:
+    """Bio drawn from Major's own Startup Qatar Founder Profile — his document,
+    his wording. No biography is invented here."""
+    out: list = [PageBreak(), Spacer(1, 0.75 * INCH),
+                 Paragraph("About the Author", S["h2"]), Spacer(1, 10)]
+    if PORTRAIT.is_file():
+        # Proportionate framing only; the supplied likeness is never synthesized.
+        from PIL import Image as PILImage
+        w, h = PILImage.open(PORTRAIT).size
+        tw = 1.85 * INCH
+        out.append(Image(str(PORTRAIT), width=tw, height=tw * h / w, hAlign="LEFT"))
+        out.append(Spacer(1, 12))
+    for para in [
+        "<b>Major Dream Williams</b> was born in New York City, raised in The Bronx "
+        "and Mount Vernon, and shaped by a Jamaican immigrant family.",
+        "He worked as a licensed financial advisor holding Series 7, 6 and 63 "
+        "credentials. He entered cryptocurrency in 2012 and moved into Web3 "
+        "development in 2017, then expanded into AI, automation, data systems and "
+        "agentic workforces.",
+        "He is the founder of AMA Solutions Corp and the architect of Foundry OS, "
+        "building digital infrastructure for founders, creators, students and "
+        "emerging markets \u2014 work organised around one principle: "
+        "<b>ownership over dependency</b>.",
+    ]:
+        out.append(Paragraph(para, S["body"]))
+    out.append(Spacer(1, 8))
+    out.append(Paragraph("\u201cFinance exposed the mechanics of capital. Web3 opened "
+                         "new models for ownership. AI made it possible to organize "
+                         "those ideas into practical systems.\u201d", S["quote"]))
+    return out
+
+
 def colophon(S: dict) -> list:
     notes = [
         "<b>Review proof &mdash; not print-ready.</b>",
@@ -339,12 +383,16 @@ def colophon(S: dict) -> list:
         "page count, printer trim, paper, binding, bleed and barcode specifications "
         "are fixed.",
         "",
-        "<b>Deliberately absent, not missing by accident:</b>",
-        "The MD/woven-hat mark and the author photograph are hash-verified assets "
-        "under the MAIM Integrity design lock. The approved originals were not "
-        "available to this build, and the lock forbids substituting a generated or "
-        "redrawn approximation. Their places are reserved and this proof ships "
-        "without them rather than with imitations.",
+        "<b>Marks and likeness:</b>",
+        "The MD/woven-hat mark and the author photograph were supplied by Major on "
+        "23 October 2026 and are placed here unaltered except for proportionate "
+        "scaling. They are owner-supplied re-exports, registered with their own "
+        "hashes in assets/brand/supplied-assets.json; they are not the v0.4 archival "
+        "originals and are not represented as those. Nothing here is redrawn, traced "
+        "or regenerated.",
+        "",
+        "<b>Cover:</b> this proof is the text block only. Covers build separately "
+        "from the approved v0.4 cover family.",
         "",
         "<b>Typeface substitution:</b>",
         "The brand body face is Georgia, which is not installed on the build "
@@ -399,7 +447,7 @@ def main() -> int:
 
     S = styles()
     story = front_matter(S) + build_story(src.read_text(encoding="utf-8"), S)
-    story += colophon(S)
+    story += about_author(S) + colophon(S)
 
     out = Path(a.output)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -407,7 +455,7 @@ def main() -> int:
     doc.build(story)
 
     print(f"wrote {out}  ({out.stat().st_size // 1024} KB)")
-    print("REVIEW PROOF — no cover, no mark, no portrait. See colophon.")
+    print("REVIEW PROOF — text block only; covers build separately. See colophon.")
     return 0
 
 
