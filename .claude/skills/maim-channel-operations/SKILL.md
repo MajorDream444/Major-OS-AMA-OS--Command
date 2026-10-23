@@ -16,7 +16,7 @@ exists to prevent.
 
 | | **Claude · Academy** | **ChatGPT · Mindset** |
 |---|---|---|
-| YouTube | `@maimdreamacademy` — `UCAxy4YB0VlQgrmQiKowu04g` | MAIM / Major AI Mindset |
+| YouTube | `@MAIM_ACADEMY` — `UCAxy4YB0VlQgrmQiKowu04g` | MAIM / Major AI Mindset |
 | Instagram | `@maim_academy` | MAIM main |
 | Job | drive founding-cohort enrollment | build the brand and audience |
 

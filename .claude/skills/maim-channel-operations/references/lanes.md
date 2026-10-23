@@ -4,9 +4,15 @@ Verified 23 October 2026.
 
 ## Claude's lane — the Academy
 
-**YouTube `@maimdreamacademy`** — `UCAxy4YB0VlQgrmQiKowu04g`
-Title "Major Dream". 0 subscribers, 0 views, 0 videos as of 23 Oct. Brand new.
+**YouTube `@MAIM_ACADEMY`** — `UCAxy4YB0VlQgrmQiKowu04g`
+Display name "Major Dream". 0 subscribers, 0 views, 0 videos as of 23 Oct.
 Authorised through vidIQ as `major@hanzo.ai`. Upload is available.
+
+⚠️ **vidIQ serves a stale handle for this channel.** `vidiq_user_channels`
+returned `@maimdreamacademy` on 23 Oct, hours after the handle was already
+`@MAIM_ACADEMY` in YouTube Studio. **Treat `channelId` as the only reliable
+identifier** and confirm a handle against Studio or the live channel page
+before putting it in anything published. A wrong handle in a link is a 404.
 
 **Instagram `@maim_academy`** — "Major Academy"
 131 followers, 392 following, 105 posts. An established account, not a new one.
@@ -45,8 +51,10 @@ which account it will actually post to.
 ## Identity notes
 
 - Spelling is **MAIM**, never MAME. **The Bronx**, never Bronx.
-- The Instagram handle is `@maim_academy`; the YouTube handle is
-  `@maimdreamacademy`. They differ. Do not assume one from the other.
+- Both handles are MAIM Academy: Instagram `@maim_academy`, YouTube
+  `@MAIM_ACADEMY`. The YouTube *display name* is still "Major Dream", which
+  differs from Instagram's "Major Academy" — a deliberate-looking gap worth
+  confirming with Major rather than silently matching.
 - `major@hanzo.ai` is the business identity: Claude, vidIQ, Metricool, YouTube.
 - `majornfts@gmail.com` holds the Fathom voice archive.
 - `artmobagi@gmail.com` holds the 23 Oct Volume 1 intake recording.

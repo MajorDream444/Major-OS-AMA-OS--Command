@@ -8,6 +8,10 @@ capability table is a claims table until someone runs it.
 Authorised as `major@hanzo.ai`. **150 renewable credits a month**, resets 23 Nov.
 `vidiq_balance` is free; call it before spending.
 
+**Handles go stale.** `vidiq_user_channels` returned a handle that had already
+been changed in YouTube Studio. Use `channelId` to identify a channel and verify
+any handle against the live page before publishing a link.
+
 **Free (0 credits):** `vidiq_user_channels`, `vidiq_balance`,
 `vidiq_instagram_connected_accounts`.
 
