@@ -26,6 +26,8 @@ from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.lib.pagesizes import inch
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch as INCH
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Image,
@@ -43,20 +45,26 @@ from reportlab.platypus import (
 
 PAGE_W, PAGE_H = 6 * inch, 9 * inch
 
-GROUND = colors.HexColor("#111111")
-GOLD = colors.HexColor("#C9931A")
-GREEN = colors.HexColor("#1F8A4C")
-RULE = colors.HexColor("#C9C4B8")
-MUTED = colors.HexColor("#5A5650")
+# Canonical MAIM design tokens v2.1 — major-ai-os/data/design-tokens.json
+GROUND = colors.HexColor("#111827")      # textDark, for ink on a light page
+GOLD = colors.HexColor("#9F742C")        # legacyGold, readable on white
+GREEN = colors.HexColor("#1F7A3A")       # jamaicanLegacyGreen
+RULE = colors.HexColor("#E5E7EB")        # borderLight
+MUTED = colors.HexColor("#4B5563")       # mutedLight
 
 # DejaVu ships with the container. Georgia is the brand body face and is not
 # available here, so the proof is set in DejaVu Serif and the substitution is
 # declared on the colophon rather than hidden.
-BODY_FONT = "Times-Roman"
-BODY_BOLD = "Times-Bold"
-BODY_ITAL = "Times-Italic"
-DISPLAY = "Helvetica-Bold"
-MONO = "Courier"
+_F = Path(__file__).resolve().parent.parent / "assets" / "fonts"
+for _n, _f in (("Inter-XB", "Inter-ExtraBold.ttf"), ("Inter", "Inter-Regular.ttf"),
+               ("Inter-Med", "Inter-Medium.ttf"), ("Inter-It", "Inter-MediumItalic.ttf")):
+    pdfmetrics.registerFont(TTFont(_n, str(_F / _f)))
+
+BODY_FONT = "Inter"
+BODY_BOLD = "Inter-Med"
+BODY_ITAL = "Inter-It"
+DISPLAY = "Inter-XB"
+MONO = "Inter-Med"
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets" / "brand"
 MARK = ASSETS / "MD-Circle-Original.png"
@@ -72,17 +80,17 @@ AUTHOR = "Major Dream Williams"
 def styles() -> dict[str, ParagraphStyle]:
     s = {}
     s["body"] = ParagraphStyle(
-        "body", fontName=BODY_FONT, fontSize=10.5, leading=15.5,
+        "body", fontName=BODY_FONT, fontSize=9.6, leading=15.2,
         alignment=TA_JUSTIFY, spaceAfter=7, textColor=GROUND,
     )
     s["first"] = ParagraphStyle("first", parent=s["body"], firstLineIndent=0)
     s["cont"] = ParagraphStyle("cont", parent=s["body"], firstLineIndent=12)
     s["h1"] = ParagraphStyle(
-        "h1", fontName=DISPLAY, fontSize=19, leading=23, spaceBefore=0,
+        "h1", fontName=DISPLAY, fontSize=17, leading=21, spaceBefore=0,
         spaceAfter=16, textColor=GROUND, alignment=TA_LEFT,
     )
     s["h2"] = ParagraphStyle(
-        "h2", fontName=DISPLAY, fontSize=12.5, leading=16, spaceBefore=16,
+        "h2", fontName=DISPLAY, fontSize=11.5, leading=15, spaceBefore=16,
         spaceAfter=7, textColor=GROUND,
     )
     s["h3"] = ParagraphStyle(
@@ -90,7 +98,7 @@ def styles() -> dict[str, ParagraphStyle]:
         spaceAfter=5, textColor=GROUND,
     )
     s["quote"] = ParagraphStyle(
-        "quote", fontName=BODY_ITAL, fontSize=10.5, leading=15.5,
+        "quote", fontName=BODY_ITAL, fontSize=9.6, leading=15.2,
         leftIndent=16, rightIndent=10, spaceBefore=4, spaceAfter=8,
         textColor=GROUND, alignment=TA_LEFT,
     )
@@ -108,7 +116,7 @@ def styles() -> dict[str, ParagraphStyle]:
         spaceBefore=30, spaceAfter=30, textColor=GROUND,
     )
     s["ttl"] = ParagraphStyle(
-        "ttl", fontName=DISPLAY, fontSize=30, leading=34, alignment=TA_CENTER,
+        "ttl", fontName=DISPLAY, fontSize=26, leading=31, alignment=TA_CENTER,
         textColor=GROUND, spaceAfter=10,
     )
     s["series"] = ParagraphStyle(
@@ -393,10 +401,11 @@ def colophon(S: dict) -> list:
         "<b>Cover:</b> this proof is the text block only. Covers build separately "
         "from the approved v0.4 cover family.",
         "",
-        "<b>Typeface substitution:</b>",
-        "The brand body face is Georgia, which is not installed on the build "
-        "machine. This proof is set in a serif substitute. Final typesetting should "
-        "use Georgia for body and Arial Narrow for display.",
+        "<b>Typography:</b>",
+        "Set in Inter, from the canonical MAIM design tokens. Inter ExtraBold for "
+        "display, Inter for text. The system OTFs carry CFF outlines that ReportLab "
+        "cannot embed, so TrueType builds converted with fontTools are committed "
+        "under assets/fonts and embedded here.",
         "",
         "Author sections are assembled from recorded intake sessions of 14 and 23 "
         "October 2026 and were approved by Major Dream Williams on 23 October 2026.",

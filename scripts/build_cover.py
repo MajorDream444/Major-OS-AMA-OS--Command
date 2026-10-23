@@ -24,20 +24,35 @@ from pathlib import Path
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import inch
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas as rl_canvas
 
 W, H = 6 * inch, 9 * inch
 M = 0.62 * inch
 
-GROUND = colors.HexColor("#111111")
-GOLD = colors.HexColor("#C9931A")
-TEXT = colors.HexColor("#F0EDE5")
-MUTED = colors.HexColor("#8C857A")
+# Canonical MAIM design tokens v2.1 — major-ai-os/data/design-tokens.json
+GROUND = colors.HexColor("#050505")   # maimBlack
+GOLD = colors.HexColor("#D8AF55")     # crownGold
+GOLD_DEEP = colors.HexColor("#9F742C")  # legacyGold
+TEXT = colors.HexColor("#F7F4EA")     # clarityWhite
+MUTED = colors.HexColor("#A8A8A8")    # smokeGray
 
-DISPLAY = "Helvetica-Bold"       # stands in for Arial Narrow
-BODY = "Times-Roman"             # stands in for Georgia
-BODY_I = "Times-Italic"
-MONO = "Courier"
+# Inter ExtraBold is on DESIGN.md's canonical display list and ships here, so
+# the brand faces are used directly rather than substituted.
+# ReportLab cannot read Inter's CFF-outline OTFs, so TrueType builds are
+# committed alongside, converted from the system OTFs with fontTools.
+_INTER = Path(__file__).resolve().parent.parent / "assets" / "fonts"
+for _name, _file in (("Inter-XB", "Inter-ExtraBold.ttf"),
+                     ("Inter", "Inter-Regular.ttf"),
+                     ("Inter-Med", "Inter-Medium.ttf"),
+                     ("Inter-It", "Inter-MediumItalic.ttf")):
+    pdfmetrics.registerFont(TTFont(_name, str(_INTER / _file)))
+
+DISPLAY = "Inter-XB"
+BODY = "Inter"
+BODY_I = "Inter-It"
+MONO = "Inter-Med"
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets" / "brand"
 MARK = ASSETS / "MD-Circle-Original.png"
@@ -107,11 +122,11 @@ def front_a(c):
     mark(c, (W - 1.0 * inch) / 2, H - M - 1.0 * inch, 1.0 * inch)
 
     c.setFillColor(GOLD)
-    c.setFont(MONO, 7.5)
+    c.setFont(MONO, 7)
     c.drawCentredString(W / 2, H - M - 1.42 * inch, SERIES)
 
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 46)
+    c.setFont(DISPLAY, 42)
     c.drawCentredString(W / 2, H / 2 + 0.52 * inch, TITLE_1)
     c.drawCentredString(W / 2, H / 2 - 0.08 * inch, TITLE_2)
 
@@ -140,7 +155,7 @@ def front_b(c):
     """Direction B — The Question. The question leads; the title answers."""
     ground(c)
     c.setFillColor(GOLD)
-    c.setFont(MONO, 7.5)
+    c.setFont(MONO, 7)
     c.drawString(M, H - M - 0.1 * inch, SERIES)
     c.setStrokeColor(GOLD)
     c.setLineWidth(0.8)
@@ -161,7 +176,7 @@ def front_b(c):
     mark(c, W - M - 0.82 * inch, M + 1.52 * inch, 0.82 * inch)
 
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 31)
+    c.setFont(DISPLAY, 29)
     c.drawString(M, M + 0.86 * inch, TITLE_1)
     c.drawString(M, M + 0.44 * inch, TITLE_2)
 
