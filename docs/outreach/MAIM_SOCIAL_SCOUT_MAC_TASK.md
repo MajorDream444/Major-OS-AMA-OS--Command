@@ -1,7 +1,33 @@
 # MAIM Social Scout — Mac-bound scheduled task
 
-**Status:** ready to create · must be created from Claude Desktop on the Mac
-**Engine:** [Agent Reach](https://github.com/Panniantong/agent-reach) (MIT, v1.5.0) — install first
+> ## ⛔ BLOCKED — do not create this task
+>
+> Agent Reach 1.6.0 was installed on the Mac on 23 Oct and tested. It does not
+> deliver the capability this spec assumes:
+>
+> | Channel | Result |
+> |---|---|
+> | Instagram | HTTP 429 on first contact; Agent Reach auto-paused the channel |
+> | Facebook — profile | returned only the URL and username. No name, bio or posts |
+> | Facebook — search | returned no data |
+>
+> Both channels are marked experimental upstream. The install report itself said
+> `还没逐项联网测试` — no channel had been tested over the network. The capability
+> table in the README is a claims table, not a results table.
+>
+> Creating this task would produce a weekly run that reaches nothing and writes
+> nothing — the exact silent failure the rest of this pipeline was built to avoid.
+>
+> **Status of the idea, not the tool:** the Mac-bound split is still correct. It is
+> the engine that failed, not the architecture. Candidate replacements: an Apify
+> Instagram actor (the strongest category on that platform), or dropping social
+> entirely if the open web keeps outperforming it — all four verified leads to date
+> came from podcast directories and awards lists, and none from social.
+>
+> Revisit only with a tested engine behind it.
+
+**Status:** BLOCKED — engine unproven · spec retained for the architecture
+**Engine:** ~~[Agent Reach](https://github.com/Panniantong/agent-reach) (MIT, v1.6.0)~~ — tested 23 Oct, insufficient
 **Runs:** Thursday 11:45 · offset from the cloud task's Monday run
 **Destination:** Airtable · AMA Intelligence Engine `appzY3Dz4lfMHtcMU` · GLOBAL_LEADS `tblRCmhB7YMrdQvrZ`
 
