@@ -59,8 +59,8 @@ DISPLAY = "Helvetica-Bold"
 MONO = "Courier"
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets" / "brand"
-MARK = ASSETS / "MD-Circle-supplied.png"
-PORTRAIT = ASSETS / "Major-Author-Photo-supplied.jpg"
+MARK = ASSETS / "MD-Circle-Original.png"
+PORTRAIT = ASSETS / "Major-Author-Photo.JPG"
 
 TITLE = "You Are the System"
 SERIES = "MAJOR MOVES · VOLUME ONE"
@@ -384,12 +384,11 @@ def colophon(S: dict) -> list:
         "are fixed.",
         "",
         "<b>Marks and likeness:</b>",
-        "The MD/woven-hat mark and the author photograph were supplied by Major on "
-        "23 October 2026 and are placed here unaltered except for proportionate "
-        "scaling. They are owner-supplied re-exports, registered with their own "
-        "hashes in assets/brand/supplied-assets.json; they are not the v0.4 archival "
-        "originals and are not represented as those. Nothing here is redrawn, traced "
-        "or regenerated.",
+        "The MD/woven-hat mark and the author photograph are the approved v0.4 "
+        "originals, restored 23 October 2026 and verified byte-for-byte against the "
+        "checksums in the MAIM Integrity design lock. They are placed unaltered "
+        "except for proportionate scaling. Nothing here is redrawn, traced or "
+        "regenerated.",
         "",
         "<b>Cover:</b> this proof is the text block only. Covers build separately "
         "from the approved v0.4 cover family.",

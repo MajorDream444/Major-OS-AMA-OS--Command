@@ -1,39 +1,55 @@
 {
-  "version": "1.0",
-  "provenance": "Supplied directly by Major Dream Williams in session, 23 October 2026.",
-  "relationship_to_v04": "These are owner-supplied re-exports. They do NOT match the hashes in the v0.4 approved-assets.json and are not represented as those originals. The design lock defers to current owner instruction, so these are authorised for use; the v0.4 package remains the archival baseline.",
-  "roles": {
-    "primary_mark": "assets/brand/MD-Circle-supplied.png",
-    "crown_variant": "assets/brand/MD-Crown-supplied.png",
-    "pin_with_caption": "assets/brand/MD-Crown-Pin-supplied.webp",
-    "author_portrait": "assets/brand/Major-Author-Photo-supplied.jpg"
+  "version": "2.0",
+  "updated": "2026-10-23",
+  "verified_originals": {
+    "note": "Byte-identical to the v0.4 approved-assets.json hashes. Restored from P1-Approved-Assets-and-Builder.zip on 23 Oct 2026 and checked with the publishing skill's own manifest. These supersede the re-exports for all use.",
+    "files": [
+      {
+        "path": "assets/brand/MD-Circle-Original.png",
+        "sha256": "4fde85ebb37e9fa94efbc182de479cdb243b16f882d987f3992665cd4cc94469",
+        "bytes": 897920
+      },
+      {
+        "path": "assets/brand/MD-Hat-Original.png",
+        "sha256": "97d66750d1a6edf966e18adec094d750ee0aeacc6a9244c1a8e2be4f39d05233",
+        "bytes": 131673
+      },
+      {
+        "path": "assets/brand/Major-Author-Photo.JPG",
+        "sha256": "77c31c9273af3a3d5c82e0e5990c698b238319e07eea21788ab6dcf27e5ca6e3",
+        "bytes": 274633
+      }
+    ]
   },
+  "owner_supplied_reexports": {
+    "note": "Supplied in session 23 Oct 2026 before the originals arrived. Retained for provenance; superseded by the verified originals above. Not for publication.",
+    "files": [
+      {
+        "path": "assets/brand/MD-Circle-supplied.png",
+        "sha256": "1a2888cfd08ab1a9d4a0889730910d9c231f0c5ff7d8d1c31ba7cc0cc0526227",
+        "bytes": 417008
+      },
+      {
+        "path": "assets/brand/MD-Crown-Pin-supplied.webp",
+        "sha256": "ed124728a0e0c07cdf4d4d56c653c8f0dabf83cf0e6ab1e87214ffc3ff16ddda",
+        "bytes": 81124
+      },
+      {
+        "path": "assets/brand/MD-Crown-supplied.png",
+        "sha256": "dcc46164282034e1867490f47ec5df95d828c3c1e345718a2a8fb21a3682a364",
+        "bytes": 283168
+      },
+      {
+        "path": "assets/brand/Major-Author-Photo-supplied.jpg",
+        "sha256": "4e19bdd08b7f4d54e4b34cdfea81508e4426687107d146df444dcaff0e2e8e4c",
+        "bytes": 231838
+      }
+    ]
+  },
+  "integrity_artwork": "The six Integrity illustrations in the same package are assigned to the Integrity collection and are NOT approved Major Moves cover art.",
   "rules": [
     "Never redraw, trace, reinterpret or regenerate the mark.",
     "Never synthesize a replacement author likeness.",
     "Scale proportionately only."
-  ],
-  "registered": "2026-10-23",
-  "assets": [
-    {
-      "path": "assets/brand/MD-Circle-supplied.png",
-      "sha256": "1a2888cfd08ab1a9d4a0889730910d9c231f0c5ff7d8d1c31ba7cc0cc0526227",
-      "bytes": 417008
-    },
-    {
-      "path": "assets/brand/MD-Crown-Pin-supplied.webp",
-      "sha256": "ed124728a0e0c07cdf4d4d56c653c8f0dabf83cf0e6ab1e87214ffc3ff16ddda",
-      "bytes": 81124
-    },
-    {
-      "path": "assets/brand/MD-Crown-supplied.png",
-      "sha256": "dcc46164282034e1867490f47ec5df95d828c3c1e345718a2a8fb21a3682a364",
-      "bytes": 283168
-    },
-    {
-      "path": "assets/brand/Major-Author-Photo-supplied.jpg",
-      "sha256": "4e19bdd08b7f4d54e4b34cdfea81508e4426687107d146df444dcaff0e2e8e4c",
-      "bytes": 231838
-    }
   ]
 }
