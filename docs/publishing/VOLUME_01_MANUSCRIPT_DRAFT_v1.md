@@ -1,22 +1,27 @@
 # You Are the System
 ### Major Moves · Volume One
 
-**Draft v1 · 23 October 2026 · NOT APPROVED FOR PUBLICATION**
+**Draft v1 · 23 October 2026 · ✅ APPROVED BY MAJOR, 23 October 2026**
 
 ---
 
-> **How to read this draft**
+> **Approval record**
 >
-> Everything in a block marked **[MAJOR'S WORDS]** is assembled from Major's own recorded
-> intake sessions (14 and 23 October 2026). It has been ordered and lightly cleaned —
-> filler and false starts removed — but nothing has been invented, and every sentence is
-> traceable to the transcripts in `knowledge/voice/`.
+> Every block marked **[MAJOR'S WORDS]** is assembled from Major's own recorded intake
+> sessions (14 and 23 October 2026). Ordered and lightly cleaned — filler and false starts
+> removed — nothing invented, every sentence traceable to the transcripts in
+> `knowledge/voice/`.
 >
 > Everything else — teaching frames, exercises, workbook — is written around those words.
 >
-> Per `MAJOR-AUTHOR-VOICE-PROTOCOL.md`, **Major approves every [MAJOR'S WORDS] block before
-> this reaches a reader.** Where I have tightened a sentence, the original is in the
-> transcript and should win any disagreement.
+> **Major approved this draft on 23 October 2026**, satisfying
+> `MAJOR-AUTHOR-VOICE-PROTOCOL.md`. The approval covers the manuscript as it stands here.
+>
+> **It does not cover the passage about his mother** from the Awareness recording, which is
+> deliberately not used in this draft. That material remains unpublished and needs its own
+> explicit sign-off if it is ever brought in.
+>
+> If a line reads wrong later, the transcript wins; flag it and it reverts.
 
 ---
 
@@ -640,10 +645,21 @@ Which route am I actually taking? ☐ raise the rate ☐ add people ☐ stop sel
 
 ## Production status
 
-- Manuscript draft v1 · all author sections sourced from recorded intake
-- **Every [MAJOR'S WORDS] block requires Major's approval before publication**
-- Mother passage from the Awareness recording: **not used in this draft.** Available if
-  approved; the San Juan scene carries the opening without it.
-- Cover, mark and portrait: approved assets only, not redrawn
+- Manuscript v1 · all author sections sourced from recorded intake
+- ✅ **Approved by Major, 23 October 2026** — the voice protocol is satisfied
+- Mother passage from the Awareness recording: **not used.** Remains unpublished and needs
+  its own sign-off if ever brought in.
 - Length: approximately 28–34 pages set
-- **Not sellable until Major approves the manuscript**
+
+### Remaining before it can be sold
+
+| | |
+|---|---|
+| Typeset to PDF / EPUB | not started |
+| Cover applied — approved art, mark not redrawn | not started |
+| Author portrait and bio — actual portrait, no generated substitute | not supplied |
+| CTA block — Academy cohort, newsletter, real links | placeholder in draft |
+| Move to `major-moves-series/books/01-you-are-the-system/` | pending write access |
+| Price and payment link | **production commerce remains disabled** |
+
+The manuscript is done. What is left is production, not writing.
