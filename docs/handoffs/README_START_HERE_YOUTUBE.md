@@ -33,6 +33,7 @@ thing that would undercut a channel whose pitch is being straight with people.
 
 | File | What |
 |---|---|
+| `docs/production/SHOOT_PLAN_2026-10-24.md` | **what is being shot today**, in what order, with the cut line |
 | `docs/marketing/SEASON_ONE_RECORDING_SHEET.md` | **what Major records from.** One idea and one assignment per video; the rest is his |
 | `docs/marketing/YOUTUBE_SEASON_ONE_PLAN.md` | the five, the separation, format reasoning, production and CTA discipline |
 | `docs/marketing/ARCHIVE_INVENTORY_HANZO_DRIVE.md` | the 23 archive videos, grouped, with what is absent |
@@ -45,7 +46,10 @@ thing that would undercut a channel whose pitch is being straight with people.
 
 `.claude/skills/` and `.agents/skills/` carry:
 
-- **`maim-channel-operations`** — the two-agent lane split, which accounts belong
+- **`maim-video-production`** — **the shoot.** Lane framing, the on-camera
+  likeness lock, shoot-day order, backdrop framing, audio discipline, the edit
+  bay rules and the credit arithmetic. Read this before any recording session.
+- **`maim-channel-operations`** — everything after upload: the two-agent lane split, which accounts belong
   to whom, what each connector can actually do, the vidIQ credit budget, the
   YouTube-unlisted staging pipeline, **the frame rule** and **the Google account
   boundaries**.
