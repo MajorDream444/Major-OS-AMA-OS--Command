@@ -73,3 +73,34 @@ which account it will actually post to.
 - `major@hanzo.ai` is the business identity: Claude, vidIQ, Metricool, YouTube.
 - `majornfts@gmail.com` holds the Fathom voice archive.
 - `artmobagi@gmail.com` holds the 23 Oct Volume 1 intake recording.
+
+## The frame belongs to the lane
+
+Separation is visual before it is editorial. Two channels that are structurally
+distinct still merge in a feed if they are shot the same way.
+
+**Major Morning AI Mindset** — robe, hot chocolate, first thing in the morning,
+the 4 W's — is an established **Major AI Mindset** format with its own thumbnail
+family. It is the movement lane. Do not reuse it for Academy content.
+
+**MAIM Academy** records at a desk, with the notebook, with something built on
+screen. Same man, different room.
+
+The rule generalises: before producing anything for either channel, ask which
+lane the *setting* reads as, not just the script. A borrowed frame undoes the
+separation faster than a borrowed topic.
+
+## Google account boundaries
+
+Each connector authenticates to exactly one Google account, and the three in use
+hold different things:
+
+| Account | Holds | Connector state |
+|---|---|---|
+| `major@hanzo.ai` | business identity, Substack, the recent video uploads | **not** connected to Drive |
+| `majornfts@gmail.com` | older Drive archive, Fathom voice archive | the Drive connector authenticates here |
+| `artmobagi@gmail.com` | the 23 Oct Volume 1 intake | Fathom, separately |
+
+Before reporting a file as missing, check which account the connector is on. A
+file uploaded to Hanzo is invisible to a connector on `majornfts`, and the
+search returns an empty result that looks exactly like "it isn't there."

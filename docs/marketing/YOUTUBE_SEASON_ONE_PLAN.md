@@ -164,20 +164,40 @@ you less aware
 
 ## Production
 
-**Source footage.** `the mindset of major pt1.mp4` (278 MB) and
-`Brother Ling Conversation.mp4` (387 MB) are in Drive and are real recordings.
-The three Fathom intakes are **audio only** — usable as voice over the
-Constricted Flow field, not as talking head.
+**The five are recorded fresh.** Decided 24 Oct. Nothing in the existing archive
+covers this material: the dinner party, the wooden boat and the triangle offense
+all come from the 23 October intake, which is **audio only**, and
+`the mindset of major pt1.mp4` was shot 9 October — two weeks before any of it
+was said. There is no footage of these stories. There was never going to be.
 
-Some Drive videos are Gemini-generated and carry a synthesised likeness. **Do not
-use those.** The design lock forbids a synthesised likeness, and the garbled
-on-screen text in at least one of them would undercut a channel whose whole
-pitch is being straight with people.
+**Self-edited in chunks.** Major records in passes rather than takes, speaking
+past the chapter wherever the thought goes further than the page. The book is the
+spine, not the script. A story that belongs in chapter 4 and surfaces while
+recording 02 stays in 02 — the series is ordered by **what the viewer does at the
+end**, not by chapter number, and the assignments below are the fixed part.
 
-**Per video:** record or pull long-form → `vidiq_video_transcript` →
-`vidiq_generate_clips` → thumbnail via `maim-brand-production` →
-`vidiq_score_title` before committing to a title → upload →
-clips scheduled through Metricool to Instagram, Threads and Shorts.
+**Setting: not the robe.** The morning-robe format — coffee, first thing, the
+4 W's — already exists and already belongs to **Major AI Mindset**, the movement
+lane. Reusing it for the Academy makes two channels that are structurally
+separate look identical in a feed, which is the exact drift this plan was written
+to prevent. The Academy records at a desk, with the notebook, with something
+built visible on screen. Same man, different room.
+
+**The existing archive is not season one, and is not wasted.** Roughly twenty
+videos sit in Drive and Substack — real conversations, real businesses, Major in
+action. They are a second asset with a different job: clips, proof, and the
+vaulted/token-gated tier. Catalogued separately when the Hanzo Drive connection
+is live; none of it blocks these five.
+
+**Never use the Gemini-generated videos.** They carry a synthesised likeness,
+which the design lock forbids outright, and at least one has garbled on-screen
+text. A channel whose pitch is being straight with people cannot open with a
+synthetic face.
+
+**Per video:** record → `vidiq_video_transcript` → `vidiq_generate_clips` →
+thumbnail via `maim-brand-production` → `vidiq_score_title` before committing to
+a title → upload → clips scheduled through Metricool to Instagram, Threads and
+Shorts.
 
 **Thumbnails** follow the Constricted Flow language, 1280×720, built with the
 same tokens as the covers so the channel and the book read as one thing.
@@ -203,9 +223,7 @@ opens, the CTA changes in one pass across all five.
 
 - **Channel display name** is "Major Dream"; Instagram's is "Major Academy".
   Handles match; names do not.
-- **Record fresh or cut from existing?** Fresh gives a consistent look across the
-  five. Existing footage costs nothing and is already in his natural register —
-  which is where the best lines have always come from.
-- **Order.** As listed, 01 is the strongest opening because the dinner party is
-  the most human thing in the book. An alternative is leading with 03, the
-  ceiling calculation, because it is the most immediately useful.
+
+Resolved 24 Oct: record fresh rather than cut from the archive, self-edited in
+chunks, book as spine not script, and the Academy gets its own setting rather
+than the Mindset channel's morning-robe frame.
