@@ -26,10 +26,25 @@ Against the book's core question — *if everything stops when you stop, what
 exactly have you built?* — the account and the manuscript are already aligned.
 Use that continuity; do not rewrite the bio into something new.
 
-**Open issue:** the profile's external link points to `artmobagi.com`. The
-waitlist, the countdown and the signup form are on `majoraimindset.com`. Every
-visitor the account sends out of Instagram currently misses them. Raise this
-before any launch push; do not change it unilaterally.
+**Link note, corrected 24 Oct.** `vidiq_ig_profile` returns only the *first*
+external link and reported `artmobagi.com`. The profile actually shows
+"www.artmobagi.com **and 2 more**" — Instagram allows several links and vidIQ
+surfaces one. An earlier note here called this a leak; that was a conclusion
+drawn from a single field. Confirm the full link list on the profile itself
+before claiming anything about where the account sends people.
+
+**Threads `@maim_ai_mindset`** — display name "MAIM ACADEMY"
+18 followers. Bio: "Former Basketball Player from NYC, Multidisciplinary
+Entrepreneur and 3X Frontier Tech Founder. JAMAICAN Diaspora Operating Systems
+Developer." Links to `majoraimindset.com` +1.
+
+The Threads handle differs from Instagram's `@maim_academy` because the
+preferred username was already taken. Same brand, three handles — check the
+platform before writing one into a link.
+
+Metricool schedules Threads (`"network": "threads"` is a valid provider), so
+connecting Threads to brand 7610638 brings it into the same queue as the rest.
+Worth doing: it already points at the right site, and its audience is reachable.
 
 ## ChatGPT's lane — the Mindset brand
 

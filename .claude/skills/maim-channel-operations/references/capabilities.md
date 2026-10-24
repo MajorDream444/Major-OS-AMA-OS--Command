@@ -39,6 +39,21 @@ Networks: Facebook `467809073092442`, Instagram `amasolagi`, YouTube
 Scheduling, analytics and best-time-to-post. **Its Instagram is not
 `@maim_academy`** — see `lanes.md` before scheduling anything to Instagram.
 
+## Metricool — AI content declarations
+
+Instagram, TikTok and YouTube all require the poster to declare AI-generated or
+significantly AI-altered content, and Metricool exposes the flags:
+`instagramData.isAiGenerated`, `tiktokData.isAigc`,
+`youtubeData.isAiGeneratedContent`.
+
+This matters for MAIM specifically. Several videos in Drive are Gemini-generated
+and carry a synthesised likeness of Major. If any of those are ever posted, the
+declaration is not optional — set the flag. Preferably post the real footage
+instead.
+
+Valid providers: twitter, facebook, instagram, linkedin, pinterest, youtube,
+tiktok, bluesky, **threads**, gmb.
+
 ## Restream
 
 Live to 30+ destinations, with event transcripts, recordings, chat history and
