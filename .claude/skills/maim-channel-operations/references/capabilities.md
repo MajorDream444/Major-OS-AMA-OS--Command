@@ -39,6 +39,32 @@ Networks: Facebook `467809073092442`, Instagram `amasolagi`, YouTube
 Scheduling, analytics and best-time-to-post. **Its Instagram is not
 `@maim_academy`** — see `lanes.md` before scheduling anything to Instagram.
 
+## Media staging — YouTube unlisted is the source of truth
+
+Major's workflow, and the right one: **film anywhere, upload to YouTube as
+unlisted, then every tool works from that link.**
+
+It works because vidIQ imports from a URL and cannot read a local path, so a
+local session has no advantage here. It also removes two hard limits at once:
+the 299 MB direct-import cap (YouTube links are fetched on a separate path) and
+the ~3 MB ceiling on Drive downloads through the connector.
+
+**Unlisted, never private.** Private videos are not fetchable by third-party
+tools even with the link. Unlisted is link-accessible, which is what vidIQ
+needs. The setting that feels more cautious is the one that breaks the pipeline.
+
+**Unlisted is not private.** Anyone holding the link can watch. Do not stage a
+recording containing anything that should not be seen.
+
+Name staged sources `RAW · <topic> · <date>` so source material stays
+distinguishable from published work.
+
+Pipeline: film → YouTube unlisted → `vidiq_video_transcript` →
+`vidiq_generate_clips` (9 credits per minute of source, so set
+`processingStartSeconds`/`processingEndSeconds` to one strong section rather
+than the whole file) → thumbnails via `maim-brand-production` →
+`vidiq_score_title` → publish → clips scheduled through Metricool.
+
 ## Metricool — AI content declarations
 
 Instagram, TikTok and YouTube all require the poster to declare AI-generated or
