@@ -11,9 +11,10 @@ by chapter number.
 **Setting:** desk, notebook, something built on screen. Not the robe — that
 frame belongs to Major AI Mindset.
 
-**Say nothing about buying a seat.** Enrollment is closed, sales are disabled.
-Every video ends the same way: the free guide and the founding cohort list at
-majoraimindset.com.
+**The CTA is live now — see `docs/production/CTA_FACTS_LIVE.md`.** Every video
+ends the same way: reserve your spot, free to reserve, 20 spots, opens
+11 November, at **academy.majoraimindset.com/reserve** (subdomain, no `www`).
+Nobody can pay yet; the payment link goes out on the 11th.
 
 ---
 

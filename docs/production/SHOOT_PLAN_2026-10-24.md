@@ -28,7 +28,7 @@ the cut line is marked.
 
 | # | Piece | Run | Why this position |
 |---|---|---|---|
-| R1 | **Outro / CTA** | 0:20 | One take, tails all five. Shooting it five times is five chances to say something that implies a seat can be bought |
+| R1 | **Outro / CTA** | 0:20 | One take, tails all five. **Script is in `CTA_FACTS_LIVE.md`** — say the domain slowly, it is the only thing a viewer has to transcribe by ear |
 | R2 | **Cold open sting** | 0:10 | Name, channel, one line. Head of every video |
 | R3 | **B-roll** | 5 min | Notebook, pen, hands, the screen with something built on it. Covers every edit seam in Vids |
 | 01 | **Your ceiling is a number** (ch 3) | ~9 min | Driest of the five — shoot it while fresh. Also the most immediately useful, so if only one exists it should be this |
@@ -85,9 +85,16 @@ title cards, b-roll, captions: fine. Its **AI avatar and synthetic voiceover are
 out** — that is the synthesised-likeness rule, and it is the one thing that
 would undercut a channel whose entire pitch is being straight with people.
 
-**Nothing may imply a seat can be bought.** Enrollment is closed, production
-commerce is disabled. Every video ends on the free guide and the founding
-cohort **list**. Not a seat, not a price, not a date.
+**The CTA facts are live and specific — read `CTA_FACTS_LIVE.md` before the
+outro.** As of 25 Oct the reserve page is up and states the terms publicly, so
+the old "no price, no date" rule no longer applies. You **may** say: reserving
+is free, 20 spots, opens 11 November, US$249 paid once, payment link first to
+anyone who reserved. You **may not** say anyone can pay today, or quote a
+different price or date.
+
+**The address is `academy.majoraimindset.com/reserve` — a subdomain, no `www`.**
+`majoraimindset.com/academy` and `/reserve` both 404 right now, so do not say
+"slash academy" on camera.
 
 **The episode panel on the backdrop is a placeholder** reading "Episode title
 goes here." Fill it per episode in Vids or cover it. Do not ship it as-is.

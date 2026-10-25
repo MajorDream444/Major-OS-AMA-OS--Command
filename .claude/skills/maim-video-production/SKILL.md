@@ -45,10 +45,19 @@ separation faster than a borrowed topic.
 
 ## Absolute — what is said
 
-Enrollment is **closed**, production commerce is **disabled**. No take, title,
-description, end screen, pinned comment or on-screen graphic may imply a seat
-can be bought, name a price, or promise a date. Outros land on the free guide
-and the founding cohort **list**.
+**Read `docs/production/CTA_FACTS_LIVE.md` before writing or shooting any CTA.**
+It holds the verified live facts and is the file that changes first when the
+site does.
+
+As of 25 October the reserve page is live and public. Takes, titles,
+descriptions, end screens and on-screen graphics **may** state: reserving is
+free, 20 spots, opens 11 November, US$249 paid once, payment link first to
+anyone who reserved, sessions Wednesdays 11/18/25 Nov and 2 Dec at 10 p.m. Bali.
+They **may not** say anyone can pay today, quote any other price or date, or
+claim a spot is held or guaranteed beyond being in line.
+
+The address is **`academy.majoraimindset.com/reserve`** — a subdomain, **no
+`www`**. `majoraimindset.com/academy` and `/reserve` 404 today.
 
 Shoot the outro **once** and tail it onto everything. Five separate outros are
 five chances to say something that has to be reshot.
