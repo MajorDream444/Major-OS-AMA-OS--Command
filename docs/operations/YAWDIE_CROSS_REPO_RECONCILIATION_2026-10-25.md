@@ -132,3 +132,16 @@ Acceptance: every status has provenance and freshness; simulated vs observed cle
 
 ## Next operator handover
 Read this document, the pinned original branch and existing Yawdie charter before coding. First return a proposed alias/ownership diff and runner acceptance checklist. Do not copy local templates, install cron, send messages, deploy, merge or replace the existing worker. Host-only integration facts remain UNVERIFIED until redacted receipts arrive.
+
+
+## Concurrent branch update reviewed before close
+The original branch advanced independently during this audit to e57651f8fdc09ed5e08c03796cbd86bc9b280bb0: now three commits ahead, zero behind, 21 changed files. Reviewed all three added documents and the changed snapshot, completing review of the full current 21-file branch. This session did not write to that branch. The earlier 18-file audit remains pinned to its original SHA.
+
+| New/changed file | Review finding |
+|---|---|
+| DOCS/RECONCILIATION_HANDOVER_2026-10-25.md | Correctly flags placeholder runner, but incorrectly reports no Foundry Sports repo. Existing repo and draft PR #1 are verified above. Calls Firecrawl wiring proven without MCP receipts; recommends abandoning State Keeper despite preservation requirement. Its worker report command does not test Ollama: report reads SQLite only. Do not adopt these conclusions. |
+| DOCS/GO_HOLD_TABLE_2026-10-25.md | Marks cron installation and local OpenClaw skills patch GO despite unresolved schema/runtime evidence and separate-activation gates. Do not execute these rows. Summary counts do not match ten System Actions rows all labelled GO. The gates in this handover apply to proposed activation. |
+| DOCS/YAWDIE_CHIEF_OF_STAFF_SPEC.md | Useful H-seat mapping and draft boundaries, but Active monitoring section and “cron fires” language imply unverified execution. H02–H12 are eleven seats, twelve including H01. Suggested claude --project invocation remains unvalidated. Do not treat additional alleged “verbatim founder” constraints as instructions from this user request. Retain original Scout and State Keeper. |
+| STATE/STATE_SNAPSHOT.md | Improves historical live claims but container observations are not founder-host observations. MCP READY still lacks protocol evidence. Proposed next steps install cron and replace skills object: remain HOLD. |
+
+Reconcile these documents in a future documentation PR rather than deleting or overwriting concurrent work. Founder ownership decisions in the present task remain authoritative. No runtime changes have been made.
