@@ -10,6 +10,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import worker
+import vault
 
 
 DEFAULT_STATE = Path.home() / '.local/share/hamal-yawdie'
@@ -30,6 +31,18 @@ def main():
     report.add_argument('--job-id')
     service = sub.add_parser('service', help='control the local LaunchAgent')
     service.add_argument('action', choices=('start', 'stop', 'uninstall'))
+    vault_command = sub.add_parser('vault', help='operate the approved Major OS bridge')
+    vault_command.add_argument('--root', type=Path, required=True)
+    vault_sub = vault_command.add_subparsers(dest='vault_action', required=True)
+    vault_sub.add_parser('init')
+    vault_submit = vault_sub.add_parser('submit')
+    vault_submit.add_argument('--source', required=True)
+    vault_submit.add_argument('--rerun', action='store_true')
+    vault_submit.add_argument('--day', default=datetime.now(ZoneInfo('Asia/Makassar')).date().isoformat())
+    vault_scan = vault_sub.add_parser('scan')
+    vault_scan.add_argument('--day', default=datetime.now(ZoneInfo('Asia/Makassar')).date().isoformat())
+    vault_export = vault_sub.add_parser('export')
+    vault_export.add_argument('--job-id', required=True)
     args = parser.parse_args()
 
     root = Path(args.state).expanduser().resolve()
@@ -37,6 +50,9 @@ def main():
     os.chmod(root, 0o700)
     if args.command == 'service':
         return subprocess.run([sys.executable, str(Path(__file__).with_name('service.py')), args.action]).returncode
+    if args.command == 'vault' and args.vault_action == 'init':
+        print(json.dumps({'created': vault.initialize_layout(args.root)}, indent=2))
+        return 0
     db = worker.connect(root / 'state.sqlite')
     try:
         if args.command == 'brief':
@@ -49,6 +65,14 @@ def main():
                                     task=args.task, rerun=args.rerun)
             print(json.dumps({'status': 'queued', 'job_id': job_id, 'workflow': args.task,
                               'intentional_rerun': args.rerun}))
+        elif args.command == 'vault':
+            if args.vault_action == 'submit':
+                result = vault.submit(db, args.root, args.source, args.day, args.rerun)
+            elif args.vault_action == 'scan':
+                result = vault.scan(db, args.root, args.day)
+            else:
+                result = vault.export_report(db, args.root, args.job_id)
+            print(json.dumps(result, indent=2))
         elif args.command == 'status':
             data = worker.status(db)
             label = 'com.major.hamal.yawdie'

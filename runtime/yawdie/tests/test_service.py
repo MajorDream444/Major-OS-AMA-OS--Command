@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,6 +43,22 @@ class ServiceTests(unittest.TestCase):
              patch.object(s, 'model_is_installed', return_value=False):
             with self.assertRaises(SystemExit):
                 s.start()
+
+    def test_vault_activation_is_explicit_and_optional(self):
+        plain = s.program_arguments()
+        self.assertNotIn('--vault-root', plain)
+        vault = Path(self.tmp.name) / 'Major OS'
+        vault.mkdir()
+        configured = s.program_arguments(vault)
+        self.assertEqual(configured[-2:], ['--vault-root', str(vault.resolve())])
+
+    def test_invalid_vault_is_rejected_before_stopping_service(self):
+        missing = Path(self.tmp.name) / 'missing'
+        with patch.dict(os.environ, {'YAWDIE_VAULT_ROOT': str(missing)}), \
+             patch.object(s, 'stop') as stop:
+            with self.assertRaises((FileNotFoundError, OSError)):
+                s.install()
+        stop.assert_not_called()
 
 
 if __name__ == '__main__':

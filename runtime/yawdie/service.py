@@ -21,15 +21,28 @@ RUNTIME = HOME / 'Library/Application Support/HAMAL/Yawdie/runtime'
 PYTHON = Path('/usr/bin/python3')
 
 
+def program_arguments(vault_root=None):
+    args = [str(PYTHON), str(RUNTIME / 'worker.py'), '--state', str(STATE),
+            'loop', '--model', MODEL, '--inbox', str(INBOX)]
+    if vault_root:
+        args.extend(['--vault-root', str(Path(vault_root).expanduser().resolve(strict=True))])
+    return args
+
+
 def run(*args, check=True):
     return subprocess.run(args, check=check)
 
 
 def install():
+    vault_root = os.environ.get('YAWDIE_VAULT_ROOT')
+    if vault_root:
+        from path_policy import PathPolicy
+        PathPolicy(vault_root, ('Yawdie/Context', 'Yawdie/Briefs/Inbox',
+                                'Yawdie/Reports', 'Yawdie/Templates'))
     stop()
     for folder in (PLIST.parent, STATE, INBOX, LOGS, BIN.parent, RUNTIME):
         folder.mkdir(parents=True, exist_ok=True, mode=0o700)
-    for name in ('worker.py', 'yawdie.py', 'service.py'):
+    for name in ('worker.py', 'yawdie.py', 'service.py', 'vault.py', 'path_policy.py'):
         shutil.copy2(SOURCE / name, RUNTIME / name)
         os.chmod(RUNTIME / name, 0o700)
     launcher = '#!/bin/sh\nexec /usr/bin/python3 ' + repr(str(RUNTIME / 'yawdie.py')) + ' "$@"\n'
@@ -37,8 +50,7 @@ def install():
     os.chmod(BIN, 0o700)
     config = {
         'Label': LABEL,
-        'ProgramArguments': [str(PYTHON), str(RUNTIME / 'worker.py'), '--state', str(STATE),
-                             'loop', '--model', MODEL, '--inbox', str(INBOX)],
+        'ProgramArguments': program_arguments(vault_root),
         'RunAtLoad': True,
         'KeepAlive': {'SuccessfulExit': False},
         'ThrottleInterval': 30,
