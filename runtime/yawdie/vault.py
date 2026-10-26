@@ -169,7 +169,21 @@ def scan(db, vault_root, day=None):
 
 def _markdown(packet, attempts, provenance):
     draft = packet['draft']
+    source_note = '[[' + provenance['brief']['relative_path'][:-3] + ']]'
     lines = [
+        '---',
+        'title: ' + json.dumps('Yawdie Report ' + packet['job_id']),
+        'date: ' + packet['day'],
+        'tags:',
+        '  - yawdie/report',
+        'status: ' + packet['status'],
+        'job_id: ' + packet['job_id'],
+        'task: ' + packet['task'],
+        'model: ' + json.dumps(packet['model']),
+        'source_note: ' + json.dumps(source_note),
+        'source_sha256: ' + provenance['brief']['sha256'],
+        'context_sha256: ' + packet.get('context_sha256', ''),
+        '---', '',
         '# Yawdie Report', '',
         f"- Job ID: `{packet['job_id']}`",
         f"- Status: `{packet['status']}`",
@@ -198,10 +212,11 @@ def _markdown(packet, attempts, provenance):
         lines.extend('- `' + item + '` — rejected by path policy' for item in provenance['rejected_context'])
     lines.extend([
         '', '## Boundaries', '',
-        '- Publishing: blocked: adapter unavailable',
-        '- External messages: blocked: adapter unavailable',
-        '- Commerce: blocked: adapter unavailable',
-        '- This is completed drafting only; no external action was performed.',
+        '> [!warning] Drafting boundary',
+        '> - Publishing: blocked: adapter unavailable',
+        '> - External messages: blocked: adapter unavailable',
+        '> - Commerce: blocked: adapter unavailable',
+        '> - This is completed drafting only; no external action was performed.',
         '', '## Execution evidence', '',
     ])
     for attempt in attempts:

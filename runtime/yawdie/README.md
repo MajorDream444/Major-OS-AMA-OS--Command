@@ -72,6 +72,11 @@ report files may sync through the user's existing iCloud settings. The adapter d
 those settings. Temporarily unavailable iCloud files are skipped and retried on a later scan;
 they are never deleted or overwritten.
 
+Report frontmatter, tags, wikilink properties and boundary callouts follow conventions reviewed
+from `MajorDream444/obsidian-skills` at pinned revision
+`3ccff5338ea700537839b21900aa5358a0402c98` (upstream `kepano/obsidian-skills`, MIT). The CLI skill
+is not exposed to the worker; see `docs/YAWDIE_OBSIDIAN_SKILLS_REUSE_2026-10-26.md`.
+
 The installer stages only runtime code in private Application Support, creates an absolute-path user LaunchAgent, and selects the already-installed `llama3.2:latest` model. It never downloads a model. Run only after `ollama list` confirms the model exists.
 
 One-command lifecycle:

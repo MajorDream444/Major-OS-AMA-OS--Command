@@ -149,6 +149,9 @@ class VaultTests(unittest.TestCase):
         self.assertTrue(repeated['unchanged'])
         self.assertIn(receipt['source']['sha256'], report.read_text())
         self.assertIn('Inference duration:', report.read_text())
+        self.assertTrue(report.read_text().startswith('---\ntitle:'))
+        self.assertIn('tags:\n  - yawdie/report', report.read_text())
+        self.assertIn('> [!warning] Drafting boundary', report.read_text())
         self.assertTrue(self.brief().exists())
 
     def test_cycle_exports_ready_jobs_without_reingesting_reports(self):
