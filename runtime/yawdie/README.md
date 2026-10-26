@@ -100,6 +100,19 @@ The Business Pressure Test leads the owned funnel. Ready products belong in MAIM
 
 ## Evidence and limitations
 
-Deterministic tests mock inference; isolated integration checks additionally prove local inference, proxy bypass, graceful administrative interruption, duplicate-loop behavior and one Major OS note-to-report flow. The live service has produced local drafts, but the Major OS service integration remains deliberately unactivated during the overnight baseline. Overnight execution, real crash recovery, sleep/wake recovery, automatic social posting, rendered video, NotebookLM, Stripe/Resend, Kai, external accounts and production deployment remain unverified or unavailable.
+Deterministic tests mock inference; isolated integration checks additionally prove local inference, proxy bypass, graceful administrative interruption, duplicate-loop behavior and one Major OS note-to-report flow. The live service has produced local drafts and the Major OS bridge is activated. The original observation was cut off before an overnight window elapsed; a separately labelled post-activation observer records deterministic health without model calls. Overnight execution, real crash recovery, sleep/wake recovery, automatic social posting, rendered video, NotebookLM, Stripe/Resend, Kai, external accounts and production deployment remain unverified or unavailable.
+
+The read-only repository adapter accepts only a private `0600` JSON manifest of exact checkout
+roots and explicit include paths. It records commit, dirty state, per-file hashes and a bounded
+snapshot hash. Hidden paths, symlinks, binaries, oversized files and unapproved repositories are
+rejected. Generated vault context uses an approved filename prefix, is written atomically, and is
+never overwritten. Example (keep the manifest and absolute paths outside Git):
+
+```bash
+yawdie repository --manifest "$HOME/.local/share/hamal-yawdie/repository-roots.json" \
+  --name Command --name Major-AI-OS --name MAIMACADEMY \
+  --vault-root "$MAJOR_OS_VAULT" \
+  --output-name YAWDIE_REPOSITORY_SNAPSHOT_YYYY-MM-DD.md
+```
 
 All twelve seats are returned by `roster`, with only the local source-to-draft content workflow executable here. Drafts require factual/voice review. Unsupported work is reported as `blocked: adapter unavailable`. The worker cannot execute model-generated commands. Paid providers and external publishing need separate tested adapters and scoped credentials; chat connectors are not inherited by this process.

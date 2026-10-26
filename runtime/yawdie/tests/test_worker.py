@@ -229,6 +229,20 @@ class WorkerTests(unittest.TestCase):
         self.assertIn('blocked: adapter unavailable', grounded['blockers'])
         self.assertEqual(grounded['evidence_needed'], '- Job receipt')
 
+    def test_operating_sections_support_founder_activation_headings(self):
+        source = (
+            '## Founder-approved priorities\n1. First.\n2. Second.\n3. Third.\n\n'
+            '## Requested output\n- Identify next actions.\n\n'
+            '## Completion criteria\n- Unsupported actions are marked blocked: adapter unavailable.\n'
+        )
+        draft = {name: 'Model draft value.' for name in w.OPERATING_FIELDS}
+        grounded = w.ground_operating_sections(draft, source)
+        self.assertIn('3. Third.', grounded['priorities'])
+        self.assertIn('Identify next actions', grounded['next_actions'])
+        self.assertIn('blocked: adapter unavailable', grounded['blockers'])
+        self.assertIn('Unsupported actions', grounded['evidence_needed'])
+        w.validate_operating_coverage(grounded, source)
+
     def test_graceful_service_stop_does_not_consume_attempt(self):
         self.enqueue()
         job = w.claim(self.db, now=100)

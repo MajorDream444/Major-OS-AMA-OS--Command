@@ -103,3 +103,32 @@ class PathPolicy:
             child = relative / path.name
             if path.suffix.lower() in self.suffixes:
                 yield child.as_posix()
+
+    def text_files(self, relative_root, max_files=32):
+        """Yield bounded text candidates recursively without following links."""
+        relative, directory = self.resolve(relative_root, require_file=False)
+        if not directory.is_dir():
+            raise PathPolicyError('approved scan root is not a directory')
+        found = 0
+        try:
+            walker = os.walk(directory, topdown=True, followlinks=False)
+            for current, directories, files in walker:
+                current = Path(current)
+                directories[:] = sorted(
+                    (name for name in directories
+                     if not name.startswith('.') and not (current / name).is_symlink()),
+                    key=str.casefold)
+                for name in sorted(files, key=str.casefold):
+                    path = current / name
+                    if name.startswith('.') or path.is_symlink() or path.suffix.lower() not in self.suffixes:
+                        continue
+                    child = path.relative_to(self.root).as_posix()
+                    self._relative(child)
+                    if not self._is_allowed(PurePosixPath(child)):
+                        continue
+                    yield child
+                    found += 1
+                    if found >= max_files:
+                        return
+        except OSError as exc:
+            raise TemporarilyUnavailable('approved folder is temporarily unavailable') from exc

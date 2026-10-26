@@ -226,20 +226,25 @@ def validate_operating_coverage(draft, source):
 
 def ground_operating_sections(draft, source):
     mapping = {
-        'priorities': 'Priorities',
-        'next_actions': 'Requested next actions',
-        'blockers': 'Known blockers and boundaries',
-        'evidence_needed': 'Evidence needed',
+        'priorities': ('Priorities', 'Founder-approved priorities'),
+        'next_actions': ('Requested next actions', 'Requested output', 'Requested outputs'),
+        'blockers': ('Known blockers and boundaries', 'Blockers'),
+        'evidence_needed': ('Evidence needed', 'Completion criteria'),
     }
     grounded = dict(draft)
-    for field, heading in mapping.items():
-        section = re.search(r'(?ms)^## ' + re.escape(heading) + r'\s*(.*?)(?=^## |\Z)', source)
-        if not section:
-            continue
-        items = [line.strip() for line in section.group(1).splitlines()
-                 if re.match(r'^\s*(?:\d+\.|-)\s+', line)]
-        if items:
-            grounded[field] = ' '.join(items)
+    for field, headings in mapping.items():
+        for heading in headings:
+            section = re.search(r'(?ms)^## ' + re.escape(heading) + r'\s*(.*?)(?=^## |\Z)', source)
+            if not section:
+                continue
+            items = [line.strip() for line in section.group(1).splitlines()
+                     if re.match(r'^\s*(?:\d+\.|-)\s+', line)]
+            if items:
+                grounded[field] = ' '.join(items)
+                break
+    if ('blocked: adapter unavailable' in source.lower() and
+            'blocked: adapter unavailable' not in grounded['blockers'].lower()):
+        grounded['blockers'] = grounded['blockers'].rstrip() + ' Unsupported actions are blocked: adapter unavailable.'
     return grounded
 
 
