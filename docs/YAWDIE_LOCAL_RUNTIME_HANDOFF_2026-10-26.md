@@ -12,7 +12,7 @@ Ollama calls use a proxy-free opener and accept loopback HTTP only. Cloud model 
 
 ## Evidence ledger
 
-Deterministic suite: 28 tests passed. It covers watcher/manual overlap, 16-way concurrent intake, changed content, intentional rerun, template exclusion, permission repair, repeated scanning, execution locks, cloud rejection, proxy disabling, URL grounding, MAIM validation, source-section preservation, stale leases, administrative interruption and idempotent service start.
+Deterministic suite: 42 tests passed. It covers watcher/manual overlap, 16-way concurrent intake, changed content, intentional rerun, template exclusion, permission repair, repeated scanning, execution locks, cloud rejection, proxy disabling, URL grounding, MAIM validation, source-section preservation, stale leases, administrative interruption, idempotent service start, pre-stop vault validation, allowlisted vault paths, traversal/symlink/binary/size rejection, bounded context, unavailable iCloud files and atomic report export.
 
 Accepted reviewed live operating brief: `254f8a36e00d4c4c982da2f0b95b3a3e`, an explicit intentional rerun with unchanged source. Two attempts were retained as `ValueError` coverage rejections before source-section preservation was deployed; the third attempt reached `draft_ready` with `llama3.2:latest`. It produced all four numbered priorities plus source-grounded next actions, blockers and evidence needed; placements and publications were empty.
 
@@ -32,9 +32,30 @@ A separate temporary LaunchAgent and isolated spool were used. Mid-inference boo
 
 This proves controlled administrative stop/restart and proxy bypass in isolated state. Real crash recovery, Mac sleep/wake during inference and live-spool mid-job interruption remain unverified.
 
+## Major OS bridge
+
+The adapter is implemented on the PR branch but has not replaced or restarted the observed
+LaunchAgent. Its path policy permits only four configured subfolders: context, brief inbox,
+reports and templates. Context and brief bodies stay in private SQLite/vault storage; public
+Git contains only code, relative folder contracts and redacted evidence.
+
+Isolated end-to-end job `8a50202cc448480d9adfbabe07ff643a` read one non-sensitive
+actionable operating brief plus one bounded context note, ran `llama3.2:latest`, and exported
+one Markdown report. It completed on attempt 1 in 18.349 seconds. An unchanged rescan left
+the isolated spool at one job. No publication or external action occurred.
+
+The controlled activation is shown in `runtime/yawdie/README.md` and must run only after the
+overnight baseline ends. That operation restages
+the runtime and restarts the service, so it was deliberately deferred. Rollback is the same
+install command with `YAWDIE_VAULT_ROOT` unset; private vault files and SQLite history remain.
+
+The Major OS vault is stored in iCloud. Local inference does not make vault storage local-only:
+approved notes and reports may sync externally under the user's existing iCloud configuration.
+The adapter does not alter sync settings and handles unavailable files without deletion.
+
 ## Ollama exposure
 
-The Ollama API currently listens on `*:11434`; no active LAN client was observed, and the only recent connection was loopback. The model subprocess itself binds loopback. No configuration evidence established that another local application needs LAN access. A proposed separate change is to configure the Ollama app/service with `OLLAMA_HOST=127.0.0.1:11434` and restart Ollama. Impact: local applications continue to work; other devices on the LAN lose Ollama API access. This change was not applied.
+The Ollama API currently listens only on `127.0.0.1:11434`. Local inference and Yawdie operation were verified after the loopback-only change. LAN clients can no longer reach this Ollama API.
 
 ## Operator commands
 
