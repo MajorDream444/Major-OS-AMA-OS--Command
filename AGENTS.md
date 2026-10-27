@@ -6,9 +6,7 @@ Before organizing release work, read `docs/operations/YAWDS_RELEASE_QUEUE_2026-1
 
 ## Runtime
 
-OpenClaw is the intended agent runtime.
-
-The current Command Center uses local/mock agent simulation only.
+Historical Command Center UI uses local/mock simulation. A separate bounded local YAWDS drafting runtime exists under `runtime/yawdie`; inspect its current implementation and local evidence before making capability claims. OpenClaw is historical intent, not evidence of the deployed service. Video/tool execution remains unverified.
 
 ## Active Mock Agent Roster
 
@@ -58,3 +56,8 @@ Rules:
 - If no graph exists yet, do not pretend it does. Continue with normal repo inspection and note that Graphify has not been initialized for this checkout.
 - After meaningful code changes, run `graphify update .` only when a graph already exists or when the user has approved creating/updating the graph.
 - Do not let Graphify replace source-of-truth docs. Use it as navigation/context over `README.md`, `SYSTEM_CORE.md`, `HANDOFF_COMMAND_CENTER.md`, and project docs.
+
+
+## Recording-to-review production — 27 October 2026
+
+All agents working on media production must read the [founder-approved production operating contract](https://github.com/MajorDream444/MAIM-PRODUCTION-OS/blob/main/docs/RECORDING_TO_REVIEW_OPERATING_CONTRACT.md) before execution. It defines YAWDS/YARDIE coordination, explicit READY submission, persistent stage jobs, evidence, recovery, approved thin-outline captions and acceptance tests. Production OS owns the contract; propose improvements there and update receiving references. Preserve current runtime boundaries. Committing guidance is not live activation or proof YAWDS read it. Require a private runtime acknowledgment of version and commit SHA. Publishing remains separately authorized.
