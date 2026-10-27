@@ -3,6 +3,10 @@
 Date: 2026-10-27  
 Status: **eventual success; awaiting founder review; not published**
 
+Editorial review on 28 October requested changes for this checksum. See
+[`EXPERTISE_EXCERPT_REVIEW_2026-10-28.md`](EXPERTISE_EXCERPT_REVIEW_2026-10-28.md). The queue stage
+remains historical evidence and is not founder acceptance.
+
 ## Scope and acknowledgment
 
 - Operating contract: 1.1.0
