@@ -13,6 +13,9 @@ spec.loader.exec_module(s)
 
 
 class ServiceTests(unittest.TestCase):
+    def test_installer_pins_compatible_swift_sdk(self):
+        self.assertEqual(s.SWIFT_SDK.name, 'MacOSX26.5.sdk')
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         root = Path(self.tmp.name)

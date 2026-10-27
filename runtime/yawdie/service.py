@@ -20,6 +20,7 @@ MODEL = 'llama3.2:latest'
 SOURCE = Path(__file__).resolve().parent
 RUNTIME = HOME / 'Library/Application Support/HAMAL/Yawdie/runtime'
 PYTHON = Path('/usr/bin/python3')
+SWIFT_SDK = Path('/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk')
 
 
 def program_arguments(vault_root=None):
@@ -42,7 +43,10 @@ def install():
                                 'Yawdie/Reports', 'Yawdie/Templates'))
     with tempfile.TemporaryDirectory(prefix='yawdie-renderer-') as temp:
         compiled_renderer = Path(temp) / 'render_excerpt'
+        if not SWIFT_SDK.is_dir():
+            raise SystemExit(f'Required pinned Swift SDK is unavailable: {SWIFT_SDK.name}')
         run('/usr/bin/xcrun', 'swiftc', str(SOURCE / 'render_excerpt.swift'),
+            '-sdk', str(SWIFT_SDK),
             '-o', str(compiled_renderer))
         stop()
         for folder in (PLIST.parent, STATE, INBOX, LOGS, BIN.parent, RUNTIME):
