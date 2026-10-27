@@ -107,6 +107,15 @@ class ProductionTests(unittest.TestCase):
         self.assertIn(r'\alpha&HFF&', ass)
         self.assertGreaterEqual(ass.count('Dialogue:'), 5)
 
+    def test_real_stage_artifacts_share_parent_job_directory(self):
+        job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
+        stage = p._claim(self.db, 'test-worker', now=30)
+        probe = {'streams': [{'codec_type': 'video'}, {'codec_type': 'audio'}, {'codec_type': 'subtitle'}],
+                 'format': {'duration': '300', 'size': '12'}}
+        with patch.object(p, '_probe', return_value=probe):
+            artifact = p._execute_stage(self.db, p.load_config(self.config_path), stage, stage)
+        self.assertEqual(artifact.parent.name, job['job_id'])
+
     def test_stage_progress_is_persistent_and_final_status_waits_for_review(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
 

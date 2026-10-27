@@ -277,7 +277,7 @@ def _atomic_json(path, data):
 
 def _execute_stage(db, config, job, stage):
     manifest = json.loads(job['manifest_json'])
-    folder = _job_dir(config, job['id'])
+    folder = _job_dir(config, job['job_id'])
     name = stage['name']
     source = Path(manifest['source'])
     if name == 'intake':
@@ -346,7 +346,7 @@ def _execute_stage(db, config, job, stage):
     if name == 'awaiting_review':
         preview = folder / (manifest['output_alias'] + '.mp4')
         packet = folder / 'evidence.json'
-        _atomic_json(packet, {'status': 'finalizing_receipts', 'job_id': job['id']})
+        _atomic_json(packet, {'status': 'finalizing_receipts', 'job_id': job['job_id']})
         return packet
     raise ValueError('Unsupported production stage')
 
