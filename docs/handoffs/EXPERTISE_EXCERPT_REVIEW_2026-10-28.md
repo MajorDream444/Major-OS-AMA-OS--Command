@@ -51,3 +51,6 @@ These checks do not replace a complete real-time listening and viewing pass by t
 
 Any later acceptance must cite this same job ID and checksum, or identify a new job/checksum for a
 revised render. Acceptance of a revised checksum does not implicitly approve this checksum.
+
+Revision evidence and the current review candidate are recorded in
+[`EXPERTISE_EXCERPT_REVISION_EVIDENCE_2026-10-28.md`](EXPERTISE_EXCERPT_REVISION_EVIDENCE_2026-10-28.md).
