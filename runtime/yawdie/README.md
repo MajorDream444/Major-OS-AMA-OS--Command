@@ -88,6 +88,44 @@ yawdie status
 yawdie service uninstall
 ```
 
+## Bounded recording-to-review pilot
+
+The production adapter adds fixed, review-only stages to the same SQLite authority:
+`submitted`, `intake`, `transcription`, `edit_preparation`, `preview_render`, `QA`, and
+`awaiting_review`. It accepts only a private `0600` configuration and manifest, exact approved
+source roots, MP4/MOV/M4V input under 2 GB, an excerpt no longer than 180 seconds, and caption
+style `maim-captions-1.1.0`. The renderer uses fixed executable argument lists; it never runs a
+model-authored command. Completion means a local preview is awaiting founder review, not that it
+was published.
+
+The private configuration schema is `yawdie-production-config-1` with `source_roots`,
+`output_root`, absolute paths for `tools.ffmpeg`, `tools.ffprobe`, and `tools.swift`, plus a
+`worker_identity`. The manifest schema is `yawdie-production-excerpt-1`; it pins the full source
+checksum, start/end seconds, output alias, idempotency key, and `review_required: true`. Never
+commit either file when it contains private paths.
+
+```bash
+yawdie production acknowledge \
+  --implementation-commit FULL_40_CHARACTER_GIT_SHA \
+  --runtime-identity launchagent:com.major.hamal.yawdie
+yawdie production acknowledgment
+yawdie production submit \
+  --config "$HOME/.local/share/hamal-yawdie/production/config.json" \
+  --manifest "$HOME/.local/share/hamal-yawdie/production/excerpt.json"
+yawdie production status --job-id JOB_ID
+```
+
+Submitting the same idempotency key returns the existing job. A deliberate new run requires a new
+operator-chosen key; changing source content also requires updating its verified checksum. Failed,
+lease-expired, and administratively interrupted attempts remain in SQLite. Ordinary service stop
+returns a claimed stage to the queue without consuming an attempt.
+
+Before activating changed runtime code, back up `state.sqlite` with SQLite's backup API while the
+service is stopped, verify `PRAGMA integrity_check`, retain the previous installed runtime, then
+run the normal idempotent installer. Roll back by stopping the service, restoring the saved runtime
+and database as a pair, and starting the existing LaunchAgent. Do not copy only the main database
+file while WAL mode is active.
+
 Uninstall removes the LaunchAgent, installed runtime copy and command, but deliberately retains private state for recovery. The source checkout remains the install authority. Processing pauses when the Mac sleeps or shuts down and resumes after login/wake.
 
 Default state location is `~/.local/share/hamal-yawdie`. Do not commit its database, original sources, drafts or operational events. Airtable remains the intended business record system; this spool has no Airtable adapter yet.

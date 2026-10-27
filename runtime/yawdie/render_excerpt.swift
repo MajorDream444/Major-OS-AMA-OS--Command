@@ -149,7 +149,6 @@ for cue in props.cues where cue.end > cue.start && cue.start < props.durationSec
     let cueStart = max(0, cue.start)
     let cueEnd = min(props.durationSeconds, cue.end)
     let wordSpan = (cueEnd - cueStart) / Double(words.count)
-    let blockHeight = CGFloat(lines.count) * lineHeight
     let bottom: CGFloat = 170
     for (lineNumber, indexes) in lines.enumerated() {
         var x = (renderSize.width - lineWidths[lineNumber]) / 2
