@@ -66,6 +66,8 @@ def initialize(db):
     columns = {row['name'] for row in db.execute('PRAGMA table_info(production_stages)')}
     if 'next_at' not in columns:
         db.execute('ALTER TABLE production_stages ADD COLUMN next_at REAL NOT NULL DEFAULT 0')
+    db.execute("UPDATE production_stages SET error_class=NULL WHERE status='completed' AND error_class IS NOT NULL")
+    db.commit()
 
 
 def _private_json(path):
@@ -469,7 +471,8 @@ def _complete(db, stage, artifact, now=None):
     output_hash = sha256_file(artifact)
     with db:
         changed = db.execute("UPDATE production_stages SET status='completed',completed_at=?,last_activity_at=?,"
-                             'output_sha256=?,artifact=?,lease_token=NULL,lease_until=NULL,next_at=0 WHERE id=? AND status=\'running\' AND lease_token=?',
+                             'output_sha256=?,artifact=?,error_class=NULL,lease_token=NULL,lease_until=NULL,next_at=0 '
+                             "WHERE id=? AND status='running' AND lease_token=?",
                              (now, now, output_hash, str(artifact), stage['id'], stage['lease_token'])).rowcount
         if not changed:
             return False

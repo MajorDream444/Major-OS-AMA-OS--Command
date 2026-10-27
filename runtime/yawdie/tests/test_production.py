@@ -187,6 +187,21 @@ class ProductionTests(unittest.TestCase):
         attempt = self.db.execute('select status from production_attempts').fetchone()[0]
         self.assertEqual(attempt, 'administrative_interrupt')
 
+    def test_success_clears_stage_error_but_preserves_failed_attempt(self):
+        p.submit(self.db, self.config_path, self.manifest_path, now=20)
+        stage = p._claim(self.db, 'test-worker', now=30)
+        p._fail(self.db, stage, RuntimeError('temporary'), now=31)
+        stage = p._claim(self.db, 'test-worker', now=100)
+        artifact = self.root / 'artifact.json'
+        artifact.write_text('{}')
+        self.assertTrue(p._complete(self.db, stage, artifact, now=101))
+        current = self.db.execute('select status,error_class from production_stages where id=?',
+                                  (stage['id'],)).fetchone()
+        failed = self.db.execute("select count(*) from production_attempts where status='queued' "
+                                 "and error_class='RuntimeError'").fetchone()[0]
+        self.assertEqual(tuple(current), ('completed', None))
+        self.assertEqual(failed, 1)
+
     def test_expired_lease_recovers_and_records_attempt(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
         old = p._claim(self.db, 'worker-a', now=30)
