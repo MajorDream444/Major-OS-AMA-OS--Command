@@ -99,7 +99,8 @@ model-authored command. Completion means a local preview is awaiting founder rev
 was published.
 
 The private configuration schema is `yawdie-production-config-1` with `source_roots`,
-`output_root`, absolute paths for `tools.ffmpeg`, `tools.ffprobe`, and `tools.swift`, plus a
+`output_root`, absolute paths for `tools.ffmpeg`, `tools.ffprobe`, and the installer-compiled
+`tools.renderer`, plus a
 `worker_identity`. The manifest schema is `yawdie-production-excerpt-1`; it pins the full source
 checksum, start/end seconds, output alias, idempotency key, and `review_required: true`. Never
 commit either file when it contains private paths.

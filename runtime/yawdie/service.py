@@ -5,6 +5,7 @@ import os
 import plistlib
 import shutil
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -39,15 +40,21 @@ def install():
         from path_policy import PathPolicy
         PathPolicy(vault_root, ('Yawdie/Context', 'Yawdie/Briefs/Inbox',
                                 'Yawdie/Reports', 'Yawdie/Templates'))
-    stop()
-    for folder in (PLIST.parent, STATE, INBOX, LOGS, BIN.parent, RUNTIME):
-        folder.mkdir(parents=True, exist_ok=True, mode=0o700)
-    for name in ('worker.py', 'yawdie.py', 'service.py', 'vault.py', 'path_policy.py',
-                 'repository.py', 'production.py'):
-        shutil.copy2(SOURCE / name, RUNTIME / name)
-        os.chmod(RUNTIME / name, 0o700)
-    shutil.copy2(SOURCE / 'render_excerpt.swift', RUNTIME / 'render_excerpt.swift')
-    os.chmod(RUNTIME / 'render_excerpt.swift', 0o600)
+    with tempfile.TemporaryDirectory(prefix='yawdie-renderer-') as temp:
+        compiled_renderer = Path(temp) / 'render_excerpt'
+        run('/usr/bin/xcrun', 'swiftc', str(SOURCE / 'render_excerpt.swift'),
+            '-o', str(compiled_renderer))
+        stop()
+        for folder in (PLIST.parent, STATE, INBOX, LOGS, BIN.parent, RUNTIME):
+            folder.mkdir(parents=True, exist_ok=True, mode=0o700)
+        for name in ('worker.py', 'yawdie.py', 'service.py', 'vault.py', 'path_policy.py',
+                     'repository.py', 'production.py'):
+            shutil.copy2(SOURCE / name, RUNTIME / name)
+            os.chmod(RUNTIME / name, 0o700)
+        shutil.copy2(SOURCE / 'render_excerpt.swift', RUNTIME / 'render_excerpt.swift')
+        os.chmod(RUNTIME / 'render_excerpt.swift', 0o600)
+        shutil.copy2(compiled_renderer, RUNTIME / 'render_excerpt')
+        os.chmod(RUNTIME / 'render_excerpt', 0o700)
     launcher = '#!/bin/sh\nexec /usr/bin/python3 ' + repr(str(RUNTIME / 'yawdie.py')) + ' "$@"\n'
     BIN.write_text(launcher)
     os.chmod(BIN, 0o700)
