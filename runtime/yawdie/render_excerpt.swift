@@ -14,6 +14,7 @@ struct RenderProps: Codable {
     let source: String
     let startSeconds: Double
     let durationSeconds: Double
+    let title: String
     let cues: [Cue]
 }
 
@@ -79,6 +80,17 @@ parent.addSublayer(videoLayer)
 let captionLayer = CALayer()
 captionLayer.frame = parent.frame
 parent.addSublayer(captionLayer)
+
+let titleLayer = CATextLayer()
+titleLayer.frame = CGRect(x: 90, y: 116, width: min(520, renderSize.width * 0.28), height: 82)
+titleLayer.string = props.title
+titleLayer.font = NSFont.boldSystemFont(ofSize: 26)
+titleLayer.fontSize = 26
+titleLayer.foregroundColor = NSColor.white.cgColor
+titleLayer.isWrapped = true
+titleLayer.truncationMode = .end
+titleLayer.contentsScale = 2
+parent.addSublayer(titleLayer)
 
 let fontSize = max(34.0, min(58.0, Double(renderSize.width) / 33.1))
 let font = NSFont(name: "Arial Bold", size: fontSize) ?? NSFont.boldSystemFont(ofSize: fontSize)

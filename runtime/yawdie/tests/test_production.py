@@ -45,6 +45,8 @@ class ProductionTests(unittest.TestCase):
             'style_version': 'maim-captions-1.1.0',
             'output_alias': 'expertise-clip-01',
             'review_required': True,
+            'caption_replacements': {'notebook LM': 'NotebookLM'},
+            'audio_peak_ceiling_db': -1.0,
         }))
         self.manifest_path.chmod(0o600)
         self.db = p.sqlite3.connect(self.root / 'state.sqlite')
@@ -117,6 +119,19 @@ class ProductionTests(unittest.TestCase):
         self.assertIn('00:00:07,000 --> 00:00:08,000', normalized)
         already_relative = p.normalize_srt('1\n00:00:02,000 --> 00:00:03,000\nText\n', 113)
         self.assertIn('00:00:02,000 --> 00:00:03,000', already_relative)
+
+    def test_caption_replacements_are_exact_and_cues_are_clamped(self):
+        source = ('1\n00:00:00,000 --> 00:00:02,000\nnotebook LM and sub stack\n\n'
+                  '2\n00:00:04,000 --> 00:00:06,000\nEnding phrase\n')
+        revised = p.revise_srt(source, {'notebook LM': 'NotebookLM', 'sub stack': 'Substack'}, 5.0)
+        self.assertIn('NotebookLM and Substack', revised)
+        self.assertIn('00:00:04,000 --> 00:00:05,000', revised)
+
+    def test_preview_audio_is_limited_with_fixed_argv(self):
+        command = p.audio_ceiling_command('/opt/ffmpeg', 'raw.mp4', 'safe.mp4', -1.0)
+        self.assertEqual(command[:6], ['/opt/ffmpeg', '-nostdin', '-y', '-i', 'raw.mp4', '-map'])
+        self.assertIn('alimiter=limit=0.891251', command)
+        self.assertEqual(command[-1], 'safe.mp4')
 
     def test_renderer_uses_fixed_compiled_binary_argv(self):
         command = p.renderer_command('/private/runtime/render_excerpt', 'props.json', 'preview.mp4')

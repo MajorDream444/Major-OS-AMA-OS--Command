@@ -16,7 +16,7 @@ from pathlib import Path
 CONTRACT_VERSION = '1.1.0'
 ARCHITECTURE_VERSION = '1.0.0'
 SOURCE_COMMIT = 'a18cac669e47e0dd489bffe8c7b3d2e74736b40c'
-ADAPTER_VERSION = 'expertise-excerpt-1.0.0'
+ADAPTER_VERSION = 'expertise-excerpt-1.1.0'
 STAGES = ('submitted', 'intake', 'transcription', 'edit_preparation',
           'preview_render', 'QA', 'awaiting_review')
 MAX_ATTEMPTS = 3
@@ -148,7 +148,9 @@ def validate_manifest(config, data):
     required = {'schema_version', 'idempotency_key', 'episode', 'title', 'source',
                 'source_sha256', 'start_seconds', 'end_seconds', 'style_version',
                 'output_alias', 'review_required'}
-    if set(data) - (required | {'instructions', 'protected_passages'}):
+    optional = {'instructions', 'protected_passages', 'caption_replacements',
+                'audio_peak_ceiling_db'}
+    if set(data) - (required | optional):
         raise ValueError('Manifest contains unsupported fields')
     if not required.issubset(data):
         raise ValueError('Manifest is missing required fields')
@@ -158,6 +160,14 @@ def validate_manifest(config, data):
         raise ValueError('Only the approved caption style is supported')
     if data['review_required'] is not True:
         raise ValueError('Founder review must remain required')
+    replacements = data.get('caption_replacements', {})
+    if (not isinstance(replacements, dict) or len(replacements) > 20 or
+            any(not isinstance(old, str) or not isinstance(new, str) or not old or
+                len(old) > 120 or len(new) > 120 for old, new in replacements.items())):
+        raise ValueError('Caption replacements must be a bounded exact-text map')
+    ceiling = float(data.get('audio_peak_ceiling_db', -1.0))
+    if ceiling < -6.0 or ceiling > -0.5:
+        raise ValueError('Audio peak ceiling must be between -6.0 and -0.5 dB')
     if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{5,127}', data['idempotency_key']):
         raise ValueError('Invalid idempotency key')
     if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{2,80}', data['output_alias']):
@@ -174,6 +184,8 @@ def validate_manifest(config, data):
     result['source'] = str(source)
     result['start_seconds'] = start
     result['end_seconds'] = end
+    result['caption_replacements'] = replacements
+    result['audio_peak_ceiling_db'] = ceiling
     return result
 
 
@@ -217,6 +229,13 @@ def _run(argv, timeout, output_limit=200000, cwd=None, env=None):
 def renderer_command(renderer, props, output):
     """Return the fixed compiled-renderer invocation."""
     return [renderer, props, output]
+
+
+def audio_ceiling_command(ffmpeg, source, output, ceiling_db):
+    linear = 10 ** (float(ceiling_db) / 20)
+    return [ffmpeg, '-nostdin', '-y', '-i', source, '-map', '0:v:0', '-map', '0:a:0',
+            '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k',
+            '-af', f'alimiter=limit={linear:.6f}', '-movflags', '+faststart', output]
 
 
 def _probe(config, path):
@@ -265,6 +284,25 @@ def normalize_srt(srt_text, source_offset):
         start, end = max(0, start - offset), max(0, end - offset)
         blocks.append(f'{number}\n{_srt_timestamp(start)} --> {_srt_timestamp(end)}\n' + '\n'.join(lines))
     return '\n\n'.join(blocks) + '\n'
+
+
+def revise_srt(srt_text, replacements, duration):
+    blocks = []
+    for block in re.split(r'\n\s*\n', srt_text.strip()):
+        lines = [line.strip() for line in block.splitlines() if line.strip()]
+        timing_index = next((i for i, line in enumerate(lines) if '-->' in line), None)
+        if timing_index is None:
+            continue
+        start_text, end_text = [part.strip().split()[0] for part in lines[timing_index].split('-->')]
+        start, end = _srt_time(start_text), min(_srt_time(end_text), float(duration))
+        if start >= duration or end <= start:
+            continue
+        text = '\n'.join(lines[timing_index + 1:])
+        for old, new in replacements.items():
+            text = text.replace(old, new)
+        blocks.append((_srt_timestamp(start), _srt_timestamp(end), text))
+    return '\n\n'.join(f'{number}\n{start} --> {end}\n{text}'
+                       for number, (start, end, text) in enumerate(blocks, 1)) + '\n'
 
 
 def srt_to_active_word_ass(srt_text):
@@ -372,7 +410,9 @@ def _execute_stage(db, config, job, stage):
               '-f', 'srt', tmp], 180)
         if not tmp.exists() or tmp.stat().st_size == 0:
             raise ValueError('Embedded transcript extraction produced no captions')
-        tmp.write_text(normalize_srt(tmp.read_text(), manifest['start_seconds']))
+        normalized = normalize_srt(tmp.read_text(), manifest['start_seconds'])
+        tmp.write_text(revise_srt(normalized, manifest['caption_replacements'],
+                                  manifest['end_seconds'] - manifest['start_seconds']))
         os.replace(tmp, path)
         os.chmod(path, 0o600)
         return path
@@ -386,17 +426,23 @@ def _execute_stage(db, config, job, stage):
         props = folder / 'render-props.json'
         _atomic_json(props, {'source': str(source), 'startSeconds': manifest['start_seconds'],
                              'durationSeconds': manifest['end_seconds'] - manifest['start_seconds'],
+                             'title': manifest['title'],
                              'cues': srt_to_cues(srt.read_text())})
         return path
     if name == 'preview_render':
         path = folder / (manifest['output_alias'] + '.mp4')
         tmp = folder / (manifest['output_alias'] + '.tmp.mp4')
+        raw = folder / (manifest['output_alias'] + '.raw.mp4')
         props = folder / 'render-props.json'
         if not props.exists():
             _atomic_json(props, {'source': str(source), 'startSeconds': manifest['start_seconds'],
                                  'durationSeconds': manifest['end_seconds'] - manifest['start_seconds'],
+                                 'title': manifest['title'],
                                  'cues': srt_to_cues((folder / 'captions.srt').read_text())})
-        _run(renderer_command(config['tools']['renderer'], props, tmp), 1800)
+        _run(renderer_command(config['tools']['renderer'], props, raw), 1800)
+        _run(audio_ceiling_command(config['tools']['ffmpeg'], raw, tmp,
+                                   manifest['audio_peak_ceiling_db']), 600)
+        raw.unlink(missing_ok=True)
         os.replace(tmp, path)
         os.chmod(path, 0o600)
         return path
@@ -414,6 +460,7 @@ def _execute_stage(db, config, job, stage):
             'streams': sorted(streams), 'caption_file_present': (folder / 'captions-active-word.ass').exists(),
             'caption_style': 'white, thin black outline, gold active word',
             'render_engine': 'AVFoundation/CoreAnimation via pinned adapter source',
+            'audio_peak_ceiling_db': manifest['audio_peak_ceiling_db'],
             'sync_status': 'derived from embedded subtitle timings; human listening review required',
             'preview_sha256': sha256_file(preview), 'preview_bytes': preview.stat().st_size,
         }
