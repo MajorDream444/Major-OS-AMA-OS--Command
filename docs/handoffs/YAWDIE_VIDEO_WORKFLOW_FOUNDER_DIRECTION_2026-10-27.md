@@ -46,11 +46,12 @@ CSS animation must not be used.
 
 ## Four-short pilot gate
 
-The founder reports four preselected shorts in the Hanzo Drive account. Connector access to the
-Hanzo account exists, but the four exact files were **not resolved by the initial metadata search**.
-Do not guess from nearby videos or the older Drive inventory. Before intake, record private aliases,
-file IDs, filenames, source checksums, approved clip ranges, title text, and intended output format.
-Then submit each through the same SQLite queue with atomic deduplication and retained evidence.
+The four preselected shorts are now resolved by exact Hanzo Drive IDs and metadata in
+`docs/handoffs/EXPERTISE_EPISODE_PRODUCTION_HANDOFF_2026-10-27.md`. Their content, cuts, sound, and
+checksums remain unverified. Do not infer duplication from matching reported sizes. Before intake,
+record private aliases, source checksums, approved clip ranges, title text, and intended output
+format, then submit each through the same SQLite queue with atomic deduplication and retained
+evidence.
 
 ## Reusable product boundary
 
