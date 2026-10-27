@@ -232,6 +232,33 @@ def _ass_time(seconds):
     return f'{hours}:{minutes:02d}:{whole:02d}.{centis:02d}'
 
 
+def _srt_timestamp(seconds):
+    millis = max(0, int(round(seconds * 1000)))
+    hours, remainder = divmod(millis, 3_600_000)
+    minutes, remainder = divmod(remainder, 60_000)
+    whole, fraction = divmod(remainder, 1000)
+    return f'{hours:02d}:{minutes:02d}:{whole:02d},{fraction:03d}'
+
+
+def normalize_srt(srt_text, source_offset):
+    parsed = []
+    for block in re.split(r'\n\s*\n', srt_text.strip()):
+        lines = [line.strip() for line in block.splitlines() if line.strip()]
+        timing_index = next((i for i, line in enumerate(lines) if '-->' in line), None)
+        if timing_index is None:
+            continue
+        start_text, end_text = [part.strip().split()[0] for part in lines[timing_index].split('-->')]
+        parsed.append((_srt_time(start_text), _srt_time(end_text), lines[timing_index + 1:]))
+    if not parsed:
+        raise ValueError('No usable caption cues were found')
+    offset = source_offset if parsed[0][0] >= max(0, source_offset - 1) else 0
+    blocks = []
+    for number, (start, end, lines) in enumerate(parsed, 1):
+        start, end = max(0, start - offset), max(0, end - offset)
+        blocks.append(f'{number}\n{_srt_timestamp(start)} --> {_srt_timestamp(end)}\n' + '\n'.join(lines))
+    return '\n\n'.join(blocks) + '\n'
+
+
 def srt_to_active_word_ass(srt_text):
     header = '''[Script Info]\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\nWrapStyle: 0\nScaledBorderAndShadow: yes\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: MAIM,Arial,58,&H00FFFFFF,&H0000C8FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2,0,2,120,120,90,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n'''
     events = []
@@ -321,6 +348,7 @@ def _execute_stage(db, config, job, stage):
               '-f', 'srt', tmp], 180)
         if not tmp.exists() or tmp.stat().st_size == 0:
             raise ValueError('Embedded transcript extraction produced no captions')
+        tmp.write_text(normalize_srt(tmp.read_text(), manifest['start_seconds']))
         os.replace(tmp, path)
         os.chmod(path, 0o600)
         return path

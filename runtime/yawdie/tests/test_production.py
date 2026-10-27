@@ -109,6 +109,15 @@ class ProductionTests(unittest.TestCase):
         cues = p.srt_to_cues(srt)
         self.assertEqual(cues, [{'start': 0.0, 'end': 2.0, 'text': 'Knowledge becomes a system.'}])
 
+    def test_source_timestamps_are_rebased_to_excerpt_time(self):
+        source = ('1\n00:01:55,020 --> 00:01:56,540\nFirst phrase\n\n'
+                  '2\n00:02:00,000 --> 00:02:01,000\nSecond phrase\n')
+        normalized = p.normalize_srt(source, 113)
+        self.assertIn('00:00:02,020 --> 00:00:03,540', normalized)
+        self.assertIn('00:00:07,000 --> 00:00:08,000', normalized)
+        already_relative = p.normalize_srt('1\n00:00:02,000 --> 00:00:03,000\nText\n', 113)
+        self.assertIn('00:00:02,000 --> 00:00:03,000', already_relative)
+
     def test_real_stage_artifacts_share_parent_job_directory(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
         stage = p._claim(self.db, 'test-worker', now=30)
