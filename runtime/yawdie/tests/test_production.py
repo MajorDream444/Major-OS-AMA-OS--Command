@@ -28,7 +28,7 @@ class ProductionTests(unittest.TestCase):
             'schema_version': 'yawdie-production-config-1',
             'source_roots': [str(self.sources)],
             'output_root': str(self.outputs),
-            'tools': {'ffmpeg': '/usr/bin/true', 'ffprobe': '/usr/bin/true'},
+            'tools': {'ffmpeg': '/usr/bin/true', 'ffprobe': '/usr/bin/true', 'swift': '/usr/bin/true'},
             'worker_identity': 'test-worker',
         }))
         self.config_path.chmod(0o600)
@@ -106,6 +106,8 @@ class ProductionTests(unittest.TestCase):
         self.assertIn(r'\c&H0000C8FF&', ass)
         self.assertIn(r'\alpha&HFF&', ass)
         self.assertGreaterEqual(ass.count('Dialogue:'), 5)
+        cues = p.srt_to_cues(srt)
+        self.assertEqual(cues, [{'start': 0.0, 'end': 2.0, 'text': 'Knowledge becomes a system.'}])
 
     def test_real_stage_artifacts_share_parent_job_directory(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)

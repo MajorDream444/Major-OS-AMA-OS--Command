@@ -46,6 +46,8 @@ def install():
                  'repository.py', 'production.py'):
         shutil.copy2(SOURCE / name, RUNTIME / name)
         os.chmod(RUNTIME / name, 0o700)
+    shutil.copy2(SOURCE / 'render_excerpt.swift', RUNTIME / 'render_excerpt.swift')
+    os.chmod(RUNTIME / 'render_excerpt.swift', 0o600)
     launcher = '#!/bin/sh\nexec /usr/bin/python3 ' + repr(str(RUNTIME / 'yawdie.py')) + ' "$@"\n'
     BIN.write_text(launcher)
     os.chmod(BIN, 0o700)

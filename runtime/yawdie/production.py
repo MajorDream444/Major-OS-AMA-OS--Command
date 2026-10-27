@@ -95,6 +95,10 @@ def load_config(path):
         if not tool.is_file() or not os.access(tool, os.X_OK):
             raise ValueError('Configured tool is unavailable: ' + name)
         tools[name] = tool
+    swift = Path(data['tools']['swift']).resolve(strict=True)
+    if not swift.is_file() or not os.access(swift, os.X_OK):
+        raise ValueError('Configured Swift runtime is unavailable')
+    tools['swift'] = swift
     return {'path': path, 'source_roots': roots, 'output_root': output_root,
             'tools': tools, 'worker_identity': str(data.get('worker_identity', '')).strip()}
 
@@ -199,9 +203,9 @@ def submit(db, config_path, manifest_path, now=None):
             'manifest_sha256': row['manifest_sha256']}
 
 
-def _run(argv, timeout, output_limit=200000):
+def _run(argv, timeout, output_limit=200000, cwd=None, env=None):
     result = subprocess.run([str(item) for item in argv], shell=False, capture_output=True,
-                            timeout=timeout)
+                            timeout=timeout, cwd=cwd, env=env)
     if result.returncode:
         raise RuntimeError('bounded tool failed with exit code ' + str(result.returncode))
     return result.stdout[:output_limit]
@@ -260,6 +264,22 @@ def srt_to_active_word_ass(srt_text):
     return header + '\n'.join(events) + '\n'
 
 
+def srt_to_cues(srt_text):
+    cues = []
+    for block in re.split(r'\n\s*\n', srt_text.strip()):
+        lines = [line.strip() for line in block.splitlines() if line.strip()]
+        timing_index = next((i for i, line in enumerate(lines) if '-->' in line), None)
+        if timing_index is None:
+            continue
+        start_text, end_text = [part.strip().split()[0] for part in lines[timing_index].split('-->')]
+        text = ' '.join(lines[timing_index + 1:]).replace('<i>', '').replace('</i>', '').strip()
+        if text:
+            cues.append({'start': _srt_time(start_text), 'end': _srt_time(end_text), 'text': text})
+    if not cues:
+        raise ValueError('No usable caption cues were found')
+    return cues
+
+
 def _job_dir(config, job_id):
     target = config['output_root'] / job_id
     target.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -296,7 +316,8 @@ def _execute_stage(db, config, job, stage):
         path = folder / 'captions.srt'
         tmp = folder / 'captions.srt.tmp'
         _run([config['tools']['ffmpeg'], '-nostdin', '-y', '-ss', manifest['start_seconds'],
-              '-to', manifest['end_seconds'], '-i', source, '-map', '0:s:0', '-c:s', 'srt',
+              '-t', manifest['end_seconds'] - manifest['start_seconds'], '-i', source,
+              '-map', '0:s:0', '-c:s', 'srt',
               '-f', 'srt', tmp], 180)
         if not tmp.exists() or tmp.stat().st_size == 0:
             raise ValueError('Embedded transcript extraction produced no captions')
@@ -310,16 +331,21 @@ def _execute_stage(db, config, job, stage):
         tmp.write_text(srt_to_active_word_ass(srt.read_text()))
         os.chmod(tmp, 0o600)
         os.replace(tmp, path)
+        props = folder / 'render-props.json'
+        _atomic_json(props, {'source': str(source), 'startSeconds': manifest['start_seconds'],
+                             'durationSeconds': manifest['end_seconds'] - manifest['start_seconds'],
+                             'cues': srt_to_cues(srt.read_text())})
         return path
     if name == 'preview_render':
-        captions = folder / 'captions-active-word.ass'
         path = folder / (manifest['output_alias'] + '.mp4')
         tmp = folder / (manifest['output_alias'] + '.tmp.mp4')
-        escaped = str(captions).replace('\\', r'\\').replace(':', r'\:').replace("'", r"\'")
-        _run([config['tools']['ffmpeg'], '-nostdin', '-y', '-ss', manifest['start_seconds'],
-              '-to', manifest['end_seconds'], '-i', source, '-vf', "ass='" + escaped + "'",
-              '-map', '0:v:0', '-map', '0:a:0', '-c:v', 'libx264', '-preset', 'veryfast',
-              '-crf', '20', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', tmp], 1200)
+        renderer = Path(__file__).resolve().parent / 'render_excerpt.swift'
+        props = folder / 'render-props.json'
+        if not props.exists():
+            _atomic_json(props, {'source': str(source), 'startSeconds': manifest['start_seconds'],
+                                 'durationSeconds': manifest['end_seconds'] - manifest['start_seconds'],
+                                 'cues': srt_to_cues((folder / 'captions.srt').read_text())})
+        _run([config['tools']['swift'], renderer, props, tmp], 1800)
         os.replace(tmp, path)
         os.chmod(path, 0o600)
         return path
@@ -336,6 +362,7 @@ def _execute_stage(db, config, job, stage):
             'duration_seconds': duration, 'expected_seconds': expected,
             'streams': sorted(streams), 'caption_file_present': (folder / 'captions-active-word.ass').exists(),
             'caption_style': 'white, thin black outline, gold active word',
+            'render_engine': 'AVFoundation/CoreAnimation via pinned adapter source',
             'sync_status': 'derived from embedded subtitle timings; human listening review required',
             'preview_sha256': sha256_file(preview), 'preview_bytes': preview.stat().st_size,
         }
