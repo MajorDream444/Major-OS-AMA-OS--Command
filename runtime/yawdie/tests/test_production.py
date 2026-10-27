@@ -118,6 +118,12 @@ class ProductionTests(unittest.TestCase):
         already_relative = p.normalize_srt('1\n00:00:02,000 --> 00:00:03,000\nText\n', 113)
         self.assertIn('00:00:02,000 --> 00:00:03,000', already_relative)
 
+    def test_swift_renderer_uses_explicit_private_module_cache(self):
+        command = p.swift_render_command('/usr/bin/swift', 'renderer.swift', 'props.json',
+                                         'preview.mp4', 'private-cache')
+        self.assertEqual(command, ['/usr/bin/swift', '-module-cache-path', 'private-cache',
+                                   'renderer.swift', 'props.json', 'preview.mp4'])
+
     def test_real_stage_artifacts_share_parent_job_directory(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
         stage = p._claim(self.db, 'test-worker', now=30)

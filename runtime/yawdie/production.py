@@ -211,6 +211,11 @@ def _run(argv, timeout, output_limit=200000, cwd=None, env=None):
     return result.stdout[:output_limit]
 
 
+def swift_render_command(swift, renderer, props, output, module_cache):
+    """Return the fixed Swift invocation with a private writable module cache."""
+    return [swift, '-module-cache-path', module_cache, renderer, props, output]
+
+
 def _probe(config, path):
     out = _run([config['tools']['ffprobe'], '-v', 'error', '-show_entries',
                 'format=duration,size:stream=index,codec_type,codec_name,width,height,r_frame_rate',
@@ -369,11 +374,14 @@ def _execute_stage(db, config, job, stage):
         tmp = folder / (manifest['output_alias'] + '.tmp.mp4')
         renderer = Path(__file__).resolve().parent / 'render_excerpt.swift'
         props = folder / 'render-props.json'
+        module_cache = folder / 'swift-module-cache'
+        module_cache.mkdir(mode=0o700, exist_ok=True)
+        os.chmod(module_cache, 0o700)
         if not props.exists():
             _atomic_json(props, {'source': str(source), 'startSeconds': manifest['start_seconds'],
                                  'durationSeconds': manifest['end_seconds'] - manifest['start_seconds'],
                                  'cues': srt_to_cues((folder / 'captions.srt').read_text())})
-        _run([config['tools']['swift'], renderer, props, tmp], 1800)
+        _run(swift_render_command(config['tools']['swift'], renderer, props, tmp, module_cache), 1800)
         os.replace(tmp, path)
         os.chmod(path, 0o600)
         return path
