@@ -90,3 +90,7 @@ installed Mac; modernization is maintenance work, not a pilot blocker.
 The next adapter is the separately approved, bounded GitHub assignment intake bridge. It was not
 implemented ahead of this pilot. Repository text must remain task data, with explicit assignment
 types, deduplication, acknowledgment, and no arbitrary command authority.
+
+Founder direction for the next media enhancement, including Remotion, title placeholders, lesson
+callouts, Obsidian ownership, Claude Code visibility, and productization, is recorded in
+`docs/handoffs/YAWDIE_VIDEO_WORKFLOW_FOUNDER_DIRECTION_2026-10-27.md`.
