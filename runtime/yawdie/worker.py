@@ -108,6 +108,10 @@ def connect(path):
     if 'task' not in {row['name'] for row in db.execute('PRAGMA table_info(jobs)')}:
         with db:
             db.execute("ALTER TABLE jobs ADD COLUMN task TEXT NOT NULL DEFAULT 'source-to-draft'")
+    # Production stages share this SQLite authority but live in separate tables so
+    # existing drafting jobs and their status contract remain backward compatible.
+    import production
+    production.initialize(db)
     return db
 
 
@@ -531,7 +535,12 @@ def main():
                         if a.vault_root:
                             import vault
                             vault.cycle(db, a.vault_root)
-                        ran = run_once(db, root, a.model)
+                        production_config = root / 'production' / 'config.json'
+                        production_ran = False
+                        if production_config.exists():
+                            import production
+                            production_ran = production.run_once(db, production_config)
+                        ran = production_ran or run_once(db, root, a.model)
                         if a.vault_root:
                             vault.export_ready(db, a.vault_root)
                         if not ran:

@@ -42,7 +42,8 @@ def install():
     stop()
     for folder in (PLIST.parent, STATE, INBOX, LOGS, BIN.parent, RUNTIME):
         folder.mkdir(parents=True, exist_ok=True, mode=0o700)
-    for name in ('worker.py', 'yawdie.py', 'service.py', 'vault.py', 'path_policy.py', 'repository.py'):
+    for name in ('worker.py', 'yawdie.py', 'service.py', 'vault.py', 'path_policy.py',
+                 'repository.py', 'production.py'):
         shutil.copy2(SOURCE / name, RUNTIME / name)
         os.chmod(RUNTIME / name, 0o700)
     launcher = '#!/bin/sh\nexec /usr/bin/python3 ' + repr(str(RUNTIME / 'yawdie.py')) + ' "$@"\n'

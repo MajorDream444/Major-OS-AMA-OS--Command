@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import worker
 import vault
 import repository
+import production
 
 
 DEFAULT_STATE = Path.home() / '.local/share/hamal-yawdie'
@@ -49,6 +50,17 @@ def main():
     repo.add_argument('--name', action='append', required=True)
     repo.add_argument('--vault-root', type=Path)
     repo.add_argument('--output-name')
+    prod = sub.add_parser('production', help='operate the bounded recording-to-review queue')
+    prod_sub = prod.add_subparsers(dest='production_action', required=True)
+    prod_ack = prod_sub.add_parser('acknowledge')
+    prod_ack.add_argument('--implementation-commit', required=True)
+    prod_ack.add_argument('--runtime-identity', required=True)
+    prod_sub.add_parser('acknowledgment')
+    prod_submit = prod_sub.add_parser('submit')
+    prod_submit.add_argument('--config', type=Path, required=True)
+    prod_submit.add_argument('--manifest', type=Path, required=True)
+    prod_status = prod_sub.add_parser('status')
+    prod_status.add_argument('--job-id')
     args = parser.parse_args()
 
     root = Path(args.state).expanduser().resolve()
@@ -76,7 +88,17 @@ def main():
         return 0
     db = worker.connect(root / 'state.sqlite')
     try:
-        if args.command == 'brief':
+        if args.command == 'production':
+            if args.production_action == 'acknowledge':
+                result = production.acknowledge(db, args.implementation_commit, args.runtime_identity)
+            elif args.production_action == 'acknowledgment':
+                result = production.acknowledgment(db)
+            elif args.production_action == 'submit':
+                result = production.submit(db, args.config, args.manifest)
+            else:
+                result = production.report(db, args.job_id)
+            print(json.dumps(result, indent=2))
+        elif args.command == 'brief':
             if args.task not in worker.TASK_FIELDS:
                 print(json.dumps({'status': 'blocked', 'reason': 'adapter unavailable', 'task': args.task}))
                 return 2
