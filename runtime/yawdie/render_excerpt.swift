@@ -73,13 +73,11 @@ videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
 
 let parent = CALayer()
 parent.frame = CGRect(origin: .zero, size: renderSize)
-parent.isGeometryFlipped = true
 let videoLayer = CALayer()
 videoLayer.frame = parent.frame
 parent.addSublayer(videoLayer)
 let captionLayer = CALayer()
 captionLayer.frame = parent.frame
-captionLayer.isGeometryFlipped = true
 parent.addSublayer(captionLayer)
 
 let fontSize = max(34.0, min(58.0, Double(renderSize.width) / 33.1))
@@ -101,13 +99,32 @@ func attributes(_ color: NSColor) -> [NSAttributedString.Key: Any] {
     ]
 }
 
+func textImage(_ text: String, color: NSColor, size: CGSize) -> CGImage? {
+    let scale: CGFloat = 2
+    let image = NSImage(size: CGSize(width: size.width * scale, height: size.height * scale))
+    image.lockFocus()
+    NSGraphicsContext.current?.cgContext.scaleBy(x: scale, y: scale)
+    NSAttributedString(string: text, attributes: attributes(color)).draw(
+        in: CGRect(origin: .zero, size: size)
+    )
+    image.unlockFocus()
+    var rect = CGRect(origin: .zero, size: image.size)
+    return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+}
+
 func addVisibility(_ layer: CALayer, start: Double, end: Double) {
+    let total = props.durationSeconds
+    let startPoint = max(0, min(1, start / total))
+    let endPoint = max(startPoint, min(1, end / total))
+    let before = max(0, startPoint - 0.0001)
+    let after = min(1, endPoint + 0.0001)
     let animation = CAKeyframeAnimation(keyPath: "opacity")
-    animation.values = [0.0, 1.0, 1.0, 0.0]
-    animation.keyTimes = [0.0, 0.01, 0.99, 1.0]
-    animation.beginTime = AVCoreAnimationBeginTimeAtZero + max(0, start)
-    animation.duration = max(0.03, end - start)
-    animation.fillMode = .both
+    animation.values = [0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+    animation.keyTimes = [0.0, NSNumber(value: before), NSNumber(value: startPoint),
+                          NSNumber(value: endPoint), NSNumber(value: after), 1.0]
+    animation.beginTime = AVCoreAnimationBeginTimeAtZero
+    animation.duration = total
+    animation.fillMode = .forwards
     animation.isRemovedOnCompletion = false
     layer.opacity = 0
     layer.add(animation, forKey: "visibility")
@@ -133,25 +150,23 @@ for cue in props.cues where cue.end > cue.start && cue.start < props.durationSec
     let cueEnd = min(props.durationSeconds, cue.end)
     let wordSpan = (cueEnd - cueStart) / Double(words.count)
     let blockHeight = CGFloat(lines.count) * lineHeight
-    let top = renderSize.height - 90 - blockHeight
+    let bottom: CGFloat = 170
     for (lineNumber, indexes) in lines.enumerated() {
         var x = (renderSize.width - lineWidths[lineNumber]) / 2
-        let y = top + CGFloat(lineNumber) * lineHeight
+        let y = bottom + CGFloat(lines.count - lineNumber - 1) * lineHeight
         for index in indexes {
             let frame = CGRect(x: x, y: y, width: widths[index], height: lineHeight)
-            let base = CATextLayer()
-            base.contentsScale = 2
+            let base = CALayer()
             base.frame = frame
-            base.alignmentMode = .center
-            base.string = NSAttributedString(string: words[index], attributes: attributes(white))
+            base.contents = textImage(words[index], color: white, size: frame.size)
+            base.contentsGravity = .resizeAspect
             addVisibility(base, start: cueStart, end: cueEnd)
             captionLayer.addSublayer(base)
 
-            let active = CATextLayer()
-            active.contentsScale = 2
+            let active = CALayer()
             active.frame = frame
-            active.alignmentMode = .center
-            active.string = NSAttributedString(string: words[index], attributes: attributes(gold))
+            active.contents = textImage(words[index], color: gold, size: frame.size)
+            active.contentsGravity = .resizeAspect
             let activeStart = cueStart + Double(index) * wordSpan
             addVisibility(active, start: activeStart, end: min(cueEnd, activeStart + wordSpan))
             captionLayer.addSublayer(active)
