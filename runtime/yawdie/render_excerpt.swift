@@ -81,17 +81,6 @@ let captionLayer = CALayer()
 captionLayer.frame = parent.frame
 parent.addSublayer(captionLayer)
 
-let titleLayer = CATextLayer()
-titleLayer.frame = CGRect(x: 90, y: 116, width: min(520, renderSize.width * 0.28), height: 82)
-titleLayer.string = props.title
-titleLayer.font = CGFont("Arial-BoldMT" as CFString)
-titleLayer.fontSize = 26
-titleLayer.foregroundColor = NSColor.white.cgColor
-titleLayer.isWrapped = true
-titleLayer.truncationMode = .end
-titleLayer.contentsScale = 2
-captionLayer.addSublayer(titleLayer)
-
 let fontSize = max(34.0, min(58.0, Double(renderSize.width) / 33.1))
 let font = NSFont(name: "Arial Bold", size: fontSize) ?? NSFont.boldSystemFont(ofSize: fontSize)
 let outlineWidth = -2.0
@@ -141,6 +130,13 @@ func addVisibility(_ layer: CALayer, start: Double, end: Double) {
     layer.opacity = 0
     layer.add(animation, forKey: "visibility")
 }
+
+let titleFrame = CGRect(x: 90, y: 116, width: min(520, renderSize.width * 0.28), height: 82)
+let titleLayer = CALayer()
+titleLayer.frame = titleFrame
+titleLayer.contents = textImage(props.title, color: white, size: titleFrame.size)
+titleLayer.contentsGravity = .resizeAspect
+captionLayer.addSublayer(titleLayer)
 
 for cue in props.cues where cue.end > cue.start && cue.start < props.durationSeconds {
     let words = cue.text.split(whereSeparator: { $0.isWhitespace }).map(String.init)
