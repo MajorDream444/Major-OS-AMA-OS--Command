@@ -5,6 +5,9 @@ Episode: 02 — **What lives in your head is not expertise**
 Coordinator: Yawdie / YAWDS / YARDIE  
 Status: **editing and review preparation; not publish-ready**
 
+Launch sequencing and capability language follow the
+[28 October Yawdie launch baseline](YAWDIE_LAUNCH_BASELINE_2026-10-28.md).
+
 ## Authority and verified current state
 
 This document consolidates founder-supplied production direction with the verified local runtime

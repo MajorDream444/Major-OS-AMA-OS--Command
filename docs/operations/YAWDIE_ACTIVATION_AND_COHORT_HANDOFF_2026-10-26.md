@@ -1,5 +1,9 @@
 # Yawdie activation and cohort handoff — 26 October 2026
 
+> Sequencing and countdown are superseded by the
+> [28 October launch baseline](../handoffs/YAWDIE_LAUNCH_BASELINE_2026-10-28.md). Evidence below is
+> retained as historical verification.
+
 ## Outcome
 
 The Major OS bridge is activated against the existing SQLite queue and local Ollama worker. One
