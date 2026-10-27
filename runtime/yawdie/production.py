@@ -235,7 +235,7 @@ def audio_ceiling_command(ffmpeg, source, output, ceiling_db):
     linear = 10 ** (float(ceiling_db) / 20)
     return [ffmpeg, '-nostdin', '-y', '-i', source, '-map', '0:v:0', '-map', '0:a:0',
             '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k',
-            '-af', f'alimiter=limit={linear:.6f}', '-movflags', '+faststart', output]
+            '-af', f'alimiter=limit={linear:.6f}:level=false', '-movflags', '+faststart', output]
 
 
 def _probe(config, path):

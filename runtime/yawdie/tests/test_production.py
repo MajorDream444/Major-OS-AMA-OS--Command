@@ -130,7 +130,7 @@ class ProductionTests(unittest.TestCase):
     def test_preview_audio_is_limited_with_fixed_argv(self):
         command = p.audio_ceiling_command('/opt/ffmpeg', 'raw.mp4', 'safe.mp4', -1.0)
         self.assertEqual(command[:6], ['/opt/ffmpeg', '-nostdin', '-y', '-i', 'raw.mp4', '-map'])
-        self.assertIn('alimiter=limit=0.891251', command)
+        self.assertIn('alimiter=limit=0.891251:level=false', command)
         self.assertEqual(command[-1], 'safe.mp4')
 
     def test_renderer_uses_fixed_compiled_binary_argv(self):
