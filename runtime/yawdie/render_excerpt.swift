@@ -113,6 +113,23 @@ func textImage(_ text: String, color: NSColor, size: CGSize) -> CGImage? {
     return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
 }
 
+func titleImage(_ text: String, size: CGSize) -> CGImage? {
+    let scale: CGFloat = 2
+    let image = NSImage(size: CGSize(width: size.width * scale, height: size.height * scale))
+    image.lockFocus()
+    NSGraphicsContext.current?.cgContext.scaleBy(x: scale, y: scale)
+    let titleFont = NSFont(name: "Arial Bold", size: 24) ?? NSFont.boldSystemFont(ofSize: 24)
+    let title = text.replacingOccurrences(of: " is not expertise", with: "\nis not expertise")
+    (title as NSString).draw(
+        with: CGRect(origin: .zero, size: size),
+        options: [.usesLineFragmentOrigin, .usesFontLeading],
+        attributes: [.font: titleFont, .foregroundColor: white]
+    )
+    image.unlockFocus()
+    var rect = CGRect(origin: .zero, size: image.size)
+    return image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+}
+
 func addVisibility(_ layer: CALayer, start: Double, end: Double) {
     let total = props.durationSeconds
     let startPoint = max(0, min(1, start / total))
@@ -134,7 +151,7 @@ func addVisibility(_ layer: CALayer, start: Double, end: Double) {
 let titleFrame = CGRect(x: 90, y: 116, width: min(520, renderSize.width * 0.28), height: 82)
 let titleLayer = CALayer()
 titleLayer.frame = titleFrame
-titleLayer.contents = textImage(props.title, color: white, size: titleFrame.size)
+titleLayer.contents = titleImage(props.title, size: titleFrame.size)
 titleLayer.contentsGravity = .resizeAspect
 captionLayer.addSublayer(titleLayer)
 
