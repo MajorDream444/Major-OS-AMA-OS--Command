@@ -132,6 +132,9 @@ class ProductionTests(unittest.TestCase):
         with patch.object(p, '_probe', return_value=probe):
             artifact = p._execute_stage(self.db, p.load_config(self.config_path), stage, stage)
         self.assertEqual(artifact.parent.name, job['job_id'])
+        snapshot = artifact.parent / 'source-original.mp4'
+        self.assertTrue(snapshot.is_file())
+        self.assertEqual(p.sha256_file(snapshot), json.loads(self.manifest_path.read_text())['source_sha256'])
 
     def test_transcript_trim_uses_output_seek_and_bounded_duration(self):
         p.submit(self.db, self.config_path, self.manifest_path, now=20)
@@ -139,6 +142,8 @@ class ProductionTests(unittest.TestCase):
         intake_path = self.outputs / 'intake.json'
         intake_path.parent.mkdir(exist_ok=True)
         intake_path.write_text('{}')
+        job_folder = p._job_dir(p.load_config(self.config_path), intake['job_id'])
+        (job_folder / 'source-original.mp4').write_bytes(self.source.read_bytes())
         p._complete(self.db, intake, intake_path, now=31)
         stage = p._claim(self.db, 'test-worker', now=32)
         captured = []

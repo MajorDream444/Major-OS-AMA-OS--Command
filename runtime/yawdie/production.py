@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
 import time
@@ -331,8 +332,12 @@ def _execute_stage(db, config, job, stage):
     manifest = json.loads(job['manifest_json'])
     folder = _job_dir(config, job['job_id'])
     name = stage['name']
-    source = Path(manifest['source'])
+    submitted_source = Path(manifest['source'])
+    source_snapshot = folder / ('source-original' + submitted_source.suffix.lower())
+    source = submitted_source if name == 'intake' else source_snapshot
     if name == 'intake':
+        if sha256_file(source) != manifest['source_sha256']:
+            raise ValueError('Source checksum changed before intake')
         probe = _probe(config, source)
         streams = {item.get('codec_type') for item in probe.get('streams', [])}
         duration = float(probe.get('format', {}).get('duration', 0))
@@ -340,10 +345,22 @@ def _execute_stage(db, config, job, stage):
             raise ValueError('Source requires video, audio and subtitle streams')
         if duration < manifest['end_seconds']:
             raise ValueError('Source is shorter than requested excerpt')
+        snapshot_tmp = source_snapshot.with_suffix(source_snapshot.suffix + '.tmp')
+        shutil.copyfile(source, snapshot_tmp)
+        os.chmod(snapshot_tmp, 0o600)
+        if sha256_file(snapshot_tmp) != manifest['source_sha256']:
+            raise ValueError('Private source snapshot checksum mismatch')
+        os.replace(snapshot_tmp, source_snapshot)
+        os.chmod(source_snapshot, 0o600)
         path = folder / 'intake.json'
         _atomic_json(path, {'source_sha256': manifest['source_sha256'], 'bytes': source.stat().st_size,
-                            'duration': duration, 'streams': sorted(streams), 'adapter': ADAPTER_VERSION})
+                            'duration': duration, 'streams': sorted(streams), 'adapter': ADAPTER_VERSION,
+                            'private_source_snapshot': source_snapshot.name})
         return path
+    if not source_snapshot.is_file() or source_snapshot.is_symlink():
+        raise RuntimeError('Private source snapshot is unavailable')
+    if sha256_file(source_snapshot) != manifest['source_sha256']:
+        raise ValueError('Private source snapshot checksum mismatch')
     if name == 'transcription':
         path = folder / 'captions.srt'
         tmp = folder / 'captions.srt.tmp'
