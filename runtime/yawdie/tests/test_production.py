@@ -118,6 +118,26 @@ class ProductionTests(unittest.TestCase):
             artifact = p._execute_stage(self.db, p.load_config(self.config_path), stage, stage)
         self.assertEqual(artifact.parent.name, job['job_id'])
 
+    def test_transcript_trim_uses_output_seek_and_bounded_duration(self):
+        p.submit(self.db, self.config_path, self.manifest_path, now=20)
+        intake = p._claim(self.db, 'test-worker', now=30)
+        intake_path = self.outputs / 'intake.json'
+        intake_path.parent.mkdir(exist_ok=True)
+        intake_path.write_text('{}')
+        p._complete(self.db, intake, intake_path, now=31)
+        stage = p._claim(self.db, 'test-worker', now=32)
+        captured = []
+
+        def command(argv, *_args, **_kwargs):
+            captured.extend(str(item) for item in argv)
+            Path(argv[-1]).write_text('1\n00:00:00,000 --> 00:00:01,000\nCaption\n')
+            return b''
+
+        with patch.object(p, '_run', side_effect=command):
+            p._execute_stage(self.db, p.load_config(self.config_path), stage, stage)
+        self.assertLess(captured.index('-i'), captured.index('-ss'))
+        self.assertEqual(captured[captured.index('-t') + 1], '98.0')
+
     def test_stage_progress_is_persistent_and_final_status_waits_for_review(self):
         job = p.submit(self.db, self.config_path, self.manifest_path, now=20)
 

@@ -315,8 +315,8 @@ def _execute_stage(db, config, job, stage):
     if name == 'transcription':
         path = folder / 'captions.srt'
         tmp = folder / 'captions.srt.tmp'
-        _run([config['tools']['ffmpeg'], '-nostdin', '-y', '-ss', manifest['start_seconds'],
-              '-t', manifest['end_seconds'] - manifest['start_seconds'], '-i', source,
+        _run([config['tools']['ffmpeg'], '-nostdin', '-y', '-i', source,
+              '-ss', manifest['start_seconds'], '-t', manifest['end_seconds'] - manifest['start_seconds'],
               '-map', '0:s:0', '-c:s', 'srt',
               '-f', 'srt', tmp], 180)
         if not tmp.exists() or tmp.stat().st_size == 0:
