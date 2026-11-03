@@ -45,9 +45,9 @@ This register distinguishes code that exists from access that is enabled and beh
 
 ### Registered vaults
 
-1. `/Users/majordreamwilliams/Documents/Obsidian Vault` — not inspected.
-2. `/Users/majordreamwilliams/Library/Mobile Documents/iCloud~md~obsidian/Documents/Major OS` — **selected by founder; inspected narrowly**.
-3. `/Users/majordreamwilliams/AMA MOB OS v2` — not selected for integration; its relevant scripts were classified only because they were encountered during the earlier ambiguity check.
+1. `Obsidian Vault` — not inspected.
+2. `Major OS` — **selected by founder; inspected narrowly; local path remains private**.
+3. `AMA MOB OS v2` — not selected for integration; its relevant scripts were classified only because they were encountered during the earlier ambiguity check.
 
 ### Relevant capabilities and truth status
 
