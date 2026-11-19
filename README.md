@@ -1,3 +1,5 @@
+[![Edit on Hanzo](https://hanzo.ai/badges/edit-on-hanzo.svg)](https://hanzo.app/dev?repo=https%3A%2F%2Fgithub.com%2FMajorDream444%2FMajor-OS-AMA-OS--Command)
+
 # Major OS / AMA OS Command Center
 
 This repository is the command center, dashboard, and operator console for Major OS / AMA OS.
